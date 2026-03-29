@@ -13,7 +13,10 @@ personal_webpage/
 │   ├── understanding-rag.html
 │   ├── fine-tuning-on-a-budget.html
 │   ├── supabase-security.html
-│   └── ai-security-risks-2026.html
+│   ├── ai-security-risks-2026.html
+│   ├── llm-chatbot-security.html
+│   ├── ai-energy-consumption.html
+│   └── ai-businesses-2026.html
 ├── css/
 │   ├── base.css            — variables, resets, typography
 │   ├── layout.css          — grid, section layouts, responsive
