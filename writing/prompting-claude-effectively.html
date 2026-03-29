@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Actually Prompt Claude Well (And What to Stop Doing) — Marian Helcl Øverli</title>
+    <meta name="description" content="Evidence-based prompting techniques for Claude — what actually improves output, what's cargo-culted nonsense, and how to get more from fewer tokens.">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/layout.css">
+    <link rel="stylesheet" href="../css/article.css">
+</head>
+<body>
+
+<nav>
+    <div class="nav-inner">
+        <a href="../index.html" class="logo"><img src="../favicon.svg" alt="MHØ" class="logo-img"></a>
+        <button class="hamburger" aria-label="Menu">&#9776;</button>
+        <ul class="nav-links">
+            <li><a href="../index.html#about">About</a></li>
+            <li><a href="../index.html#projects">Projects</a></li>
+            <li><a href="../index.html#skills">Skills</a></li>
+            <li><a href="../index.html#blog">Writing</a></li>
+            <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+        <a href="../index.html#ai-twin" class="btn btn-primary nav-cta">Chat with My AI Twin</a>
+    </div>
+</nav>
+
+<article class="article">
+    <a href="../index.html#blog" class="article-back">&larr; Back to writing</a>
+
+    <header class="article-header">
+        <div class="article-date">March 2026</div>
+        <h1>How to Actually Prompt Claude Well (And What to Stop Doing)</h1>
+        <p class="article-subtitle">
+            There's a lot of prompting advice floating around. Some of it works. Some of it
+            is cargo-culted from early GPT-3 experiments and has no effect on modern models.
+            This article covers what actually makes a difference when prompting Claude — and
+            which popular tricks you can safely drop.
+        </p>
+    </header>
+
+    <div class="article-body">
+
+        <h2>Part 1: What Actually Works</h2>
+
+        <h2>1. Be Clear and Direct</h2>
+        <p>
+            This sounds obvious, but it's the single highest-impact prompting technique and
+            the one most people skip. Anthropic's own documentation puts it simply: "Show
+            your prompt to a colleague with minimal context. If they'd be confused, Claude
+            will be too." Vague prompts produce vague outputs. Specific prompts produce
+            specific outputs. The relationship is almost linear.
+        </p>
+        <p>
+            Instead of "help me with my code," say "refactor this Python function to use
+            list comprehensions instead of for-loops, and add type hints to the parameters."
+            Instead of "write something about climate change," say "write a 300-word summary
+            of how carbon pricing mechanisms work, aimed at someone with no economics
+            background." The more precisely you describe what you want, the less likely you
+            are to need follow-up corrections.
+        </p>
+        <p>
+            This also applies to format. If you want a bullet list, say so. If you want a
+            table, say so. If you want the answer in JSON, say so and provide the schema.
+            Claude will match whatever structure you specify — but it can't read your mind
+            about structure any more than a human colleague could.
+        </p>
+
+        <h2>2. Use Examples</h2>
+        <p>
+            Few-shot prompting — giving Claude 2–5 examples of the input-output pattern you
+            want — is one of the most reliable ways to control output format, tone, and
+            structure. It works because showing is more precise than telling. You can write
+            a paragraph describing the format you want, or you can just show three examples
+            and let Claude infer the pattern. The examples approach is faster to write and
+            produces more consistent results.
+        </p>
+        <p>
+            This is especially useful for tasks with specific formatting requirements:
+            structured data extraction, classification with a fixed label set, or writing
+            in a particular style. If you want Claude to generate product descriptions in
+            a specific brand voice, one example is worth a hundred words of style
+            instructions.
+        </p>
+        <pre><code>Here are examples of the format I need:
+
+Input: "The quarterly earnings exceeded expectations by 12%"
+Output: {"sentiment": "positive", "topic": "earnings", "confidence": 0.95}
+
+Input: "Supply chain delays are expected to continue through Q3"
+Output: {"sentiment": "negative", "topic": "supply_chain", "confidence": 0.88}
+
+Now classify this:
+Input: "The new product launch has been postponed indefinitely"</code></pre>
+
+        <h2>3. Structure with XML Tags</h2>
+        <p>
+            Claude is specifically trained to work well with XML-style tags for structuring
+            prompts. This is one of the areas where Claude genuinely differs from other
+            models. When you have a complex prompt with multiple types of information —
+            instructions, context documents, examples, and a question — wrapping each in
+            descriptive tags eliminates ambiguity about where one section ends and another
+            begins.
+        </p>
+        <pre><code>&lt;instructions&gt;
+Summarize the following document in 3 bullet points.
+Focus on actionable findings only.
+&lt;/instructions&gt;
+
+&lt;document&gt;
+[your document here]
+&lt;/document&gt;
+
+&lt;output_format&gt;
+Return exactly 3 bullet points, each starting with a verb.
+&lt;/output_format&gt;</code></pre>
+        <p>
+            This matters most when prompts get long. For a simple one-liner, tags are
+            overkill. But once you're passing in documents, reference material, or multiple
+            sets of instructions, XML tags help Claude parse the prompt unambiguously. They
+            also make your prompts easier for humans to read and maintain, which is a
+            practical benefit if you're iterating on prompts in a team.
+        </p>
+
+        <h2>4. Give Context for Why</h2>
+        <p>
+            Telling Claude what you want is necessary. Telling it why you want it often
+            produces better results. "Summarize this document" and "summarize this document
+            for a board meeting where the CEO needs to make a go/no-go decision on the
+            project" will produce noticeably different outputs. The second version gives
+            Claude enough context to prioritize the right information and frame it
+            appropriately.
+        </p>
+        <p>
+            This works because context constrains the space of reasonable outputs. Without
+            context, Claude has to guess at what matters. With context, it can make informed
+            choices about emphasis, detail level, and tone. This is especially useful for
+            writing tasks, analysis, and any situation where "correct" depends on who's
+            reading the output.
+        </p>
+
+        <h2>5. Put Long Documents Before Your Question</h2>
+        <p>
+            When your prompt includes a long document (20k+ tokens), place the document
+            before your instructions or questions. This is a practical concern about how
+            attention works in transformer models: information at the very beginning and
+            very end of the context tends to be weighted more heavily than information
+            buried in the middle. Putting the document first and your question last means
+            the question is fresh when Claude starts generating.
+        </p>
+        <p>
+            For extremely long contexts, consider telling Claude what to look for before
+            the document as well: "The following is a 50-page contract. After reading it,
+            identify all clauses related to termination rights." This primes the model to
+            attend to the relevant sections during its forward pass, rather than processing
+            the entire document with no focus.
+        </p>
+
+        <h2>6. Use the System Prompt for Role and Constraints</h2>
+        <p>
+            If you're using the API, the system prompt is the right place for persistent
+            instructions: role definitions, output constraints, tone guidelines, and
+            behavioral rules. Claude gives strong weight to system prompt instructions,
+            more so in recent model versions. A role set in the system prompt focuses
+            Claude's behavior more effectively than the same role set in the user message.
+        </p>
+        <p>
+            Keep the system prompt focused and concise. Anthropic's documentation notes that
+            overly complex system prompts can cause Claude to overthink or overtrigger on
+            certain behaviors. If you find the model being excessively cautious or verbose,
+            the system prompt is usually the first place to look. Write it like you'd write
+            a brief for a capable colleague: clear scope, clear constraints, and trust them
+            to handle the details.
+        </p>
+
+        <h2>7. Let Claude Think</h2>
+        <p>
+            For complex reasoning tasks — math, logic, multi-step analysis, code debugging
+            — giving Claude space to reason before answering improves accuracy. The newer
+            Claude models (Opus 4.5/4.6, Sonnet 4.5/4.6) support extended thinking, where
+            the model can do internal reasoning before producing a visible response. When
+            available, this is the best approach for hard problems: you don't need to prompt
+            for it manually, you just enable it in the API.
+        </p>
+        <p>
+            Even without extended thinking, a prompt like "reason through this carefully
+            before answering" can help on complex tasks. But Anthropic's current guidance is
+            interesting: "A prompt like 'think thoroughly' often produces better reasoning
+            than a hand-written step-by-step plan. Claude's reasoning frequently exceeds
+            what a human would prescribe." In other words, tell it to think hard, but don't
+            micromanage the thinking process.
+        </p>
+
+        <h2>Part 2: What to Stop Doing</h2>
+
+        <h2>8. Stop Saying "Think Step by Step"</h2>
+        <p>
+            This was genuinely useful with GPT-3 and early GPT-4. It's been cargo-culted
+            into nearly every prompting guide since. For current Claude models, it's largely
+            unnecessary and sometimes counterproductive. Modern Claude models are already
+            trained to reason through complex problems. Forcing a specific step-by-step
+            format can actually constrain the model's reasoning into a structure that doesn't
+            fit the problem.
+        </p>
+        <p>
+            If you want Claude to show its reasoning, say "show your reasoning" or "explain
+            how you arrived at your answer." If you want it to reason more carefully, say
+            "think thoroughly" or enable extended thinking. But the specific incantation
+            "let's think step by step" is a relic from a different model generation. It
+            won't break anything, but it's taking up tokens for minimal benefit.
+        </p>
+
+        <h2>9. Stop Threatening and Bribing the Model</h2>
+        <p>
+            "I'll tip you $100 for a great answer." "Your job depends on getting this
+            right." "A person's life is at stake." These prompts circulate on social media
+            with claims of improved output quality. They do not work in any mechanistically
+            meaningful way. Claude does not have financial motivations, job security
+            concerns, or emotional responses to threats. It processes tokens.
+        </p>
+        <p>
+            If these prompts occasionally seem to produce better results, it's because they
+            add emphasis — the model may attend more to a task described as important. But
+            you can achieve the same effect far more reliably by being specific about your
+            requirements and quality criteria. "This needs to be production-ready code with
+            error handling and edge case coverage" is actionable. "I'll fire you if this is
+            wrong" is not.
+        </p>
+
+        <h2>10. Stop Adding "Take a Deep Breath"</h2>
+        <p>
+            This one originated from a 2023 paper that showed marginal improvements on math
+            benchmarks with certain emotional prompts. It got wildly overgeneralized. Claude
+            does not have a nervous system. It does not experience stress. It cannot calm
+            down by breathing. The phrase is meaningless noise in the prompt.
+        </p>
+        <p>
+            The underlying intuition — that priming the model to be careful can help — is
+            not entirely wrong. But "be thorough and precise" communicates the same intent
+            in words the model can actually act on. If you're spending tokens on emotional
+            regulation for a language model, those tokens would serve you better as an
+            additional example or a clearer description of the output format.
+        </p>
+
+        <h2>11. Stop Repeating Instructions</h2>
+        <p>
+            Saying the same instruction three times does not make Claude follow it three
+            times as hard. The model processes the full context and attends to instructions
+            based on clarity and positioning, not repetition count. Repeating yourself
+            wastes tokens, inflates costs, and makes your prompt harder to maintain.
+        </p>
+        <p>
+            If Claude isn't following an instruction, the fix is rarely to repeat it. More
+            often, the instruction is ambiguous, contradicts something else in the prompt,
+            or is buried in a wall of text. Move it to a more prominent position (beginning
+            or end of the prompt), use XML tags to separate it, or rephrase it more
+            specifically. One clear instruction outperforms three vague ones.
+        </p>
+
+        <h2>12. Stop Writing Novels in Your System Prompt</h2>
+        <p>
+            A 2,000-word system prompt full of edge cases, ALL-CAPS warnings, and nested
+            conditionals is harder for Claude to follow than a focused 200-word one. Long
+            system prompts also increase the chance of contradictory instructions, where one
+            rule tells the model to be concise and another asks for detailed explanations.
+            When instructions conflict, the model has to pick one, and you may not like
+            which it chooses.
+        </p>
+        <p>
+            Anthropic specifically notes that Claude Opus 4.5 and 4.6 are more responsive
+            to system prompts than previous models. Prompts that were designed to be
+            aggressive to ensure compliance may now cause overtriggering. The fix is to dial
+            back, not add more. Write the system prompt that a sharp colleague would need
+            to do the job well, and resist the urge to add instructions for every
+            hypothetical edge case.
+        </p>
+
+        <h2>13. Stop Using "You Are an Expert" as a Magic Spell</h2>
+        <p>
+            "You are a world-class expert in X" appears in nearly every prompting template
+            online. It does have a mild effect — it sets a tone and frames the expected
+            quality level. Anthropic confirms that setting a role in the system prompt
+            focuses Claude's behavior. But it's a framing device, not a competence upgrade.
+            Saying "you are a world-class Python developer" does not give Claude access to
+            Python knowledge it wouldn't otherwise have.
+        </p>
+        <p>
+            Where role-setting actually helps is in tone and approach. "You are a senior
+            engineer reviewing a pull request" produces different output than "you are a
+            patient tutor explaining code to a beginner" — because the role implies a
+            different communication style and level of detail. Use roles for framing, not
+            as a substitute for clear instructions. And keep it to one sentence in the
+            system prompt — you don't need a character backstory.
+        </p>
+
+        <h2>The Efficient Prompting Mindset</h2>
+        <p>
+            The most effective prompts share three properties: they're specific about what
+            they want, they provide enough context for Claude to make good decisions, and
+            they don't waste tokens on things that don't affect the output. Every token in
+            your prompt costs money (if you're on the API) and attention (in the model's
+            context window). Treat tokens like you'd treat words in a technical
+            specification: every one should earn its place.
+        </p>
+        <p>
+            The common thread through the anti-patterns above is magical thinking — the
+            belief that specific phrases have special power over the model. They don't.
+            Claude processes natural language and follows instructions. The better your
+            instructions, the better the output. There is no incantation that substitutes
+            for clarity.
+        </p>
+        <p>
+            If you take one thing from this article: before adding anything to a prompt,
+            ask whether it gives Claude information it can act on. Examples, context,
+            format specifications, and constraints all qualify. Emotional appeals, threats,
+            repetition, and breathing exercises do not. Spend your tokens on the things
+            that work.
+        </p>
+    </div>
+
+    <footer class="article-footer">
+        <p>Written by Marian Helcl Øverli — March 2026</p>
+    </footer>
+</article>
+
+<script src="../js/main.js"></script>
+
+</body>
+</html>

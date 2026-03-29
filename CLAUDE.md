@@ -16,7 +16,8 @@ personal_webpage/
 │   ├── ai-security-risks-2026.html
 │   ├── llm-chatbot-security.html
 │   ├── ai-energy-consumption.html
-│   └── ai-businesses-2026.html
+│   ├── ai-businesses-2026.html
+│   └── prompting-claude-effectively.html
 ├── css/
 │   ├── base.css            — variables, resets, typography
 │   ├── layout.css          — grid, section layouts, responsive
@@ -58,7 +59,7 @@ personal_webpage/
 - **Writing/Blog** — blog post cards linking to full articles in `writing/`
 - **AI News** — live AI news feed (`js/news.js`)
 - **AI Twin Chat** — Gradio chatbot iframe for recruiters to chat with an AI version of Marian
-- **Contact** — email, social links
+- **Contact** — "Say Hello" button (Gmail compose link), GitHub and LinkedIn social links
 
 ## Design
 - Dark theme with purple accent (`#6c63ff`)
@@ -68,8 +69,6 @@ personal_webpage/
 - SEO + Open Graph meta tags included
 
 ## Placeholders to Fill
-- Social links (GitHub, LinkedIn, Twitter) — currently point to generic URLs
-- Email address — currently `your.email@example.com`
 - `og:url` meta tag — update to real domain when deployed
 - AI Twin chat — set the `src` on the iframe in `#ai-twin` to your deployed Gradio app URL (e.g. HuggingFace Spaces)
 
