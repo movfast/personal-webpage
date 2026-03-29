@@ -1,0 +1,125 @@
+.article {
+    max-width: 740px;
+    margin: 0 auto;
+    padding: 8rem 1.5rem 4rem;
+}
+
+.article-back {
+    font-size: 0.9rem;
+    color: var(--accent);
+    text-decoration: none;
+}
+
+.article-back:hover {
+    text-decoration: underline;
+}
+
+.article-header {
+    margin: 2rem 0 3rem;
+}
+
+.article-date {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+}
+
+.article-header h1 {
+    font-size: 2rem;
+    line-height: 1.3;
+    margin-bottom: 1rem;
+}
+
+.article-header .article-subtitle {
+    color: var(--text-muted);
+    font-size: 1.05rem;
+    line-height: 1.6;
+}
+
+.article-body h2 {
+    font-size: 1.4rem;
+    margin: 2.5rem 0 1rem;
+    color: var(--text);
+}
+
+.article-body h3 {
+    font-size: 1.15rem;
+    margin: 2rem 0 0.75rem;
+    color: var(--text);
+}
+
+.article-body p {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.8;
+    margin-bottom: 1.25rem;
+}
+
+.article-body ul,
+.article-body ol {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.8;
+    margin: 0 0 1.25rem 1.5rem;
+}
+
+.article-body li {
+    margin-bottom: 0.4rem;
+}
+
+.article-body code {
+    background: var(--border);
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+    font-size: 0.88em;
+}
+
+.article-body pre {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem;
+    overflow-x: auto;
+    margin-bottom: 1.5rem;
+}
+
+.article-body pre code {
+    background: none;
+    padding: 0;
+    font-size: 0.85rem;
+    line-height: 1.6;
+}
+
+.article-body strong {
+    color: var(--text);
+}
+
+.article-body a {
+    color: var(--accent);
+}
+
+.article-body a:hover {
+    text-decoration: underline;
+}
+
+.article-body blockquote {
+    border-left: 3px solid var(--accent);
+    padding: 0.5rem 1.25rem;
+    margin: 1.5rem 0;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+.article-footer {
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+@media (max-width: 768px) {
+    .article-header h1 {
+        font-size: 1.5rem;
+    }
+}

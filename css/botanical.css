@@ -1,0 +1,222 @@
+/**
+ * botanical.css — Nature/botanical theme override
+ * Activated by adding class "botanical" to <body>
+ * Colors: soft greens, cream, lilac purples, warm wood tones
+ */
+
+body.botanical {
+    --bg: #f5f0e8;
+    --surface: #fffdf7;
+    --border: #d4cbb8;
+    --text: #2d3a2d;
+    --text-muted: #6b7c6b;
+    --accent: #8b5e9b;
+    --accent-glow: rgba(139, 94, 155, 0.12);
+    --green: #4a7c59;
+    --yellow: #c9a84c;
+    --red: #c2556e;
+    --blue: #5b7fa5;
+
+    background: var(--bg);
+    color: var(--text);
+}
+
+/* Nav */
+body.botanical nav {
+    background: rgba(245, 240, 232, 0.9);
+    border-bottom-color: var(--border);
+}
+
+body.botanical nav .nav-links a {
+    color: var(--text-muted);
+}
+
+body.botanical nav .nav-links a:hover {
+    color: var(--text);
+}
+
+body.botanical .logo-img {
+    filter: none;
+}
+
+/* Buttons */
+body.botanical .btn-primary {
+    background: var(--accent);
+    color: #fff;
+}
+
+body.botanical .btn-primary:hover {
+    box-shadow: 0 4px 20px var(--accent-glow);
+    color: #fff;
+}
+
+body.botanical .nav-cta {
+    color: #fff;
+}
+
+body.botanical .btn-outline {
+    border-color: var(--border);
+    color: var(--text);
+}
+
+body.botanical .btn-outline:hover {
+    border-color: var(--accent);
+}
+
+/* Hero */
+body.botanical .hero h1 .highlight {
+    background: linear-gradient(135deg, #b534cf, #f9a825, #ff4500);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+body.botanical .hero .greeting {
+    color: var(--green);
+}
+
+/* Cards */
+body.botanical .project-card,
+body.botanical .blog-card,
+body.botanical .detail-card {
+    background: var(--surface);
+    border-color: var(--border);
+}
+
+body.botanical .project-card:hover,
+body.botanical .blog-card:hover {
+    border-color: var(--green);
+}
+
+body.botanical .project-screenshot {
+    background: var(--border);
+    border-bottom-color: var(--border);
+}
+
+/* Tags — botanical colors */
+body.botanical .tag:nth-child(3n+1) {
+    color: var(--accent);
+    background: rgba(139, 94, 155, 0.1);
+}
+
+body.botanical .tag:nth-child(3n+2) {
+    color: var(--green);
+    background: rgba(74, 124, 89, 0.1);
+}
+
+body.botanical .tag:nth-child(3n+3) {
+    color: var(--yellow);
+    background: rgba(201, 168, 76, 0.12);
+}
+
+/* Skills */
+body.botanical .skill-category:nth-child(1) h3 { color: var(--green); }
+body.botanical .skill-category:nth-child(2) h3 { color: var(--accent); }
+body.botanical .skill-category:nth-child(3) h3 { color: var(--yellow); }
+body.botanical .skill-category:nth-child(4) h3 { color: var(--blue); }
+
+body.botanical .skill-category li::before {
+    content: '🌿';
+    font-size: 0.7rem;
+}
+
+/* Blog */
+body.botanical .blog-card .blog-date {
+    color: var(--green);
+}
+
+body.botanical .read-more {
+    color: var(--accent);
+}
+
+/* Chat */
+body.botanical .chat-container {
+    background: var(--surface);
+    border-color: var(--border);
+}
+
+body.botanical .chat-placeholder-hint {
+    color: var(--green) !important;
+}
+
+/* Footer */
+body.botanical footer {
+    border-top-color: var(--border);
+    color: var(--text-muted);
+}
+
+/* Sections */
+body.botanical .section-title {
+    color: var(--text);
+}
+
+body.botanical a {
+    color: var(--accent);
+}
+
+body.botanical a.btn-primary {
+    color: #fff;
+}
+
+body.botanical a.btn-outline {
+    color: var(--text);
+}
+
+/* Mobile nav */
+@media (max-width: 768px) {
+    body.botanical nav .nav-links {
+        background: rgba(245, 240, 232, 0.97);
+    }
+}
+
+/* --- Botanical Decorations --- */
+
+/* Branch canvas sits behind everything */
+#botanical-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.4;
+}
+
+body.botanical > *:not(#botanical-canvas):not(#botanical-petals):not(#theme-toggle) {
+    position: relative;
+    z-index: 1;
+}
+
+/* Leaf canvas (rendered via JS) */
+
+/* Theme toggle button */
+#theme-toggle {
+    position: fixed;
+    top: 5rem;
+    right: 1rem;
+    z-index: 9991;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-family: system-ui, sans-serif;
+    color: var(--text-muted);
+    transition: transform 0.3s, box-shadow 0.3s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+#theme-toggle .toggle-icon {
+    font-size: 1.1rem;
+}
+
+#theme-toggle:hover {
+    transform: scale(1.05);
+    border-color: var(--accent);
+    color: var(--text);
+}

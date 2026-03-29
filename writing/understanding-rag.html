@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Understanding RAG: From Theory to Implementation — Marian Helcl Øverli</title>
+    <meta name="description" content="A deep dive into retrieval-augmented generation — how it works, when it shines, and lessons learned building a RAG system.">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/layout.css">
+    <link rel="stylesheet" href="../css/article.css">
+</head>
+<body>
+
+<nav>
+    <div class="nav-inner">
+        <a href="../index.html" class="logo"><img src="../favicon.svg" alt="MHØ" class="logo-img"></a>
+        <button class="hamburger" aria-label="Menu">&#9776;</button>
+        <ul class="nav-links">
+            <li><a href="../index.html#about">About</a></li>
+            <li><a href="../index.html#projects">Projects</a></li>
+            <li><a href="../index.html#skills">Skills</a></li>
+            <li><a href="../index.html#blog">Writing</a></li>
+            <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+        <a href="../index.html#ai-twin" class="btn btn-primary nav-cta">Chat with My AI Twin</a>
+    </div>
+</nav>
+
+<article class="article">
+    <a href="../index.html#blog" class="article-back">&larr; Back to writing</a>
+
+    <header class="article-header">
+        <div class="article-date">March 2026</div>
+        <h1>Understanding RAG: From Theory to Implementation</h1>
+        <p class="article-subtitle">
+            Retrieval-augmented generation lets you ground an LLM's responses in your
+            own data. This article covers how the pipeline works, the decisions you'll
+            face when building one, and what I learned putting it together in practice.
+        </p>
+    </header>
+
+    <div class="article-body">
+
+        <h2>What Is RAG?</h2>
+        <p>
+            Retrieval-augmented generation (RAG) is a pattern where you combine a
+            language model with an external knowledge source. When a user asks a question,
+            the system first searches a document store for relevant passages, then feeds
+            those passages to the LLM as context alongside the question. The model
+            generates its answer grounded in the retrieved content.
+        </p>
+        <p>
+            This is useful because LLMs have a fixed training cutoff and a limited context
+            window. RAG lets you bring in up-to-date, domain-specific information at query
+            time — company docs, research papers, product manuals, legal contracts — and
+            get answers that reference that material directly.
+        </p>
+
+        <h2>How the Pipeline Works</h2>
+        <p>
+            A RAG system has two main phases: <strong>ingestion</strong> (preparing your
+            documents) and <strong>retrieval + generation</strong> (answering queries).
+        </p>
+
+        <h3>Ingestion</h3>
+        <ol>
+            <li><strong>Load documents</strong> — pull in your source material: PDFs, web pages, markdown files, database records. Libraries like LangChain and LlamaIndex have loaders for most formats.</li>
+            <li><strong>Chunk the text</strong> — split each document into smaller pieces, typically 200–1000 tokens. The chunk size matters: too large and you dilute relevance, too small and you lose context.</li>
+            <li><strong>Generate embeddings</strong> — run each chunk through an embedding model (e.g. <code>all-MiniLM-L6-v2</code>, OpenAI's <code>text-embedding-3-small</code>) to produce a dense vector that captures semantic meaning.</li>
+            <li><strong>Store in a vector database</strong> — save the vectors and their associated text in a vector store like ChromaDB, Pinecone, FAISS, or pgvector. This is your searchable knowledge base.</li>
+        </ol>
+
+        <h3>Retrieval + Generation</h3>
+        <ol>
+            <li><strong>Embed the query</strong> — when a user asks a question, embed it using the same model you used for the documents.</li>
+            <li><strong>Search for relevant chunks</strong> — perform a similarity search (cosine similarity or approximate nearest neighbors) against your vector store. Retrieve the top-k most relevant chunks.</li>
+            <li><strong>Build the prompt</strong> — construct a prompt that includes the retrieved chunks as context, along with the user's question and any system instructions.</li>
+            <li><strong>Generate the answer</strong> — send the prompt to the LLM. The model uses the provided context to produce a grounded response.</li>
+        </ol>
+
+        <pre><code># Simplified RAG query flow
+query = "What are the key risk factors in the 2024 annual report?"
+
+# 1. Embed the query
+query_vector = embedding_model.encode(query)
+
+# 2. Retrieve relevant chunks
+results = vector_store.similarity_search(query_vector, k=5)
+
+# 3. Build prompt with context
+context = "\n\n".join([r.text for r in results])
+prompt = f"Based on the following context, answer the question.\n\n{context}\n\nQuestion: {query}"
+
+# 4. Generate
+answer = llm.generate(prompt)</code></pre>
+
+        <h2>Key Decisions When Building a RAG System</h2>
+
+        <h3>Chunking Strategy</h3>
+        <p>
+            Chunking is one of the most impactful decisions. A straightforward approach is
+            fixed-size chunks with some overlap (e.g. 500 tokens with 50-token overlap).
+            The overlap ensures that sentences split across chunk boundaries still appear
+            in at least one chunk.
+        </p>
+        <p>
+            For structured documents, semantic chunking works better — splitting on section
+            headers, paragraphs, or logical boundaries. This preserves the natural units
+            of the document and tends to produce more coherent retrieval results.
+        </p>
+
+        <h3>Embedding Model</h3>
+        <p>
+            The embedding model determines how well your search captures meaning.
+            Smaller models like <code>all-MiniLM-L6-v2</code> are fast and run locally.
+            Larger models like OpenAI's embedding APIs or <code>e5-large-v2</code>
+            capture more nuance. The trade-off is speed and cost versus retrieval quality.
+        </p>
+        <p>
+            One important detail: use the same embedding model for both ingestion and
+            querying. Vectors from different models live in different vector spaces and
+            produce meaningless similarity scores when compared.
+        </p>
+
+        <h3>How Many Chunks to Retrieve</h3>
+        <p>
+            Retrieving too few chunks means you might miss relevant information. Retrieving
+            too many floods the context window with marginally relevant text, which can
+            confuse the model or push out the truly relevant passages.
+        </p>
+        <p>
+            A good starting point is 3–5 chunks. From there, tune based on your use case.
+            You can also add a re-ranking step: retrieve a larger set (say 20), then use
+            a cross-encoder to score each chunk against the query and keep the top 5.
+        </p>
+
+        <h3>Vector Store</h3>
+        <p>
+            For prototypes and small datasets, <strong>ChromaDB</strong> or
+            <strong>FAISS</strong> work well — they run locally with minimal setup.
+            For production with larger datasets, managed services like
+            <strong>Pinecone</strong> or <strong>Weaviate</strong> handle scaling and
+            persistence. If you're already using PostgreSQL, <strong>pgvector</strong>
+            lets you store embeddings alongside your relational data in a single database.
+        </p>
+
+        <h2>What I Learned Building One</h2>
+        <p>
+            I built a RAG system for my
+            <a href="../index.html#projects">Financial Risk Copilot</a> project, where
+            users can ask natural language questions about 10-K filings and annual reports.
+            Here are the things that stood out:
+        </p>
+
+        <h3>Chunk size had the biggest impact on answer quality</h3>
+        <p>
+            I started with 1000-token chunks and the answers were vague — the retrieved
+            context had relevant keywords but too much surrounding noise. Dropping to
+            400-token chunks with 50-token overlap gave much more focused results. The
+            LLM could zero in on the specific passage that answered the question.
+        </p>
+
+        <h3>The prompt template matters more than you'd expect</h3>
+        <p>
+            Small changes in how you present the context to the LLM make a real difference.
+            Adding instructions like "Only answer based on the provided context" and
+            "If the context doesn't contain the answer, say so" dramatically reduced
+            hallucination. Numbering the source chunks and asking the model to cite
+            which chunk it used made answers more traceable.
+        </p>
+
+        <h3>Evaluation is the hard part</h3>
+        <p>
+            Building the pipeline is relatively fast with LangChain and ChromaDB. The
+            harder work is evaluating whether the system actually gives good answers.
+            I built a small test set of question-answer pairs from the documents and
+            scored retrieval recall (did the right chunk appear in the top-k?) and
+            answer correctness (did the LLM produce an accurate response?). Automated
+            evaluation with an LLM-as-judge helped scale this.
+        </p>
+
+        <h3>Local embeddings kept things simple</h3>
+        <p>
+            Using <code>all-MiniLM-L6-v2</code> from sentence-transformers meant
+            everything ran locally with zero API costs during development. The retrieval
+            quality was good enough for my use case. For a production system with more
+            diverse documents, upgrading to a larger embedding model would be worth
+            benchmarking.
+        </p>
+
+        <h2>When RAG Makes Sense</h2>
+        <p>
+            RAG is a strong fit when you have a specific knowledge base that changes over
+            time and you want an LLM to answer questions grounded in that data. Document
+            QA, customer support over product docs, internal knowledge bases, and research
+            assistants are all natural use cases.
+        </p>
+        <p>
+            For tasks where the knowledge is static and well-bounded, fine-tuning the
+            model on that data can also work. RAG and fine-tuning complement each other —
+            you can fine-tune for tone and reasoning patterns while using RAG for
+            factual grounding. They solve different parts of the problem.
+        </p>
+
+        <h2>Resources</h2>
+        <ul>
+            <li><a href="https://python.langchain.com/">LangChain documentation</a> — the most popular orchestration framework for RAG</li>
+            <li><a href="https://www.sbert.net/">Sentence Transformers</a> — local embedding models</li>
+            <li><a href="https://docs.trychroma.com/">ChromaDB</a> — lightweight vector store, great for getting started</li>
+        </ul>
+    </div>
+
+    <footer class="article-footer">
+        <p>Written by Marian Helcl Øverli — March 2026</p>
+    </footer>
+</article>
+
+<script src="../js/main.js"></script>
+
+</body>
+</html>

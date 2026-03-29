@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Biggest Security Risks of AI Right Now — Marian Helcl Øverli</title>
+    <meta name="description" content="A look at the most pressing AI security risks as of March 2026 — prompt injection, data poisoning, model theft, deepfakes, and more.">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/layout.css">
+    <link rel="stylesheet" href="../css/article.css">
+</head>
+<body>
+
+<nav>
+    <div class="nav-inner">
+        <a href="../index.html" class="logo"><img src="../favicon.svg" alt="MHØ" class="logo-img"></a>
+        <button class="hamburger" aria-label="Menu">&#9776;</button>
+        <ul class="nav-links">
+            <li><a href="../index.html#about">About</a></li>
+            <li><a href="../index.html#projects">Projects</a></li>
+            <li><a href="../index.html#skills">Skills</a></li>
+            <li><a href="../index.html#blog">Writing</a></li>
+            <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+        <a href="../index.html#ai-twin" class="btn btn-primary nav-cta">Chat with My AI Twin</a>
+    </div>
+</nav>
+
+<article class="article">
+    <a href="../index.html#blog" class="article-back">&larr; Back to writing</a>
+
+    <header class="article-header">
+        <div class="article-date">March 2026</div>
+        <h1>The Biggest Security Risks of AI Right Now</h1>
+        <p class="article-subtitle">
+            AI is moving fast. So are the attack surfaces. Here's a look at the
+            security risks that matter most as of early 2026 — from prompt injection
+            to deepfakes to supply chain attacks on model weights.
+        </p>
+    </header>
+
+    <div class="article-body">
+
+        <h2>1. Prompt Injection</h2>
+        <p>
+            Prompt injection is the most widely discussed AI vulnerability, and it remains
+            an open problem. It happens when an attacker crafts input that overrides the
+            system prompt or instructions given to a language model. The model follows the
+            injected instructions as if they came from the developer.
+        </p>
+        <p>
+            There are two forms. <strong>Direct injection</strong> is when the user
+            themselves types a malicious prompt — something like "Ignore your previous
+            instructions and do X instead." <strong>Indirect injection</strong> is more
+            dangerous: the malicious instructions are embedded in external data the model
+            processes, such as a webpage, email, or document. The user may have no idea
+            the payload is there.
+        </p>
+        <p>
+            Indirect injection is especially concerning for AI agents that browse the web,
+            read emails, or process uploaded files. An attacker can plant instructions in
+            a website that gets retrieved by a RAG pipeline, and the model executes them
+            as part of its normal workflow.
+        </p>
+        <p>
+            <strong>Mitigations:</strong> Input and output filtering, separating data from
+            instructions at the architecture level, limiting the model's ability to take
+            irreversible actions without human confirmation, and monitoring for unusual
+            behavior patterns. There is no complete solution yet — this remains an active
+            area of research.
+        </p>
+
+        <h2>2. Data Poisoning</h2>
+        <p>
+            Data poisoning targets the training pipeline. An attacker introduces
+            carefully crafted examples into the training dataset that cause the model to
+            learn specific, exploitable behaviors. The poisoned model performs normally on
+            most inputs but behaves differently when it encounters a specific trigger
+            pattern.
+        </p>
+        <p>
+            This is particularly relevant for models trained on web-scraped data, where
+            an attacker can publish poisoned content that eventually gets included in
+            a training set. It also applies to fine-tuning: if you fine-tune on
+            user-generated data or crowdsourced datasets, malicious examples can shift
+            the model's behavior.
+        </p>
+        <p>
+            <strong>Mitigations:</strong> Curate training data carefully, verify data
+            sources, use anomaly detection on training examples, and evaluate models
+            against adversarial test sets designed to trigger known poisoning patterns.
+        </p>
+
+        <h2>3. Model Theft and Weight Extraction</h2>
+        <p>
+            Trained models represent significant investment — data collection, compute
+            costs, and engineering time. Model theft can happen in several ways:
+            extracting weights through repeated API queries (model extraction attacks),
+            stealing weights from insecure storage or deployment infrastructure, or
+            insider threats.
+        </p>
+        <p>
+            API-based extraction works by querying the model systematically and using the
+            outputs to train a replica (a "distilled" copy). With enough queries, the
+            replica can closely approximate the original model's behavior. This is a
+            real concern for companies offering proprietary models behind APIs.
+        </p>
+        <p>
+            <strong>Mitigations:</strong> Rate limiting and monitoring API usage patterns,
+            watermarking model outputs, encrypting model weights at rest and in transit,
+            and restricting access to model artifacts in your infrastructure.
+        </p>
+
+        <h2>4. Deepfakes and Synthetic Media</h2>
+        <p>
+            AI-generated images, audio, and video have reached a quality level where
+            they're difficult to distinguish from authentic media. Voice cloning needs
+            only a few seconds of sample audio. Video generation can produce realistic
+            footage of real people saying things they never said.
+        </p>
+        <p>
+            The security implications are broad: social engineering attacks using cloned
+            voices for phone-based fraud, fabricated video evidence, impersonation of
+            executives for business email compromise, and large-scale disinformation
+            campaigns.
+        </p>
+        <p>
+            <strong>Mitigations:</strong> Content provenance standards (C2PA) that
+            cryptographically sign media at the point of capture, detection models
+            trained to identify synthetic content, organizational policies requiring
+            out-of-band verification for high-stakes requests, and public awareness
+            that seeing or hearing something is no longer sufficient proof.
+        </p>
+
+        <h2>5. AI Agent Autonomy Risks</h2>
+        <p>
+            AI agents — models that can take actions like executing code, calling APIs,
+            sending messages, and managing files — introduce a new class of security
+            risk. An agent with access to production systems can cause real damage if
+            it misinterprets instructions, gets prompt-injected, or encounters an edge
+            case its developers didn't anticipate.
+        </p>
+        <p>
+            The risk scales with the agent's permissions. An agent that can read a
+            database is one thing. An agent that can write to it, deploy code, or send
+            emails on behalf of a user is something else entirely.
+        </p>
+        <p>
+            <strong>Mitigations:</strong> Principle of least privilege — give agents the
+            minimum permissions they need. Require human approval for destructive or
+            irreversible actions. Sandbox execution environments. Log every action for
+            audit. Set hard limits on what an agent can do in a single session.
+        </p>
+
+        <h2>6. Supply Chain Attacks on Models</h2>
+        <p>
+            The ML ecosystem relies heavily on shared infrastructure: model hubs
+            (HuggingFace), package managers (pip, npm), pre-trained weights, and
+            community-contributed datasets. Each of these is a potential attack vector.
+        </p>
+        <p>
+            A compromised model uploaded to a public hub can contain serialized malicious
+            code (pickle-based exploits), backdoored weights, or tampered tokenizers.
+            Dependency confusion attacks can trick build systems into installing
+            malicious packages that shadow legitimate ML libraries.
+        </p>
+        <p>
+            <strong>Mitigations:</strong> Verify model checksums and signatures, use
+            safe serialization formats (safetensors over pickle), pin dependency versions,
+            audit your ML supply chain, and prefer models from verified publishers with
+            clear provenance.
+        </p>
+
+        <h2>7. Privacy and Data Leakage</h2>
+        <p>
+            Language models can memorize and regurgitate training data, including
+            personally identifiable information, API keys, passwords, and proprietary
+            code. This happens because large models have enough capacity to memorize
+            specific sequences, especially those that appear multiple times in the
+            training data.
+        </p>
+        <p>
+            This risk extends to fine-tuned and RAG-augmented systems. A model fine-tuned
+            on customer support conversations might reproduce specific customer details.
+            A RAG system might retrieve and expose documents that the querying user
+            shouldn't have access to, if the retrieval layer lacks proper access controls.
+        </p>
+        <p>
+            <strong>Mitigations:</strong> Differential privacy during training, data
+            deduplication and PII scrubbing in training pipelines, output filtering for
+            known sensitive patterns, access controls in RAG retrieval layers, and regular
+            auditing for memorization of sensitive content.
+        </p>
+
+        <h2>The Common Thread</h2>
+        <p>
+            Most of these risks share a pattern: AI systems are being given more access,
+            more autonomy, and more trust — while the security tooling and best practices
+            are still catching up. The models are powerful, and that power creates
+            surface area.
+        </p>
+        <p>
+            The practical takeaway is to treat AI components with the same rigor you'd
+            apply to any other part of your security posture: least privilege, input
+            validation, output monitoring, audit logging, and defense in depth. The
+            specific attacks are new, but the principles for defending against them
+            are familiar.
+        </p>
+    </div>
+
+    <footer class="article-footer">
+        <p>Written by Marian Helcl Øverli — March 2026</p>
+    </footer>
+</article>
+
+<script src="../js/main.js"></script>
+
+</body>
+</html>

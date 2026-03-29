@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase: What It Is, What It's Used For, and How to Secure It — Marian Helcl Øverli</title>
+    <meta name="description" content="A practical overview of Supabase — its features, common use cases, security risks, and how to prevent them.">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/layout.css">
+    <link rel="stylesheet" href="../css/article.css">
+</head>
+<body>
+
+<nav>
+    <div class="nav-inner">
+        <a href="../index.html" class="logo"><img src="../favicon.svg" alt="MHØ" class="logo-img"></a>
+        <button class="hamburger" aria-label="Menu">&#9776;</button>
+        <ul class="nav-links">
+            <li><a href="../index.html#about">About</a></li>
+            <li><a href="../index.html#projects">Projects</a></li>
+            <li><a href="../index.html#skills">Skills</a></li>
+            <li><a href="../index.html#blog">Writing</a></li>
+            <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+        <a href="../index.html#ai-twin" class="btn btn-primary nav-cta">Chat with My AI Twin</a>
+    </div>
+</nav>
+
+<article class="article">
+    <a href="../index.html#blog" class="article-back">&larr; Back to writing</a>
+
+    <header class="article-header">
+        <div class="article-date">March 2026</div>
+        <h1>Supabase: What It Is, What It's Used For, and How to Secure It</h1>
+        <p class="article-subtitle">
+            Supabase gives you a full backend — Postgres database, authentication,
+            file storage, and real-time subscriptions — through a dashboard and a
+            handful of client libraries. This article walks through what it is,
+            where it shines, and how to keep it secure.
+        </p>
+    </header>
+
+    <div class="article-body">
+
+        <h2>What Is Supabase?</h2>
+        <p>
+            Supabase is an open-source backend-as-a-service (BaaS) built on top of
+            <strong>PostgreSQL</strong>. You get a managed database, user authentication,
+            file storage, auto-generated APIs, and real-time data subscriptions — all
+            configured through a web dashboard and accessed via client libraries for
+            JavaScript, Python, Dart, Swift, and Kotlin.
+        </p>
+        <p>
+            Under the hood, Supabase composes several open-source tools into a single
+            platform:
+        </p>
+        <ul>
+            <li><strong>PostgreSQL</strong> — the core relational database, with full SQL support including joins, transactions, views, and extensions like <code>pgvector</code> for embeddings</li>
+            <li><strong>GoTrue</strong> — handles authentication and user management: email/password, OAuth providers, magic links, and multi-factor auth</li>
+            <li><strong>PostgREST</strong> — reads your database schema and generates a full REST API automatically, so every table becomes an API endpoint</li>
+            <li><strong>Realtime</strong> — delivers database changes to connected clients over WebSockets, enabling live updates</li>
+            <li><strong>Storage</strong> — an S3-compatible file storage system with its own access policies</li>
+            <li><strong>Edge Functions</strong> — serverless functions running on Deno for custom backend logic like webhooks, payment processing, or third-party API calls</li>
+            <li><strong>pg_graphql</strong> — an optional GraphQL layer that sits on top of your tables</li>
+        </ul>
+
+        <h2>How the Security Model Works</h2>
+        <p>
+            Every Supabase project comes with two keys: an <strong>anon key</strong> and a
+            <strong>service_role key</strong>. The anon key is meant to be used in frontend
+            code — it's public. The service_role key has full access to everything and is
+            meant to stay on the server.
+        </p>
+        <p>
+            Because the anon key is public, your database is directly accessible from the
+            browser. The security layer that controls what each user can actually do is
+            <strong>Row Level Security (RLS)</strong> — a PostgreSQL feature that lets you
+            write policies defining exactly which rows a given user can read, insert, update,
+            or delete.
+        </p>
+        <p>
+            This is the foundation of Supabase security. Every table needs RLS enabled with
+            explicit policies. The API, Realtime, and Storage all respect these policies.
+        </p>
+
+        <h2>What Is Supabase Used For?</h2>
+        <p>
+            Supabase works well for a wide range of applications because it gives you a full
+            Postgres database with a managed infrastructure layer on top:
+        </p>
+        <ul>
+            <li><strong>MVPs and prototypes</strong> — a complete backend in minutes: auth, database, and API ready to go</li>
+            <li><strong>SaaS products</strong> — user management, subscription data, and tenant isolation with RLS policies</li>
+            <li><strong>Mobile apps</strong> — first-class SDKs for Flutter, React Native, Swift, and Kotlin</li>
+            <li><strong>AI/ML projects</strong> — store and query vector embeddings with <code>pgvector</code>, build RAG pipelines backed by Postgres</li>
+            <li><strong>Real-time apps</strong> — chat, live dashboards, and collaborative editors using Realtime subscriptions</li>
+            <li><strong>Internal tools</strong> — admin panels and back-office apps backed by Postgres with row-level access control</li>
+        </ul>
+
+        <h2>Security Risks and How to Handle Them</h2>
+
+        <h3>1. Tables Without Row Level Security</h3>
+        <p>
+            When you create a new table, RLS is disabled by default. With RLS off, the
+            auto-generated API gives full read and write access to every row in that table
+            to anyone who has the anon key — which is everyone, since it's public.
+        </p>
+        <p>
+            Enable RLS on every table and write specific policies that match your access
+            requirements. A good starting point: each user can only access their own rows.
+        </p>
+        <pre><code>-- Enable RLS
+ALTER TABLE documents ENABLE ROW LEVEL SECURITY;
+
+-- Each user can only access their own documents
+CREATE POLICY "users own documents" ON documents
+  FOR ALL USING (auth.uid() = owner_id)
+  WITH CHECK (auth.uid() = owner_id);</code></pre>
+        <p>
+            For tables with shared data, write more granular policies — separate SELECT,
+            INSERT, UPDATE, and DELETE policies with the minimum access each operation
+            needs.
+        </p>
+
+        <h3>2. Service Role Key Exposure</h3>
+        <p>
+            The service_role key bypasses all RLS policies. It belongs in server-side code
+            only: Edge Functions, backend API routes, or CI/CD pipelines.
+        </p>
+        <p>
+            Store it in your hosting provider's secret management (Vercel environment
+            variables, Fly.io secrets, etc.). Add <code>.env</code> to your
+            <code>.gitignore</code>. Audit your client bundle to confirm the key
+            is absent — build tools sometimes inline environment variables that start
+            with certain prefixes.
+        </p>
+
+        <h3>3. Storage Bucket Policies</h3>
+        <p>
+            Supabase Storage uses the same policy system as database tables. Each bucket
+            needs policies that scope file access to the right users. A practical pattern
+            is to organize files into per-user folders and write a policy that enforces it:
+        </p>
+        <pre><code>-- Users can only access files in their own folder
+CREATE POLICY "user files" ON storage.objects
+  FOR ALL USING (
+    bucket_id = 'uploads'
+    AND (storage.foldername(name))[1] = auth.uid()::text
+  );</code></pre>
+        <p>
+            For shared assets like public profile pictures, create a separate bucket with
+            a read-only policy and restrict uploads to authenticated users.
+        </p>
+
+        <h3>4. Input Validation</h3>
+        <p>
+            The PostgREST API accepts any data that satisfies your column types. For
+            stronger guarantees, add validation at the database level using PostgreSQL's
+            built-in tools:
+        </p>
+        <ul>
+            <li><code>CHECK</code> constraints for value ranges and format rules</li>
+            <li><code>NOT NULL</code> for required fields</li>
+            <li><code>UNIQUE</code> constraints to prevent duplicates</li>
+            <li>Foreign keys for referential integrity</li>
+            <li>Custom domains and types for reusable validation</li>
+        </ul>
+        <p>
+            For more complex validation (cross-field checks, external lookups), run the
+            logic in an Edge Function and have the client call that function instead of
+            inserting directly.
+        </p>
+
+        <h3>5. Realtime Data Access</h3>
+        <p>
+            Realtime broadcasts database changes to subscribed clients over WebSockets.
+            It respects RLS policies — a user will only receive change events for rows
+            their policies allow them to read. This works correctly as long as your RLS
+            policies are in place.
+        </p>
+        <p>
+            Test this explicitly: connect as two different users and verify that each
+            only receives events for their own data. Pay special attention to tables
+            where you've written broader SELECT policies, since those determine what
+            gets broadcast.
+        </p>
+
+        <h3>6. Edge Function Authentication</h3>
+        <p>
+            Edge Functions are accessible via a public URL. To restrict access, verify
+            the JWT from the Authorization header inside the function:
+        </p>
+        <pre><code>import { createClient } from "@supabase/supabase-js";
+
+Deno.serve(async (req) => {
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader) return new Response("Unauthorized", { status: 401 });
+
+  const supabase = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_ANON_KEY")!,
+    { global: { headers: { Authorization: authHeader } } }
+  );
+
+  const { data: { user }, error } = await supabase.auth.getUser();
+  if (error || !user) return new Response("Unauthorized", { status: 401 });
+
+  // Authenticated — proceed with logic
+});</code></pre>
+        <p>
+            This pattern creates a Supabase client scoped to the calling user, so any
+            database queries inside the function also respect that user's RLS policies.
+        </p>
+
+        <h3>7. Use the Security Advisor</h3>
+        <p>
+            The Supabase dashboard includes a <strong>Security Advisor</strong> that scans
+            your project and flags tables without RLS, exposed schemas, and other
+            misconfigurations. Run it regularly — especially before deploying to production
+            and after adding new tables.
+        </p>
+
+        <h2>Closing Thoughts</h2>
+        <p>
+            Supabase gives solo developers and small teams a production-grade backend
+            with very little setup. The key to using it well is understanding that
+            your database sits behind a public API, and Row Level Security is what
+            controls access. Enable it on every table, scope your policies tightly,
+            keep the service_role key on the server, and let the Security Advisor
+            catch anything you miss.
+        </p>
+    </div>
+
+    <footer class="article-footer">
+        <p>Written by Marian Helcl Øverli — March 2026</p>
+    </footer>
+</article>
+
+<script src="../js/main.js"></script>
+
+</body>
+</html>
