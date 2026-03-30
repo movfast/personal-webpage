@@ -199,6 +199,7 @@ nav .nav-links a:hover {
         padding: 1.5rem 2rem;
         gap: 1rem;
         border-bottom: 1px solid var(--border);
+        z-index: 200;
     }
 
     nav .nav-links.open {
