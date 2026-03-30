@@ -188,13 +188,19 @@ nav .nav-links a:hover {
         display: block;
     }
 
+    nav {
+        backdrop-filter: none;
+        background: rgba(18, 18, 42, 0.98);
+        overflow: visible;
+    }
+
     nav .nav-links {
         display: none;
         position: absolute;
         top: 60px;
         left: 0;
         width: 100%;
-        background: rgba(18, 18, 42, 0.95);
+        background: rgba(18, 18, 42, 0.98);
         flex-direction: column;
         padding: 1.5rem 2rem;
         gap: 1rem;
