@@ -183,7 +183,7 @@ body.botanical a.btn-outline {
     opacity: 0.4;
 }
 
-body.botanical > *:not(#botanical-canvas):not(#botanical-petals):not(#theme-toggle) {
+body.botanical > *:not(#botanical-canvas):not(#botanical-petals):not(#theme-toggle):not(nav) {
     position: relative;
     z-index: 1;
 }
