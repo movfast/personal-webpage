@@ -73,6 +73,7 @@ nav .nav-links a:hover {
     justify-content: flex-end;
     padding-top: 60px;
     position: relative;
+    z-index: 1;
 }
 
 .hero-heading {
