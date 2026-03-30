@@ -62,9 +62,11 @@
         </p>
         <p>
             At inference, costs per query are smaller but accumulate at scale. A single
-            ChatGPT query is estimated to consume around 0.001–0.01 kWh, depending on
-            query length and model size — roughly 10 times the energy of a standard
-            Google Search. With hundreds of millions of ChatGPT users and comparable
+            ChatGPT query is estimated to consume around 0.3 Wh (0.0003 kWh) for a
+            typical GPT-4o request, though this varies with query length and model size.
+            Early estimates put this at roughly 10 times a Google Search, though more
+            recent analyses suggest the gap has narrowed considerably as models become
+            more efficient. With hundreds of millions of ChatGPT users and comparable
             usage at competing services, inference energy adds up to gigawatt-hours per
             day across the industry. The per-query cost sounds trivial; the aggregate
             does not.
@@ -73,12 +75,15 @@
         <h2>2. The Carbon Cost of Training</h2>
         <p>
             Training a large language model produces substantial CO2-equivalent emissions.
-            A 2019 study by Strubell et al. estimated that training a single large
-            transformer (BERT-scale) could emit around 284 tonnes of CO2e. More recent
-            frontier models are dramatically larger. Estimates for GPT-3 (175B parameters)
-            put training emissions somewhere between 500 and 550 tonnes CO2e, and
-            GPT-4-scale runs are estimated in the range of several thousand tonnes,
-            depending on the grid supplying the compute.
+            A 2019 study by Strubell et al. estimated that a full neural architecture
+            search process — training thousands of model variants to find an optimal
+            transformer architecture — could emit around 284 tonnes of CO2e. A single
+            BERT training run is far cheaper (under a tonne), but the paper illustrated
+            how quickly costs compound at scale. More recent frontier models are
+            dramatically larger. Estimates for GPT-3 (175B parameters) put training
+            emissions somewhere between 500 and 550 tonnes CO2e, and GPT-4-scale runs
+            are estimated in the range of several thousand tonnes, depending on the grid
+            supplying the compute.
         </p>
         <p>
             To make that tangible: a transatlantic round-trip flight between Oslo and
@@ -95,9 +100,10 @@
             hardware in Iceland, where the grid is nearly 100% renewable geothermal and
             hydro, has a fraction of the footprint of the same run in a coal-heavy region.
             The average US grid emits roughly 386 g CO2 per kWh (2023 EPA figure); the
-            Swedish grid runs at around 13 g CO2/kWh. Running the same 5 GWh training
-            job shifts from approximately 1,930 tonnes CO2e on the US average to about
-            65 tonnes in Sweden — a factor of 30 difference from grid selection alone.
+            Swedish grid runs at roughly 30–40 g CO2/kWh depending on the year.
+            Running the same 5 GWh training job shifts from approximately 1,930 tonnes
+            CO2e on the US average to about 150–200 tonnes in Sweden — a factor of
+            10–13 difference from grid selection alone.
         </p>
 
         <h2>3. Inference Is the Bigger Long-Term Problem</h2>
@@ -137,16 +143,17 @@
             its global water consumption increased by 34% between 2021 and 2022, reaching
             6.4 million cubic meters — roughly the volume of 2,500 Olympic swimming pools.
             That increase coincided with rapid AI infrastructure expansion. Google reported
-            a similar trajectory, with global water consumption reaching 5.6 billion liters
-            in 2022.
+            a similar trajectory, with global water consumption reaching 5.6 billion
+            gallons (approximately 21 billion liters) in 2022.
         </p>
         <p>
             Water usage effectiveness (WUE) — liters of water consumed per kWh of IT
             energy — typically ranges from 0.5 to 2.0 L/kWh for modern data centers.
             At the lower end of that range, a 5 GWh training run consumes 2.5 million
-            liters of water. Training GPT-4 is estimated to have required on the order
-            of 700,000 liters of fresh water for cooling — roughly what 1,200 people
-            drink in a year. A 100 MW data center running continuously can draw as much
+            liters of water. Training GPT-3 is estimated to have required on the order
+            of 700,000 liters of fresh water for direct on-site cooling alone — roughly
+            what 1,200 people drink in a year. Frontier models trained at larger scale
+            use proportionally more. A 100 MW data center running continuously can draw as much
             water per day as a small city.
         </p>
         <p>
@@ -200,7 +207,7 @@
             and Azure all publish carbon intensity estimates for their regions, and the
             differences are large. Running compute in us-east-1 (Virginia, mixed gas and
             coal) versus eu-north-1 (Stockholm, nearly 100% hydro and wind) can represent
-            a 20–30x difference in grams of CO2 per kWh. For training jobs where geographic
+            a 10–30x difference in grams of CO2 per kWh. For training jobs where geographic
             latency does not matter, routing to a low-carbon region is a direct reduction
             in real emissions — not just a certificate purchase.
         </p>
@@ -219,7 +226,7 @@
             and Lambda Labs colocate in regions with favorable renewable energy access.
             Nordic cloud infrastructure — Iceland's geothermal grid, Swedish and Norwegian
             hydro — offers some of the lowest carbon intensities in the world, typically
-            20–50 g CO2/kWh compared to 400–600 g CO2/kWh for coal-heavy grids. The unit
+            30–50 g CO2/kWh compared to 400–600 g CO2/kWh for coal-heavy grids. The unit
             economics for pure GPU compute are often competitive with hyperscalers.
         </p>
 
@@ -284,6 +291,21 @@
             is worth getting right.
         </p>
 
+        <h2>Resources</h2>
+        <ul>
+            <li><a href="https://www.iea.org/reports/energy-and-ai/energy-demand-from-ai">IEA — Energy Demand from AI</a> — data center energy consumption figures and projections</li>
+            <li><a href="https://arxiv.org/abs/1906.02243">Strubell et al. (2019) — Energy and Policy Considerations for Deep Learning in NLP</a> — the foundational paper on carbon costs of training</li>
+            <li><a href="https://www.nvidia.com/en-us/data-center/h100/">NVIDIA H100 GPU</a> — official specs including the 700W TDP rating</li>
+            <li><a href="https://epoch.ai/gradient-updates/how-much-energy-does-chatgpt-use">Epoch AI — How Much Energy Does ChatGPT Use?</a> — per-query energy estimates and methodology</li>
+            <li><a href="https://blogs.microsoft.com/on-the-issues/2024/05/15/microsoft-environmental-sustainability-report-2024/">Microsoft 2024 Environmental Sustainability Report</a> — water consumption and data center growth figures</li>
+            <li><a href="https://sustainability.google/reports/google-2023-environmental-report/">Google 2023 Environmental Report</a> — water and energy consumption data</li>
+            <li><a href="https://www.epa.gov/egrid">EPA eGRID</a> — US grid carbon intensity data by region</li>
+            <li><a href="https://ourworldindata.org/grapher/carbon-intensity-electricity">Our World in Data — Carbon Intensity of Electricity</a> — country-level grid carbon intensity comparisons</li>
+            <li><a href="https://deepmind.google/blog/graphcast-ai-model-for-faster-and-more-accurate-global-weather-forecasting/">Google DeepMind — GraphCast</a> — AI weather forecasting model</li>
+            <li><a href="https://deepmind.google/blog/deepmind-ai-reduces-google-data-centre-cooling-bill-by-40/">Google DeepMind — Data Centre Cooling with RL</a> — 40% reduction in cooling energy</li>
+            <li><a href="https://arxiv.org/abs/2306.00978">AWQ: Activation-aware Weight Quantization (MIT Han Lab)</a> — post-training quantization techniques for LLM compression</li>
+            <li><a href="https://www.electricitymaps.com/">Electricity Maps</a> — real-time grid carbon intensity API for carbon-aware computing</li>
+        </ul>
     </div>
 
     <footer class="article-footer">
