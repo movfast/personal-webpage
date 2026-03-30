@@ -217,14 +217,38 @@ nav .nav-links a:hover {
         padding: 4rem 1.25rem 2rem;
     }
 
+    .hero {
+        min-height: auto;
+        padding-top: 80px;
+        padding-bottom: 1rem;
+    }
+
+    .hero-heading {
+        position: static;
+        transform: none;
+        padding: 0 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .hero h1 {
+        font-size: clamp(1.8rem, 7vw, 2.5rem);
+    }
+
     .hero-inner {
-        flex-direction: column;
+        flex-direction: column-reverse;
         align-items: center;
+        padding: 0 1.25rem;
+    }
+
+    .hero-text {
+        padding-bottom: 0;
     }
 
     .hero .profile-photo {
-        width: 220px;
-        height: 280px;
+        width: 200px;
+        height: 260px;
+        transform: none;
+        margin-bottom: 1rem;
     }
 
     .chat-iframe {
