@@ -1,0 +1,44 @@
+schema_version: "1.0"
+id: "personal_webpage"
+display_name: "Personal Portfolio Website"
+description: "Dark-themed portfolio with botanical light mode, 13 easter egg quirks, AI news feed, and AI Twin Chat. Deployed to GitHub Pages."
+github_repo: "https://github.com/movfast/personal-webpage"
+classification:
+  category: "Web / Portfolio"
+  subcategory: "Static Site"
+  tech_stack: ["HTML", "CSS", "JavaScript"]
+  complexity: "medium"
+  visibility: "public"
+status: "in_progress"
+progress: 85
+progress_note: "AI Twin Chat in active development; core site fully deployed"
+priority: "high"
+milestones:
+  - title: "Core pages"
+    status: "done"
+    due_date: "2025-11-01"
+    completed_date: "2025-11-01"
+  - title: "Easter egg system"
+    status: "done"
+    due_date: "2025-12-01"
+    completed_date: "2025-12-01"
+  - title: "AI news feed"
+    status: "done"
+    due_date: "2026-01-15"
+    completed_date: "2026-01-15"
+  - title: "AI Twin Chat"
+    status: "in_progress"
+    due_date: "2026-04-15"
+    completed_date: null
+  - title: "SEO + performance"
+    status: "pending"
+    due_date: "2026-05-15"
+    completed_date: null
+next_actions:
+  - "Polish AI Twin Chat responses"
+  - "Add project showcase section"
+  - "Optimize Lighthouse scores"
+blockers: []
+started_date: "2025-10-01"
+target_completion: "2026-06-01"
+last_updated: "2026-03-30"
