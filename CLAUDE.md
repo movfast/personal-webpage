@@ -54,7 +54,7 @@ personal_webpage/
 ## Key Sections (index.html)
 - **Hero** — intro with profile photo, tagline, CTA buttons, resume download
 - **About** — bio, background (physics → acoustics → AI), detail cards
-- **Projects** — project cards with screenshots, tags, links
+- **Projects** — project cards with screenshots, tags, links (includes Wolf Behavior Classification dashboard linked to GitHub Pages)
 - **Skills** — languages, ML/AI, tools, data
 - **Writing/Blog** — blog post cards linking to full articles in `writing/`
 - **AI News** — live AI news feed (`js/news.js`)
