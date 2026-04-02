@@ -113,6 +113,12 @@
     object-fit: cover;
 }
 
+.project-card .project-screenshot-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+}
+
 .project-card .project-body {
     padding: 1.5rem;
 }
