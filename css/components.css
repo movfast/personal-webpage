@@ -173,6 +173,7 @@
 .skill-category:nth-child(2) h3 { color: var(--green); }
 .skill-category:nth-child(3) h3 { color: var(--yellow); }
 .skill-category:nth-child(4) h3 { color: var(--blue); }
+.skill-category:nth-child(5) h3 { color: var(--cyan); }
 
 .skill-category ul {
     list-style: none;

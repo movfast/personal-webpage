@@ -114,6 +114,7 @@ body.botanical .skill-category:nth-child(1) h3 { color: var(--green); }
 body.botanical .skill-category:nth-child(2) h3 { color: var(--accent); }
 body.botanical .skill-category:nth-child(3) h3 { color: var(--yellow); }
 body.botanical .skill-category:nth-child(4) h3 { color: var(--blue); }
+body.botanical .skill-category:nth-child(5) h3 { color: var(--cyan); }
 
 body.botanical .skill-category li::before {
     content: '🌿';
