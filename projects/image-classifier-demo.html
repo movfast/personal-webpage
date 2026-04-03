@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Draw & Classify — Neural Network Demo — Marian Helcl Øverli</title>
+    <meta name="description" content="Draw digits and watch a neural network classify them in real-time with animated neuron activations.">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/layout.css">
+    <link rel="stylesheet" href="../css/article.css">
+    <style>
+        .game-wrapper { max-width: 840px; margin: 2rem auto; }
+        .game-frame { width: 100%; aspect-ratio: 4 / 3; border: none; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(108,99,255,0.1); }
+        .game-info { margin-top: 2.5rem; }
+        .game-info h2 { font-size: 1.3rem; margin-bottom: 0.75rem; }
+        .game-info p { color: var(--text-muted); line-height: 1.7; margin-bottom: 1rem; }
+        .game-info table { width: 100%; border-collapse: collapse; margin: 1rem 0 1.5rem; }
+        .game-info th, .game-info td { text-align: left; padding: 0.5rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.08); }
+        .game-info th { color: var(--accent); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .game-info td { color: var(--text-muted); font-size: 0.95rem; }
+        .tech-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="nav-inner">
+        <a href="../index.html" class="logo"><img src="../favicon.svg" alt="MHØ" class="logo-img"></a>
+        <button class="hamburger" aria-label="Menu">&#9776;</button>
+        <ul class="nav-links">
+            <li><a href="../index.html#about">About</a></li>
+            <li><a href="../index.html#projects">Projects</a></li>
+            <li><a href="../index.html#skills">Skills</a></li>
+            <li><a href="../index.html#blog">Writing</a></li>
+            <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+        <a href="../index.html#ai-twin" class="btn btn-primary nav-cta">Chat with My AI Twin</a>
+    </div>
+</nav>
+
+<article class="article">
+    <a href="../index.html#projects" class="article-back">&larr; Back to projects</a>
+
+    <header class="article-header">
+        <h1>Draw & Classify — Neural Network Demo</h1>
+        <p class="article-subtitle">
+            Draw digits on the canvas and watch a 2-layer neural network classify them in real-time,
+            with animated neuron activations and live probability bars.
+        </p>
+        <div class="tech-tags">
+            <span class="tag">JavaScript</span>
+            <span class="tag">Canvas 2D</span>
+            <span class="tag">Neural Network</span>
+            <span class="tag">MNIST</span>
+        </div>
+    </header>
+
+    <div class="game-wrapper">
+        <iframe class="game-frame" src="../image-classifier-demo.html" title="Draw & Classify Neural Network Demo" allowfullscreen></iframe>
+    </div>
+
+    <div class="game-info">
+        <h2>How It Works</h2>
+        <p>
+            Draw a digit (0-9) on the canvas. Your drawing is downsampled to 28x28 pixels (like MNIST)
+            and fed through a 784→64→10 neural network running entirely in JavaScript. The network
+            diagram shows neuron activations in real-time.
+        </p>
+
+        <table>
+            <thead><tr><th>Control</th><th>Action</th></tr></thead>
+            <tbody>
+                <tr><td>Draw on canvas</td><td>Sketch a digit with mouse or touch</td></tr>
+                <tr><td>Clear</td><td>Reset the canvas</td></tr>
+                <tr><td>Eraser</td><td>Toggle eraser mode</td></tr>
+                <tr><td>Brush size</td><td>Adjust stroke width</td></tr>
+                <tr><td>Gallery digits</td><td>Load a pre-drawn example</td></tr>
+            </tbody>
+        </table>
+
+        <h2>The Network Architecture</h2>
+        <p>
+            The network has an input layer (784 neurons for the 28x28 image), a hidden layer (64 neurons
+            with ReLU activation and hand-crafted spatial pattern detectors), and an output layer
+            (10 neurons with softmax for digit probabilities). The visualization shows the most active
+            hidden neurons glowing proportionally to their activation values.
+        </p>
+    </div>
+</article>
+
+<script src="../js/main.js"></script>
+</body>
+</html>

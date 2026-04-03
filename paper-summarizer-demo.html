@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paper Dissector — LLM Chunking Pipeline Demo</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #1a1a2e;
+  color: #e0e0f0;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 24px 12px;
+}
+
+.container {
+  width: 100%;
+  max-width: 800px;
+  max-height: 600px;
+  overflow-y: auto;
+  background: #1a1a40;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(108,99,255,0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Scrollbar */
+.container::-webkit-scrollbar,
+.paper-panel::-webkit-scrollbar,
+.summary-panel::-webkit-scrollbar { width: 6px; }
+.container::-webkit-scrollbar-track,
+.paper-panel::-webkit-scrollbar-track,
+.summary-panel::-webkit-scrollbar-track { background: transparent; }
+.container::-webkit-scrollbar-thumb,
+.paper-panel::-webkit-scrollbar-thumb,
+.summary-panel::-webkit-scrollbar-thumb { background: #6c63ff44; border-radius: 3px; }
+
+/* Header */
+.header {
+  padding: 20px 24px 12px;
+  border-bottom: 1px solid #2a2a5a;
+  flex-shrink: 0;
+}
+.header h1 {
+  font-size: 1.2rem;
+  color: #6c63ff;
+  margin-bottom: 4px;
+}
+.header .paper-title {
+  font-size: 0.85rem;
+  color: #a0a0c0;
+  font-style: italic;
+  margin-bottom: 12px;
+}
+
+/* Controls */
+.controls {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.control-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: #a0a0c0;
+}
+.control-group label { white-space: nowrap; }
+.control-group input[type="range"] {
+  width: 80px;
+  accent-color: #6c63ff;
+  cursor: pointer;
+}
+.control-group .val {
+  color: #6c63ff;
+  font-weight: 600;
+  min-width: 28px;
+  text-align: right;
+}
+.btn-summarize-all {
+  margin-left: auto;
+  background: #6c63ff;
+  color: #fff;
+  border: none;
+  padding: 6px 16px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+.btn-summarize-all:hover { background: #5a52e0; transform: translateY(-1px); }
+.btn-summarize-all:active { transform: translateY(0); }
+.btn-summarize-all:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.compression-display {
+  font-size: 0.7rem;
+  color: #a0a0c0;
+  padding: 4px 10px;
+  background: #2a2a5a;
+  border-radius: 6px;
+}
+.compression-display span { color: #6c63ff; font-weight: 600; }
+
+/* Main layout */
+.main {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.paper-panel {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  border-right: 1px solid #2a2a5a;
+}
+
+.summary-panel {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Paper sections */
+.section-block {
+  margin-bottom: 12px;
+  border-radius: 10px;
+  background: #2a2a5a;
+  overflow: hidden;
+  transition: box-shadow 0.3s;
+}
+.section-block.active { box-shadow: 0 0 0 1px #6c63ff44; }
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s;
+}
+.section-header:hover { background: #33335a; }
+.section-header h3 {
+  font-size: 0.8rem;
+  color: #c0c0e0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.section-header h3::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-right: 2px solid #6c63ff;
+  border-bottom: 2px solid #6c63ff;
+  transform: rotate(-45deg);
+  transition: transform 0.2s;
+}
+.section-block.open .section-header h3::before {
+  transform: rotate(45deg);
+}
+.btn-section-summarize {
+  background: transparent;
+  border: 1px solid #6c63ff;
+  color: #6c63ff;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 0.65rem;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.btn-section-summarize:hover { background: #6c63ff; color: #fff; }
+.btn-section-summarize:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.section-body {
+  padding: 0 14px;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease, padding 0.35s ease;
+}
+.section-block.open .section-body {
+  max-height: 2000px;
+  padding: 0 14px 14px;
+}
+
+.section-body p {
+  font-size: 0.73rem;
+  line-height: 1.6;
+  color: #b0b0d0;
+  margin-bottom: 8px;
+}
+
+/* Chunk visualization */
+.chunk-overlay {
+  position: relative;
+}
+.chunk-overlay .chunk {
+  display: inline;
+  border-radius: 3px;
+  padding: 1px 0;
+  transition: background 0.4s, opacity 0.4s, transform 0.4s;
+}
+.chunk.compressing {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+/* Summary panel */
+.tab-bar {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 12px;
+  flex-shrink: 0;
+}
+.tab-btn {
+  flex: 1;
+  background: #2a2a5a;
+  border: none;
+  color: #a0a0c0;
+  padding: 8px 6px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 8px 8px 0 0;
+  transition: background 0.2s, color 0.2s;
+}
+.tab-btn.active { background: #6c63ff22; color: #6c63ff; border-bottom: 2px solid #6c63ff; }
+.tab-btn:hover:not(.active) { background: #33335a; }
+
+.tab-content {
+  display: none;
+  flex: 1;
+  overflow-y: auto;
+}
+.tab-content.active { display: block; }
+
+.summary-card {
+  background: #2a2a5a;
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 10px;
+  animation: cardIn 0.4s ease;
+}
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.summary-card h4 {
+  font-size: 0.75rem;
+  color: #6c63ff;
+  margin-bottom: 8px;
+}
+.summary-card ul {
+  list-style: none;
+  padding: 0;
+}
+.summary-card li {
+  font-size: 0.7rem;
+  color: #b0b0d0;
+  line-height: 1.55;
+  padding: 4px 0 4px 14px;
+  position: relative;
+  animation: bulletIn 0.35s ease both;
+}
+.summary-card li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 10px;
+  width: 5px;
+  height: 5px;
+  background: #6c63ff;
+  border-radius: 50%;
+}
+.summary-card li:nth-child(1) { animation-delay: 0s; }
+.summary-card li:nth-child(2) { animation-delay: 0.1s; }
+.summary-card li:nth-child(3) { animation-delay: 0.2s; }
+.summary-card li:nth-child(4) { animation-delay: 0.3s; }
+.summary-card li:nth-child(5) { animation-delay: 0.4s; }
+
+@keyframes bulletIn {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #555580;
+  font-size: 0.8rem;
+  text-align: center;
+  gap: 8px;
+}
+.empty-state .icon { font-size: 2rem; opacity: 0.4; }
+
+/* Processing animation */
+.processing-bar {
+  height: 3px;
+  background: #2a2a5a;
+  border-radius: 2px;
+  margin-bottom: 12px;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 0.3s;
+  flex-shrink: 0;
+}
+.processing-bar.active { opacity: 1; }
+.processing-bar .fill {
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, #6c63ff, #a78bfa);
+  border-radius: 2px;
+  transition: width 0.3s;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .container { max-height: none; border-radius: 10px; }
+  .main { flex-direction: column; }
+  .paper-panel { border-right: none; border-bottom: 1px solid #2a2a5a; max-height: 50vh; }
+  .summary-panel { min-height: 300px; }
+  .controls { gap: 8px; }
+  .control-group input[type="range"] { width: 60px; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1>Paper Dissector</h1>
+    <div class="paper-title">Efficient Neural Architecture Search for Low-Resource Languages (arXiv:2602.14832)</div>
+    <div class="controls">
+      <div class="control-group">
+        <label>Chunk size</label>
+        <input type="range" id="chunkSize" min="50" max="200" value="100" step="10">
+        <span class="val" id="chunkSizeVal">100</span>
+      </div>
+      <div class="control-group">
+        <label>Overlap</label>
+        <input type="range" id="overlap" min="0" max="50" value="15" step="5">
+        <span class="val" id="overlapVal">15</span>
+      </div>
+      <div class="compression-display" id="compressionDisplay">
+        Ratio: <span>--</span>
+      </div>
+      <button class="btn-summarize-all" id="btnSummarizeAll">Summarize All</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="paper-panel" id="paperPanel"></div>
+    <div class="summary-panel">
+      <div class="processing-bar" id="processingBar"><div class="fill" id="processingFill"></div></div>
+      <div class="tab-bar">
+        <button class="tab-btn active" data-tab="findings">Key Findings</button>
+        <button class="tab-btn" data-tab="methods">Methods</button>
+        <button class="tab-btn" data-tab="results">Results</button>
+      </div>
+      <div class="tab-content active" id="tab-findings">
+        <div class="empty-state"><div class="icon">&#128269;</div>Click "Summarize" on a section to begin</div>
+      </div>
+      <div class="tab-content" id="tab-methods">
+        <div class="empty-state"><div class="icon">&#9881;</div>Methods summaries will appear here</div>
+      </div>
+      <div class="tab-content" id="tab-results">
+        <div class="empty-state"><div class="icon">&#128202;</div>Results summaries will appear here</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ====== PAPER DATA ======
+const paperSections = [
+  {
+    id: "abstract",
+    title: "Abstract",
+    tab: "findings",
+    paragraphs: [
+      "Neural architecture search (NAS) has achieved remarkable success in designing high-performing models for well-resourced languages such as English, Mandarin, and German. However, applying NAS to low-resource languages presents unique challenges, including limited parallel corpora, morphological complexity, and scarce computational budgets. In this work, we propose LR-NAS, a resource-efficient neural architecture search framework specifically designed for low-resource natural language processing tasks.",
+      "Our approach introduces a two-stage search strategy that first identifies promising architectural motifs on a high-resource proxy language, then adapts these motifs to target low-resource languages through a lightweight fine-tuning phase. We evaluate LR-NAS across twelve typologically diverse low-resource languages spanning four language families, covering tasks including named entity recognition, part-of-speech tagging, and dependency parsing.",
+      "Experimental results demonstrate that LR-NAS discovers architectures that outperform manually designed baselines by an average of 3.7 F1 points while requiring only 18% of the GPU hours typically consumed by standard NAS procedures. We further show that the discovered architectures exhibit strong cross-lingual transfer properties, enabling effective zero-shot performance on unseen related languages.",
+      "Our analysis reveals that LR-NAS consistently favors shallow-wide architectures with extensive use of character-level convolutions and gated residual connections, suggesting that morphological feature extraction is a critical bottleneck for low-resource language understanding."
+    ]
+  },
+  {
+    id: "introduction",
+    title: "Introduction",
+    tab: "findings",
+    paragraphs: [
+      "The development of neural network architectures for natural language processing has historically been driven by manual design choices informed by linguistic intuition and empirical trial-and-error. While this approach has produced effective models for high-resource languages, it often fails to account for the structural and distributional properties unique to low-resource languages. Languages with rich morphological systems, flexible word order, and limited training data pose fundamentally different optimization challenges compared to analytic languages with abundant corpora.",
+      "Neural architecture search offers a principled alternative by automating the design process, yet existing NAS methods remain prohibitively expensive for most low-resource NLP researchers. Standard differentiable NAS approaches such as DARTS require hundreds of GPU hours per search, and reinforcement-learning-based methods demand even greater computational investment. This cost barrier effectively excludes research groups working on endangered and under-resourced languages from benefiting from automated architecture design.",
+      "We address this gap by introducing LR-NAS, a two-stage framework that decouples the expensive search phase from the language-specific adaptation phase. In the first stage, we conduct architecture search on a high-resource proxy language to identify a set of promising structural motifs, including attention patterns, convolution kernel configurations, and skip-connection topologies. In the second stage, we employ a lightweight evolutionary strategy to combine and adapt these motifs for each target language, guided by a small held-out validation set.",
+      "The key insight underlying our approach is that while optimal architectures differ across languages, the space of useful architectural components is largely shared. By searching for components rather than complete architectures, we reduce the search cost by an order of magnitude while retaining the ability to produce language-specific designs. We demonstrate that this strategy generalizes across multiple NLP tasks and language families, consistently outperforming both fixed-architecture baselines and prior efficient NAS methods."
+    ]
+  },
+  {
+    id: "methods",
+    title: "Methods",
+    tab: "methods",
+    paragraphs: [
+      "Our framework consists of three core components: a search space definition, a proxy-language search procedure, and a target-language adaptation mechanism. The search space encompasses encoder blocks composed of multi-head self-attention layers, depthwise separable convolutions with kernel sizes ranging from 3 to 15, gated linear units, and configurable residual and skip connections. Each block also includes a character-level sub-module that can be toggled between CNN, LSTM, and Transformer variants.",
+      "For the proxy-language search, we employ a one-shot supernet strategy trained on English data from the Universal Dependencies treebank. The supernet encodes all candidate architectures as subgraphs of a shared over-parameterized network. We use a progressive shrinking schedule that gradually prunes low-performing paths over 50 epochs, retaining the top-K architectural motifs ranked by validation performance on a held-out English development set. This yields a motif library of approximately 200 reusable components.",
+      "Target-language adaptation begins by initializing a population of 64 candidate architectures, each assembled by sampling motifs from the library. We apply a compact evolutionary strategy with tournament selection, one-point crossover, and mutation operators that can swap motifs, adjust layer depths, or modify hidden dimensions. Fitness is evaluated on a small validation set of 500 sentences in the target language, and the search terminates after 20 generations or upon convergence.",
+      "To handle the extreme data scarcity common in low-resource settings, we incorporate two regularization strategies during the adaptation phase. First, we apply stochastic depth with a linear decay schedule, randomly dropping entire blocks during training. Second, we use a cross-lingual distillation objective where a teacher model trained on the proxy language provides soft label supervision, stabilizing training when target-language labels are scarce.",
+      "The final architecture is selected by Pareto-optimal filtering across validation performance and parameter count, allowing practitioners to choose models that balance accuracy against deployment constraints. We provide a configuration interface that lets users specify maximum parameter budgets and inference latency targets."
+    ]
+  },
+  {
+    id: "experiments",
+    title: "Experiments",
+    tab: "methods",
+    paragraphs: [
+      "We evaluate LR-NAS on twelve low-resource languages: Yoruba, Wolof, Bambara, and Ewe from the Niger-Congo family; Kazakh, Uyghur, and Kyrgyz from Turkic; Sinhala, Marathi, and Nepali from Indo-Aryan; and Maltese and Amharic from Afro-Asiatic. Training data ranges from 800 sentences for Bambara to approximately 12,000 sentences for Marathi, drawn from the Universal Dependencies and MasakhaNER corpora.",
+      "We compare against four baselines: a standard BiLSTM-CRF architecture, multilingual BERT fine-tuned with language-adaptive training, the DARTS NAS framework applied directly to each target language, and EfficientNAS, a recent one-shot method designed for low-compute settings. All methods are evaluated on named entity recognition, part-of-speech tagging, and dependency parsing using standard metrics: entity-level F1, tagging accuracy, and labeled attachment score respectively.",
+      "Hyperparameter selection follows a consistent protocol across all experiments. We use the Adam optimizer with a learning rate of 2e-4 and linear warmup over 10% of training steps. Batch sizes are set to 16 for NER and POS tagging, and 8 for dependency parsing. The proxy-language search budget is fixed at 48 GPU hours on a single NVIDIA A100, and the target-language adaptation requires an additional 2-4 GPU hours per language depending on validation set size.",
+      "To assess cross-lingual transfer, we conduct zero-shot experiments where architectures discovered for one language are directly applied to a related language without any further adaptation. We test Kazakh architectures on Kyrgyz, Yoruba architectures on Ewe, and Marathi architectures on Nepali, measuring the performance gap relative to language-specific search."
+    ]
+  },
+  {
+    id: "results",
+    title: "Results",
+    tab: "results",
+    paragraphs: [
+      "LR-NAS achieves state-of-the-art performance on 9 of 12 languages for named entity recognition, with an average improvement of 3.7 F1 points over the strongest baseline. The gains are most pronounced for agglutinative languages such as Kazakh and Uyghur, where LR-NAS discovers architectures with wider character-level convolution kernels that capture morphological patterns more effectively. For POS tagging, our method matches or exceeds multilingual BERT on 10 of 12 languages despite using models with 85% fewer parameters.",
+      "The computational efficiency of LR-NAS is substantial. The total search cost including both the proxy-language search and target-language adaptation amounts to 52 GPU hours on average, compared to 290 GPU hours for standard DARTS applied independently to each language. This represents an 82% reduction in compute while achieving superior or comparable accuracy across all tasks and languages evaluated in our study.",
+      "Zero-shot transfer experiments reveal that architectures discovered by LR-NAS retain 91-96% of their performance when applied to related unseen languages, compared to only 78-84% retention for fixed architectures. This suggests that our search process identifies structural properties that are robust to within-family language variation. Notably, Kazakh architectures transferred to Kyrgyz achieve 94.2% of the Kyrgyz-specific search performance on NER, indicating strong generalization.",
+      "Ablation studies confirm the importance of each component. Removing the cross-lingual distillation objective reduces average F1 by 2.1 points, while disabling the character-level sub-module search leads to a 4.3-point drop on agglutinative languages but only a 0.8-point drop on the Indo-Aryan group. The evolutionary adaptation phase contributes an average gain of 1.9 F1 points over using the proxy-language architecture directly.",
+      "Analysis of the discovered architectures reveals consistent structural preferences. For agglutinative languages, LR-NAS selects wider character convolution kernels with sizes of 7 to 11, multiple gated residual paths, and shallower overall depth of 4 to 6 layers. For Indo-Aryan languages with simpler morphology, the framework prefers deeper and narrower architectures of 8 to 10 layers with standard self-attention, aligning with the hypothesis that morphological complexity drives architectural requirements."
+    ]
+  },
+  {
+    id: "conclusion",
+    title: "Conclusion",
+    tab: "findings",
+    paragraphs: [
+      "We have presented LR-NAS, a resource-efficient neural architecture search framework that makes automated architecture design accessible for low-resource language processing. Our two-stage approach of proxy-language motif discovery followed by lightweight evolutionary adaptation reduces the computational cost of NAS by over 80% while delivering architectures that outperform strong baselines across twelve typologically diverse languages.",
+      "The results demonstrate that architectural preferences are strongly influenced by the morphological properties of the target language, a finding that challenges the one-size-fits-all approach common in multilingual NLP. Our discovered architectures provide concrete evidence that shallow-wide models with extensive character-level processing are better suited for agglutinative languages, while deeper attention-based models are preferred for languages with simpler morphological systems.",
+      "Several directions for future work emerge from our findings. Extending LR-NAS to generative tasks such as machine translation and text summarization would test whether the discovered motifs transfer across task types. Incorporating language-typological features directly into the search objective could further improve adaptation efficiency. Finally, integrating LR-NAS with parameter-efficient fine-tuning methods such as LoRA and adapter layers may enable architecture search at even smaller computational scales, potentially bringing NAS within reach of individual researchers working on critically endangered languages."
+    ]
+  }
+];
+
+// ====== CHUNK COLORS ======
+const chunkColors = [
+  'rgba(108,99,255,0.18)',
+  'rgba(167,139,250,0.18)',
+  'rgba(99,200,255,0.18)',
+  'rgba(255,167,99,0.18)',
+  'rgba(99,255,167,0.18)',
+  'rgba(255,99,167,0.18)',
+  'rgba(200,255,99,0.18)',
+  'rgba(255,220,99,0.18)',
+  'rgba(99,167,255,0.18)',
+  'rgba(220,99,255,0.18)',
+];
+
+// ====== SIGNAL PHRASES ======
+const signalPhrases = [
+  "we propose", "we present", "we introduce", "our approach", "our method", "our framework",
+  "results show", "results demonstrate", "we demonstrate", "we show", "experiments reveal",
+  "outperform", "state-of-the-art", "achieves", "improvement", "we evaluate",
+  "this suggests", "this indicates", "we find", "our analysis", "we observe",
+  "key insight", "in this work", "we address", "the results", "our results"
+];
+
+// ====== EXTRACTIVE SUMMARIZER ======
+function tokenize(text) {
+  return text.toLowerCase().replace(/[^\w\s]/g, '').split(/\s+/).filter(w => w.length > 0);
+}
+
+function computeTFIDF(sentences, allSentences) {
+  const docCount = allSentences.length;
+  const df = {};
+  allSentences.forEach(s => {
+    const unique = new Set(tokenize(s));
+    unique.forEach(w => { df[w] = (df[w] || 0) + 1; });
+  });
+  return sentences.map(s => {
+    const words = tokenize(s);
+    const tf = {};
+    words.forEach(w => { tf[w] = (tf[w] || 0) + 1; });
+    let score = 0;
+    Object.entries(tf).forEach(([w, count]) => {
+      const idf = Math.log((docCount + 1) / ((df[w] || 0) + 1));
+      score += (count / words.length) * idf;
+    });
+    return score;
+  });
+}
+
+function scoreSentences(sentences) {
+  const tfidfScores = computeTFIDF(sentences, sentences);
+  const n = sentences.length;
+
+  return sentences.map((s, i) => {
+    let score = 0;
+
+    // TF-IDF
+    score += tfidfScores[i] * 3;
+
+    // Position: first and last sentences score higher
+    if (i === 0) score += 2.5;
+    else if (i === n - 1) score += 2.0;
+    else if (i === 1) score += 1.5;
+
+    // Sentence length: prefer medium-length (15-40 words)
+    const wordCount = tokenize(s).length;
+    if (wordCount >= 15 && wordCount <= 40) score += 1.5;
+    else if (wordCount >= 10 && wordCount <= 50) score += 0.7;
+    else if (wordCount < 8) score -= 1;
+
+    // Signal phrases
+    const lower = s.toLowerCase();
+    signalPhrases.forEach(phrase => {
+      if (lower.includes(phrase)) score += 1.8;
+    });
+
+    return { text: s, score, index: i };
+  });
+}
+
+function extractSummary(text, compressionRatio) {
+  const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+  const clean = sentences.map(s => s.trim()).filter(s => s.length > 10);
+  if (clean.length === 0) return [];
+
+  const targetCount = Math.max(1, Math.round(clean.length * compressionRatio));
+  const scored = scoreSentences(clean);
+  scored.sort((a, b) => b.score - a.score);
+  const selected = scored.slice(0, targetCount);
+  selected.sort((a, b) => a.index - b.index);
+  return selected.map(s => s.text);
+}
+
+// ====== CHUNKING ======
+function chunkText(text, chunkSize, overlap) {
+  const words = text.split(/\s+/);
+  const chunks = [];
+  let i = 0;
+  while (i < words.length) {
+    const end = Math.min(i + chunkSize, words.length);
+    chunks.push(words.slice(i, end).join(' '));
+    i += chunkSize - overlap;
+    if (i >= words.length) break;
+  }
+  return chunks;
+}
+
+// ====== DOM BUILDING ======
+const paperPanel = document.getElementById('paperPanel');
+
+function buildPaperPanel() {
+  paperPanel.innerHTML = '';
+  paperSections.forEach(sec => {
+    const block = document.createElement('div');
+    block.className = 'section-block';
+    block.id = 'section-' + sec.id;
+    block.innerHTML = `
+      <div class="section-header">
+        <h3>${sec.title}</h3>
+        <button class="btn-section-summarize" data-section="${sec.id}">Summarize</button>
+      </div>
+      <div class="section-body">
+        ${sec.paragraphs.map(p => `<p>${p}</p>`).join('')}
+      </div>
+    `;
+    // Toggle collapse
+    block.querySelector('.section-header').addEventListener('click', (e) => {
+      if (e.target.closest('.btn-section-summarize')) return;
+      block.classList.toggle('open');
+    });
+    // Summarize button
+    block.querySelector('.btn-section-summarize').addEventListener('click', () => {
+      summarizeSection(sec.id);
+    });
+    paperPanel.appendChild(block);
+  });
+  // Open abstract by default
+  document.getElementById('section-abstract').classList.add('open');
+}
+
+// ====== TABS ======
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ====== SLIDERS ======
+const chunkSizeSlider = document.getElementById('chunkSize');
+const overlapSlider = document.getElementById('overlap');
+const chunkSizeVal = document.getElementById('chunkSizeVal');
+const overlapVal = document.getElementById('overlapVal');
+
+chunkSizeSlider.addEventListener('input', () => { chunkSizeVal.textContent = chunkSizeSlider.value; });
+overlapSlider.addEventListener('input', () => { overlapVal.textContent = overlapSlider.value; });
+
+// ====== SUMMARIZE SECTION ======
+let isProcessing = false;
+
+async function summarizeSection(sectionId) {
+  if (isProcessing) return;
+  isProcessing = true;
+
+  const section = paperSections.find(s => s.id === sectionId);
+  if (!section) { isProcessing = false; return; }
+
+  const block = document.getElementById('section-' + sectionId);
+  block.classList.add('open', 'active');
+
+  const body = block.querySelector('.section-body');
+  const fullText = section.paragraphs.join(' ');
+  const chunkSize = parseInt(chunkSizeSlider.value);
+  const overlap = parseInt(overlapSlider.value);
+
+  // Disable buttons
+  document.querySelectorAll('.btn-section-summarize, .btn-summarize-all').forEach(b => b.disabled = true);
+
+  // Start processing bar
+  const bar = document.getElementById('processingBar');
+  const fill = document.getElementById('processingFill');
+  bar.classList.add('active');
+  fill.style.width = '10%';
+
+  // Step 1: Chunk visualization
+  const chunks = chunkText(fullText, chunkSize, overlap);
+  body.innerHTML = '';
+  const chunkContainer = document.createElement('div');
+  chunkContainer.className = 'chunk-overlay';
+  chunks.forEach((chunk, i) => {
+    const span = document.createElement('span');
+    span.className = 'chunk';
+    span.style.background = chunkColors[i % chunkColors.length];
+    span.textContent = chunk + ' ';
+    span.style.opacity = '0';
+    span.style.transition = `opacity 0.4s ease ${i * 0.08}s, background 0.4s ease ${i * 0.08}s, transform 0.4s ease`;
+    chunkContainer.appendChild(span);
+  });
+  body.appendChild(chunkContainer);
+
+  // Animate chunks in
+  await sleep(50);
+  chunkContainer.querySelectorAll('.chunk').forEach(c => { c.style.opacity = '1'; });
+  fill.style.width = '30%';
+  await sleep(400 + chunks.length * 80);
+
+  // Step 2: Compress chunks
+  fill.style.width = '60%';
+  chunkContainer.querySelectorAll('.chunk').forEach((c, i) => {
+    setTimeout(() => { c.classList.add('compressing'); }, i * 60);
+  });
+  await sleep(300 + chunks.length * 60);
+
+  // Step 3: Extract summary
+  const compressionRatio = 0.3;
+  const summaryBullets = extractSummary(fullText, compressionRatio);
+  fill.style.width = '85%';
+
+  // Update compression display
+  const originalWords = fullText.split(/\s+/).length;
+  const summaryWords = summaryBullets.join(' ').split(/\s+/).length;
+  document.getElementById('compressionDisplay').innerHTML =
+    `Ratio: <span>${originalWords}</span> &rarr; <span>${summaryWords}</span> words (${Math.round(summaryWords/originalWords*100)}%)`;
+
+  // Step 4: Show summary card in appropriate tab
+  const tabId = 'tab-' + section.tab;
+  const tabEl = document.getElementById(tabId);
+
+  // Clear empty state
+  const empty = tabEl.querySelector('.empty-state');
+  if (empty) empty.remove();
+
+  const card = document.createElement('div');
+  card.className = 'summary-card';
+  card.innerHTML = `<h4>${section.title}</h4><ul>${summaryBullets.map(b => `<li>${b}</li>`).join('')}</ul>`;
+  tabEl.appendChild(card);
+
+  // Switch to correct tab
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === section.tab);
+  });
+  document.querySelectorAll('.tab-content').forEach(t => {
+    t.classList.toggle('active', t.id === tabId);
+  });
+
+  fill.style.width = '100%';
+  await sleep(400);
+
+  // Reset section body
+  body.innerHTML = section.paragraphs.map(p => `<p>${p}</p>`).join('');
+  block.classList.remove('active');
+
+  bar.classList.remove('active');
+  fill.style.width = '0%';
+
+  // Re-enable buttons
+  document.querySelectorAll('.btn-section-summarize, .btn-summarize-all').forEach(b => b.disabled = false);
+  isProcessing = false;
+}
+
+// ====== SUMMARIZE ALL ======
+document.getElementById('btnSummarizeAll').addEventListener('click', async () => {
+  if (isProcessing) return;
+  for (const sec of paperSections) {
+    await summarizeSection(sec.id);
+    await sleep(200);
+  }
+});
+
+// ====== UTILS ======
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ====== INIT ======
+buildPaperPanel();
+</script>
+</body>
+</html>

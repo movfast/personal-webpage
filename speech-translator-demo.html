@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Language Telephone | Speech Translation Demo</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #1a1a2e;
+  color: #e0e0e0;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.container {
+  width: 100%;
+  max-width: 800px;
+  min-height: 600px;
+  background: linear-gradient(145deg, #16213e, #1a1a2e);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(108,99,255,0.1);
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.container::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #6c63ff, transparent);
+}
+
+/* Header */
+.header { text-align: center; }
+.header h1 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #6c63ff, #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 4px;
+}
+.header p {
+  font-size: 0.85rem;
+  color: #8888aa;
+}
+
+/* Input Area */
+.input-area {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.text-input {
+  flex: 1;
+  background: #0f0f23;
+  border: 1px solid #2a2a4a;
+  border-radius: 10px;
+  padding: 12px 16px;
+  color: #e0e0e0;
+  font-size: 0.95rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.3s;
+}
+.text-input:focus { border-color: #6c63ff; }
+.text-input::placeholder { color: #555577; }
+
+.mic-btn, .go-btn {
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.mic-btn {
+  background: #2a2a4a;
+  color: #e0e0e0;
+  width: 48px;
+  min-width: 48px;
+}
+.mic-btn:hover { background: #3a3a5a; }
+.mic-btn.recording {
+  background: #ff4444;
+  animation: pulse-mic 1s ease-in-out infinite;
+}
+.mic-btn.hidden { display: none; }
+
+@keyframes pulse-mic {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,68,68,0.4); }
+  50% { box-shadow: 0 0 0 10px rgba(255,68,68,0); }
+}
+
+.go-btn {
+  background: #6c63ff;
+  color: white;
+  padding: 12px 20px;
+}
+.go-btn:hover { background: #5a52e0; transform: translateY(-1px); }
+.go-btn:active { transform: translateY(0); }
+.go-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+/* Waveform */
+.waveform-wrap {
+  height: 40px;
+  background: #0f0f23;
+  border-radius: 8px;
+  overflow: hidden;
+  display: none;
+}
+.waveform-wrap.active { display: block; }
+.waveform-wrap canvas { width: 100%; height: 100%; }
+
+/* Presets */
+.presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+}
+.preset-btn {
+  background: #0f0f23;
+  border: 1px solid #2a2a4a;
+  border-radius: 20px;
+  padding: 6px 14px;
+  color: #8888aa;
+  font-size: 0.75rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.preset-btn:hover {
+  border-color: #6c63ff;
+  color: #c0c0e0;
+  background: #1a1a3e;
+}
+
+/* Translation Chain */
+.chain-section { flex: 1; min-height: 200px; }
+.chain-section h2 {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #6c63ff;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.chain-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  overflow-x: auto;
+  padding: 10px 0;
+  position: relative;
+}
+
+.chain-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-width: 90px;
+  opacity: 0;
+  transform: scale(0.7);
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+}
+.chain-node.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.node-circle {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #16213e;
+  border: 2px solid #2a2a4a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  position: relative;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+.node-circle:hover {
+  border-color: #6c63ff;
+  box-shadow: 0 0 20px rgba(108,99,255,0.3);
+}
+.node-circle.active {
+  border-color: #6c63ff;
+  box-shadow: 0 0 20px rgba(108,99,255,0.4);
+  animation: node-glow 0.6s ease-out;
+}
+@keyframes node-glow {
+  0% { box-shadow: 0 0 0 0 rgba(108,99,255,0.6); }
+  100% { box-shadow: 0 0 20px rgba(108,99,255,0.4); }
+}
+
+.node-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #8888aa;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.node-text {
+  font-size: 0.7rem;
+  color: #c0c0e0;
+  text-align: center;
+  max-width: 100px;
+  word-wrap: break-word;
+  min-height: 2.4em;
+  line-height: 1.2;
+}
+
+.listen-btn {
+  background: none;
+  border: 1px solid #2a2a4a;
+  border-radius: 12px;
+  padding: 2px 8px;
+  color: #6c63ff;
+  font-size: 0.6rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+.listen-btn:hover {
+  background: rgba(108,99,255,0.1);
+  border-color: #6c63ff;
+}
+
+.chain-arrow {
+  color: #2a2a4a;
+  font-size: 1.2rem;
+  margin: 0 2px;
+  opacity: 0;
+  transition: opacity 0.4s;
+  align-self: flex-start;
+  margin-top: 18px;
+}
+.chain-arrow.visible { opacity: 1; color: #6c63ff; }
+
+/* Results */
+.results {
+  display: none;
+  gap: 16px;
+}
+.results.visible { display: flex; flex-direction: column; }
+
+.comparison {
+  display: flex;
+  gap: 12px;
+}
+.comparison-box {
+  flex: 1;
+  background: #0f0f23;
+  border-radius: 10px;
+  padding: 14px;
+  border: 1px solid #2a2a4a;
+}
+.comparison-box h3 {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+.comparison-box.original h3 { color: #6c63ff; }
+.comparison-box.final h3 { color: #ff6b6b; }
+.comparison-box p {
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+.comparison-box.final p { color: #ff6b6b; }
+
+.diff-display {
+  text-align: center;
+  padding: 8px;
+}
+.drift-score {
+  font-size: 0.8rem;
+  color: #8888aa;
+}
+.drift-score span {
+  color: #6c63ff;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.play-again-btn {
+  background: none;
+  border: 1px solid #6c63ff;
+  border-radius: 10px;
+  padding: 10px 24px;
+  color: #6c63ff;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  align-self: center;
+}
+.play-again-btn:hover {
+  background: rgba(108,99,255,0.1);
+}
+
+/* Status */
+.status-msg {
+  text-align: center;
+  color: #555577;
+  font-size: 0.8rem;
+  min-height: 1.2em;
+}
+
+/* Back link */
+.back-link {
+  position: absolute;
+  top: 16px;
+  left: 20px;
+  color: #6c63ff;
+  text-decoration: none;
+  font-size: 0.85rem;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+.back-link:hover { opacity: 1; }
+
+/* Responsive */
+@media (max-width: 600px) {
+  .container { padding: 20px 16px; min-height: auto; }
+  .header h1 { font-size: 1.3rem; }
+  .chain-container { flex-wrap: wrap; gap: 8px; }
+  .chain-arrow { display: none; }
+  .chain-node { min-width: 70px; }
+  .node-circle { width: 44px; height: 44px; font-size: 1.2rem; }
+  .comparison { flex-direction: column; }
+  .input-area { flex-wrap: wrap; }
+  .text-input { min-width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <a href="projects.html" class="back-link">&larr; Projects</a>
+
+  <div class="header">
+    <h1>Language Telephone</h1>
+    <p>Watch how meaning drifts as a phrase travels through 5 languages</p>
+  </div>
+
+  <div class="input-area">
+    <button class="mic-btn" id="micBtn" title="Record with microphone">&#127908;</button>
+    <input type="text" class="text-input" id="textInput" placeholder="Type a phrase or pick one below..." maxlength="120">
+    <button class="go-btn" id="goBtn">Translate &#10140;</button>
+  </div>
+
+  <div class="waveform-wrap" id="waveformWrap">
+    <canvas id="waveformCanvas"></canvas>
+  </div>
+
+  <div class="presets">
+    <button class="preset-btn" data-phrase="The quick brown fox jumps over the lazy dog">quick brown fox</button>
+    <button class="preset-btn" data-phrase="I would like a cup of coffee please">cup of coffee</button>
+    <button class="preset-btn" data-phrase="The weather is beautiful today">beautiful weather</button>
+    <button class="preset-btn" data-phrase="Where is the nearest train station">train station</button>
+    <button class="preset-btn" data-phrase="My cat likes to sleep on the keyboard">cat on keyboard</button>
+  </div>
+
+  <div class="chain-section">
+    <h2>Translation Chain</h2>
+    <div class="chain-container" id="chainContainer"></div>
+  </div>
+
+  <p class="status-msg" id="statusMsg">Enter a phrase and hit Translate to begin</p>
+
+  <div class="results" id="results">
+    <div class="comparison">
+      <div class="comparison-box original">
+        <h3>Original</h3>
+        <p id="originalText"></p>
+      </div>
+      <div class="comparison-box final">
+        <h3>After 5 Translations</h3>
+        <p id="finalText"></p>
+      </div>
+    </div>
+    <div class="diff-display">
+      <div class="drift-score">Meaning drift: <span id="driftScore">0%</span></div>
+    </div>
+    <button class="play-again-btn" id="playAgainBtn">Try Another Phrase</button>
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  /* ===== LANGUAGE CONFIG ===== */
+  const LANGS = [
+    { code: 'en', label: 'English',  flag: '\uD83C\uDDEC\uD83C\uDDE7', voice: 'en' },
+    { code: 'es', label: 'Spanish',  flag: '\uD83C\uDDEA\uD83C\uDDF8', voice: 'es' },
+    { code: 'fr', label: 'French',   flag: '\uD83C\uDDEB\uD83C\uDDF7', voice: 'fr' },
+    { code: 'de', label: 'German',   flag: '\uD83C\uDDE9\uD83C\uDDEA', voice: 'de' },
+    { code: 'ja', label: 'Japanese', flag: '\uD83C\uDDEF\uD83C\uDDF5', voice: 'ja' },
+    { code: 'en', label: 'English',  flag: '\uD83C\uDDEC\uD83C\uDDE7', voice: 'en' }
+  ];
+
+  /* ===== DICTIONARIES ===== */
+  // en->es
+  const en_es = {
+    'the':'el','a':'un','an':'un','is':'es','are':'son','was':'era','were':'eran',
+    'i':'yo','you':'tu','he':'el','she':'ella','we':'nosotros','they':'ellos',
+    'my':'mi','your':'tu','his':'su','her':'su','our':'nuestro','their':'su',
+    'this':'esto','that':'eso','these':'estos','those':'esos',
+    'and':'y','or':'o','but':'pero','not':'no','very':'muy',
+    'to':'a','in':'en','on':'en','at':'en','from':'de','with':'con','for':'para','of':'de','by':'por',
+    'what':'que','where':'donde','when':'cuando','how':'como','who':'quien','why':'por que',
+    'do':'hacer','have':'tener','be':'ser','go':'ir','come':'venir','make':'hacer',
+    'say':'decir','get':'obtener','give':'dar','take':'tomar','see':'ver',
+    'know':'saber','think':'pensar','want':'querer','like':'gustar','need':'necesitar',
+    'find':'encontrar','put':'poner','use':'usar','tell':'decir','ask':'preguntar',
+    'work':'trabajar','call':'llamar','try':'intentar','leave':'salir','keep':'mantener',
+    'let':'dejar','begin':'comenzar','show':'mostrar','hear':'oir','play':'jugar',
+    'run':'correr','move':'mover','live':'vivir','believe':'creer','bring':'traer',
+    'happen':'pasar','write':'escribir','sit':'sentar','stand':'estar de pie','lose':'perder',
+    'pay':'pagar','meet':'conocer','learn':'aprender','change':'cambiar','help':'ayudar',
+    'eat':'comer','drink':'beber','sleep':'dormir','walk':'caminar','jump':'saltar',
+    'quick':'rapido','brown':'marron','lazy':'perezoso','big':'grande','small':'pequeno',
+    'good':'bueno','bad':'malo','new':'nuevo','old':'viejo','long':'largo','short':'corto',
+    'hot':'caliente','cold':'frio','beautiful':'hermoso','ugly':'feo',
+    'happy':'feliz','sad':'triste','fast':'rapido','slow':'lento',
+    'red':'rojo','blue':'azul','green':'verde','white':'blanco','black':'negro',
+    'yellow':'amarillo','purple':'morado','orange':'naranja','pink':'rosa',
+    'one':'uno','two':'dos','three':'tres','four':'cuatro','five':'cinco',
+    'six':'seis','seven':'siete','eight':'ocho','nine':'nueve','ten':'diez',
+    'cat':'gato','dog':'perro','fox':'zorro','bird':'pajaro','fish':'pez',
+    'horse':'caballo','cow':'vaca','mouse':'raton','bear':'oso','wolf':'lobo',
+    'lion':'leon','elephant':'elefante','monkey':'mono','rabbit':'conejo','snake':'serpiente',
+    'water':'agua','coffee':'cafe','tea':'te','milk':'leche','beer':'cerveza',
+    'wine':'vino','juice':'jugo','bread':'pan','cheese':'queso','meat':'carne',
+    'food':'comida','rice':'arroz','egg':'huevo','sugar':'azucar','salt':'sal',
+    'house':'casa','door':'puerta','window':'ventana','room':'habitacion','table':'mesa',
+    'chair':'silla','bed':'cama','book':'libro','phone':'telefono','car':'coche',
+    'train':'tren','bus':'autobus','station':'estacion','airport':'aeropuerto','street':'calle',
+    'city':'ciudad','country':'pais','world':'mundo','sun':'sol','moon':'luna',
+    'star':'estrella','rain':'lluvia','snow':'nieve','weather':'tiempo','day':'dia',
+    'night':'noche','morning':'manana','today':'hoy','tomorrow':'manana','time':'tiempo',
+    'year':'ano','month':'mes','week':'semana','hour':'hora','minute':'minuto',
+    'man':'hombre','woman':'mujer','child':'nino','friend':'amigo','family':'familia',
+    'mother':'madre','father':'padre','brother':'hermano','sister':'hermana',
+    'head':'cabeza','hand':'mano','eye':'ojo','heart':'corazon','foot':'pie',
+    'please':'por favor','thank':'gracias','hello':'hola','goodbye':'adios','yes':'si',
+    'no':'no','sorry':'lo siento','love':'amor','life':'vida','name':'nombre',
+    'over':'sobre','under':'debajo','near':'cerca','far':'lejos','nearest':'mas cercano',
+    'cup':'taza','keyboard':'teclado','likes':'le gusta','would':'me gustaria',
+    'sleep':'dormir','jumps':'salta','sits':'se sienta','dog':'perro',
+    'here':'aqui','there':'alli','now':'ahora','then':'entonces',
+    'also':'tambien','just':'solo','only':'solo','still':'todavia','already':'ya',
+    'never':'nunca','always':'siempre','sometimes':'a veces','often':'a menudo',
+    'much':'mucho','many':'muchos','some':'algunos','all':'todos','every':'cada',
+    'little':'pequeno','more':'mas','less':'menos','well':'bien','back':'atras',
+    'up':'arriba','down':'abajo','left':'izquierda','right':'derecha',
+    'open':'abrir','close':'cerrar','read':'leer','look':'mirar','watch':'ver',
+    'listen':'escuchar','speak':'hablar','talk':'hablar','sing':'cantar','dance':'bailar',
+    'buy':'comprar','sell':'vender','send':'enviar','wait':'esperar','start':'empezar',
+    'stop':'parar','turn':'girar','fall':'caer','grow':'crecer','fly':'volar',
+    'swim':'nadar','drive':'conducir','ride':'montar','carry':'llevar','hold':'sostener',
+    'break':'romper','build':'construir','cook':'cocinar','clean':'limpiar','wash':'lavar',
+    'nice':'agradable','pretty':'bonito','strong':'fuerte','weak':'debil',
+    'rich':'rico','poor':'pobre','young':'joven','heavy':'pesado','light':'ligero',
+    'dark':'oscuro','bright':'brillante','sweet':'dulce','sour':'acido',
+    'hard':'duro','soft':'suave','loud':'fuerte','quiet':'tranquilo',
+    'school':'escuela','teacher':'profesor','student':'estudiante','music':'musica',
+    'game':'juego','money':'dinero','king':'rey','queen':'reina',
+    'mountain':'montana','river':'rio','sea':'mar','forest':'bosque','garden':'jardin',
+    'flower':'flor','tree':'arbol','grass':'hierba','stone':'piedra','fire':'fuego',
+    'wind':'viento','cloud':'nube','sky':'cielo','earth':'tierra'
+  };
+
+  // es->fr
+  const es_fr = {
+    'el':'le','un':'un','es':'est','son':'sont','era':'etait','eran':'etaient',
+    'yo':'je','tu':'tu','ella':'elle','nosotros':'nous','ellos':'ils',
+    'mi':'mon','su':'son','nuestro':'notre',
+    'esto':'ceci','eso':'cela','estos':'ces','esos':'ces',
+    'y':'et','o':'ou','pero':'mais','no':'non','muy':'tres',
+    'a':'a','en':'dans','de':'de','con':'avec','para':'pour','por':'par',
+    'que':'quoi','donde':'ou','cuando':'quand','como':'comment','quien':'qui','por que':'pourquoi',
+    'hacer':'faire','tener':'avoir','ser':'etre','ir':'aller','venir':'venir',
+    'decir':'dire','obtener':'obtenir','dar':'donner','tomar':'prendre','ver':'voir',
+    'saber':'savoir','pensar':'penser','querer':'vouloir','gustar':'aimer','necesitar':'avoir besoin',
+    'encontrar':'trouver','poner':'mettre','usar':'utiliser','preguntar':'demander',
+    'trabajar':'travailler','llamar':'appeler','intentar':'essayer','salir':'sortir','mantener':'garder',
+    'dejar':'laisser','comenzar':'commencer','mostrar':'montrer','oir':'entendre','jugar':'jouer',
+    'correr':'courir','mover':'bouger','vivir':'vivre','creer':'croire','traer':'apporter',
+    'pasar':'arriver','escribir':'ecrire','sentar':'asseoir','perder':'perdre',
+    'pagar':'payer','conocer':'connaitre','aprender':'apprendre','cambiar':'changer','ayudar':'aider',
+    'comer':'manger','beber':'boire','dormir':'dormir','caminar':'marcher','saltar':'sauter',
+    'rapido':'rapide','marron':'brun','perezoso':'paresseux','grande':'grand','pequeno':'petit',
+    'bueno':'bon','malo':'mauvais','nuevo':'nouveau','viejo':'vieux','largo':'long','corto':'court',
+    'caliente':'chaud','frio':'froid','hermoso':'magnifique','feo':'laid',
+    'feliz':'heureux','triste':'triste','lento':'lent',
+    'rojo':'rouge','azul':'bleu','verde':'vert','blanco':'blanc','negro':'noir',
+    'amarillo':'jaune','morado':'violet','naranja':'orange','rosa':'rose',
+    'uno':'un','dos':'deux','tres':'trois','cuatro':'quatre','cinco':'cinq',
+    'seis':'six','siete':'sept','ocho':'huit','nueve':'neuf','diez':'dix',
+    'gato':'chat','perro':'chien','zorro':'renard','pajaro':'oiseau','pez':'poisson',
+    'caballo':'cheval','vaca':'vache','raton':'souris','oso':'ours','lobo':'loup',
+    'leon':'lion','elefante':'elephant','mono':'singe','conejo':'lapin','serpiente':'serpent',
+    'agua':'eau','cafe':'cafe','te':'the','leche':'lait','cerveza':'biere',
+    'vino':'vin','jugo':'jus','pan':'pain','queso':'fromage','carne':'viande',
+    'comida':'nourriture','arroz':'riz','huevo':'oeuf','azucar':'sucre','sal':'sel',
+    'casa':'maison','puerta':'porte','ventana':'fenetre','habitacion':'chambre','mesa':'table',
+    'silla':'chaise','cama':'lit','libro':'livre','telefono':'telephone','coche':'voiture',
+    'tren':'train','autobus':'bus','estacion':'gare','aeropuerto':'aeroport','calle':'rue',
+    'ciudad':'ville','pais':'pays','mundo':'monde','sol':'soleil','luna':'lune',
+    'estrella':'etoile','lluvia':'pluie','nieve':'neige','tiempo':'temps','dia':'jour',
+    'noche':'nuit','manana':'matin','hoy':'aujourd hui','ano':'annee','mes':'mois',
+    'semana':'semaine','hora':'heure','minuto':'minute',
+    'hombre':'homme','mujer':'femme','nino':'enfant','amigo':'ami','familia':'famille',
+    'madre':'mere','padre':'pere','hermano':'frere','hermana':'soeur',
+    'cabeza':'tete','mano':'main','ojo':'oeil','corazon':'coeur','pie':'pied',
+    'por favor':'s il vous plait','gracias':'merci','hola':'bonjour','adios':'au revoir','si':'oui',
+    'lo siento':'pardon','amor':'amour','vida':'vie','nombre':'nom',
+    'sobre':'sur','debajo':'sous','cerca':'pres','lejos':'loin','mas cercano':'le plus proche',
+    'taza':'tasse','teclado':'clavier','le gusta':'aime','me gustaria':'je voudrais',
+    'salta':'saute','se sienta':'s assoit',
+    'aqui':'ici','alli':'la bas','ahora':'maintenant','entonces':'alors',
+    'tambien':'aussi','solo':'seulement','todavia':'encore','ya':'deja',
+    'nunca':'jamais','siempre':'toujours','a veces':'parfois','a menudo':'souvent',
+    'mucho':'beaucoup','muchos':'beaucoup','algunos':'quelques','todos':'tous','cada':'chaque',
+    'mas':'plus','menos':'moins','bien':'bien','atras':'arriere',
+    'arriba':'en haut','abajo':'en bas','izquierda':'gauche','derecha':'droite',
+    'abrir':'ouvrir','cerrar':'fermer','leer':'lire','mirar':'regarder',
+    'escuchar':'ecouter','hablar':'parler','cantar':'chanter','bailar':'danser',
+    'comprar':'acheter','vender':'vendre','enviar':'envoyer','esperar':'attendre','empezar':'commencer',
+    'parar':'arreter','girar':'tourner','caer':'tomber','crecer':'grandir','volar':'voler',
+    'nadar':'nager','conducir':'conduire','montar':'monter','llevar':'porter','sostener':'tenir',
+    'romper':'casser','construir':'construire','cocinar':'cuisiner','limpiar':'nettoyer','lavar':'laver',
+    'agradable':'agreable','bonito':'joli','fuerte':'fort','debil':'faible',
+    'rico':'riche','pobre':'pauvre','joven':'jeune','pesado':'lourd','ligero':'leger',
+    'oscuro':'sombre','brillante':'brillant','dulce':'doux','acido':'aigre',
+    'duro':'dur','suave':'doux','tranquilo':'calme',
+    'escuela':'ecole','profesor':'professeur','estudiante':'etudiant','musica':'musique',
+    'juego':'jeu','dinero':'argent','rey':'roi','reina':'reine',
+    'montana':'montagne','rio':'riviere','mar':'mer','bosque':'foret','jardin':'jardin',
+    'flor':'fleur','arbol':'arbre','hierba':'herbe','piedra':'pierre','fuego':'feu',
+    'viento':'vent','nube':'nuage','cielo':'ciel','tierra':'terre'
+  };
+
+  // fr->de
+  const fr_de = {
+    'le':'der','la':'die','un':'ein','une':'eine','est':'ist','sont':'sind','etait':'war','etaient':'waren',
+    'je':'ich','tu':'du','il':'er','elle':'sie','nous':'wir','ils':'sie','vous':'ihr',
+    'mon':'mein','ton':'dein','son':'sein','notre':'unser',
+    'ceci':'dies','cela':'das','ces':'diese',
+    'et':'und','ou':'oder','mais':'aber','non':'nein','tres':'sehr',
+    'a':'zu','dans':'in','de':'von','avec':'mit','pour':'fuer','par':'durch',
+    'quoi':'was','ou':'wo','quand':'wann','comment':'wie','qui':'wer','pourquoi':'warum',
+    'faire':'machen','avoir':'haben','etre':'sein','aller':'gehen','venir':'kommen',
+    'dire':'sagen','obtenir':'bekommen','donner':'geben','prendre':'nehmen','voir':'sehen',
+    'savoir':'wissen','penser':'denken','vouloir':'wollen','aimer':'lieben','avoir besoin':'brauchen',
+    'trouver':'finden','mettre':'setzen','utiliser':'benutzen','demander':'fragen',
+    'travailler':'arbeiten','appeler':'rufen','essayer':'versuchen','sortir':'ausgehen','garder':'behalten',
+    'laisser':'lassen','commencer':'anfangen','montrer':'zeigen','entendre':'hoeren','jouer':'spielen',
+    'courir':'laufen','bouger':'bewegen','vivre':'leben','croire':'glauben','apporter':'bringen',
+    'arriver':'ankommen','ecrire':'schreiben','asseoir':'sitzen','perdre':'verlieren',
+    'payer':'bezahlen','connaitre':'kennen','apprendre':'lernen','changer':'aendern','aider':'helfen',
+    'manger':'essen','boire':'trinken','dormir':'schlafen','marcher':'gehen','sauter':'springen',
+    'rapide':'schnell','brun':'braun','paresseux':'faul','grand':'gross','petit':'klein',
+    'bon':'gut','mauvais':'schlecht','nouveau':'neu','vieux':'alt','long':'lang','court':'kurz',
+    'chaud':'heiss','froid':'kalt','magnifique':'wunderschoen','laid':'haesslich',
+    'heureux':'gluecklich','triste':'traurig','lent':'langsam',
+    'rouge':'rot','bleu':'blau','vert':'gruen','blanc':'weiss','noir':'schwarz',
+    'jaune':'gelb','violet':'lila','orange':'orange','rose':'rosa',
+    'un':'eins','deux':'zwei','trois':'drei','quatre':'vier','cinq':'fuenf',
+    'six':'sechs','sept':'sieben','huit':'acht','neuf':'neun','dix':'zehn',
+    'chat':'katze','chien':'hund','renard':'fuchs','oiseau':'vogel','poisson':'fisch',
+    'cheval':'pferd','vache':'kuh','souris':'maus','ours':'baer','loup':'wolf',
+    'lion':'loewe','elephant':'elefant','singe':'affe','lapin':'hase','serpent':'schlange',
+    'eau':'wasser','cafe':'kaffee','the':'tee','lait':'milch','biere':'bier',
+    'vin':'wein','jus':'saft','pain':'brot','fromage':'kaese','viande':'fleisch',
+    'nourriture':'essen','riz':'reis','oeuf':'ei','sucre':'zucker','sel':'salz',
+    'maison':'haus','porte':'tuer','fenetre':'fenster','chambre':'zimmer','table':'tisch',
+    'chaise':'stuhl','lit':'bett','livre':'buch','telephone':'telefon','voiture':'auto',
+    'train':'zug','bus':'bus','gare':'bahnhof','aeroport':'flughafen','rue':'strasse',
+    'ville':'stadt','pays':'land','monde':'welt','soleil':'sonne','lune':'mond',
+    'etoile':'stern','pluie':'regen','neige':'schnee','temps':'zeit','jour':'tag',
+    'nuit':'nacht','matin':'morgen','aujourd hui':'heute','annee':'jahr','mois':'monat',
+    'semaine':'woche','heure':'stunde','minute':'minute',
+    'homme':'mann','femme':'frau','enfant':'kind','ami':'freund','famille':'familie',
+    'mere':'mutter','pere':'vater','frere':'bruder','soeur':'schwester',
+    'tete':'kopf','main':'hand','oeil':'auge','coeur':'herz','pied':'fuss',
+    's il vous plait':'bitte','merci':'danke','bonjour':'guten tag','au revoir':'auf wiedersehen','oui':'ja',
+    'pardon':'entschuldigung','amour':'liebe','vie':'leben','nom':'name',
+    'sur':'auf','sous':'unter','pres':'nahe','loin':'weit','le plus proche':'naechste',
+    'tasse':'tasse','clavier':'tastatur','aime':'liebt','je voudrais':'ich moechte',
+    'saute':'springt','s assoit':'sitzt',
+    'ici':'hier','la bas':'dort','maintenant':'jetzt','alors':'dann',
+    'aussi':'auch','seulement':'nur','encore':'noch','deja':'schon',
+    'jamais':'nie','toujours':'immer','parfois':'manchmal','souvent':'oft',
+    'beaucoup':'viel','quelques':'einige','tous':'alle','chaque':'jeder',
+    'plus':'mehr','moins':'weniger','bien':'gut','arriere':'zurueck',
+    'en haut':'oben','en bas':'unten','gauche':'links','droite':'rechts',
+    'ouvrir':'oeffnen','fermer':'schliessen','lire':'lesen','regarder':'schauen',
+    'ecouter':'zuhoeren','parler':'sprechen','chanter':'singen','danser':'tanzen',
+    'acheter':'kaufen','vendre':'verkaufen','envoyer':'senden','attendre':'warten','arreter':'stoppen',
+    'tourner':'drehen','tomber':'fallen','grandir':'wachsen','voler':'fliegen',
+    'nager':'schwimmen','conduire':'fahren','monter':'steigen','porter':'tragen','tenir':'halten',
+    'casser':'brechen','construire':'bauen','cuisiner':'kochen','nettoyer':'putzen','laver':'waschen',
+    'agreable':'angenehm','joli':'huebsch','fort':'stark','faible':'schwach',
+    'riche':'reich','pauvre':'arm','jeune':'jung','lourd':'schwer','leger':'leicht',
+    'sombre':'dunkel','brillant':'hell','doux':'suess','aigre':'sauer',
+    'dur':'hart','calme':'ruhig',
+    'ecole':'schule','professeur':'lehrer','etudiant':'schueler','musique':'musik',
+    'jeu':'spiel','argent':'geld','roi':'koenig','reine':'koenigin',
+    'montagne':'berg','riviere':'fluss','mer':'meer','foret':'wald','jardin':'garten',
+    'fleur':'blume','arbre':'baum','herbe':'gras','pierre':'stein','feu':'feuer',
+    'vent':'wind','nuage':'wolke','ciel':'himmel','terre':'erde'
+  };
+
+  // de->ja (romanized)
+  const de_ja = {
+    'der':'sono','die':'sono','das':'sono','ein':'hitotsu no','eine':'hitotsu no',
+    'ist':'desu','sind':'desu','war':'deshita','waren':'deshita',
+    'ich':'watashi','du':'anata','er':'kare','sie':'kanojo','wir':'watashitachi',
+    'mein':'watashi no','dein':'anata no','sein':'kare no','unser':'watashitachi no',
+    'dies':'kore','diese':'korera',
+    'und':'to','oder':'matawa','aber':'demo','nein':'iie','sehr':'totemo',
+    'zu':'e','in':'ni','von':'kara','mit':'to issho ni','fuer':'no tame ni','durch':'wo tootte',
+    'was':'nani','wo':'doko','wann':'itsu','wie':'dou','wer':'dare','warum':'naze',
+    'machen':'tsukuru','haben':'motsu','sein':'iru','gehen':'iku','kommen':'kuru',
+    'sagen':'iu','bekommen':'morau','geben':'ageru','nehmen':'toru','sehen':'miru',
+    'wissen':'shiru','denken':'kangaeru','wollen':'hoshii','lieben':'aisuru','brauchen':'hitsuyou',
+    'finden':'mitsukeru','setzen':'oku','benutzen':'tsukau','fragen':'kiku',
+    'arbeiten':'hataraku','rufen':'yobu','versuchen':'kokoromiru','ausgehen':'dekakeru','behalten':'tamotsu',
+    'lassen':'saseru','anfangen':'hajimeru','zeigen':'miseru','hoeren':'kiku','spielen':'asobu',
+    'laufen':'hashiru','bewegen':'ugoku','leben':'ikiru','glauben':'shinjiru','bringen':'motteiku',
+    'ankommen':'tsuku','schreiben':'kaku','sitzen':'suwaru','verlieren':'ushinau',
+    'bezahlen':'harau','kennen':'shiru','lernen':'manabu','aendern':'kaeru','helfen':'tasukeru',
+    'essen':'taberu','trinken':'nomu','schlafen':'nemuru','springen':'tobu',
+    'schnell':'hayai','braun':'chairo no','faul':'namakemono no','gross':'ookii','klein':'chiisai',
+    'gut':'yoi','schlecht':'warui','neu':'atarashii','alt':'furui','lang':'nagai','kurz':'mijikai',
+    'heiss':'atsui','kalt':'samui','wunderschoen':'utsukushii','haesslich':'minikui',
+    'gluecklich':'shiawase','traurig':'kanashii','langsam':'osoi',
+    'rot':'akai','blau':'aoi','gruen':'midori no','weiss':'shiroi','schwarz':'kuroi',
+    'gelb':'kiiro no','lila':'murasaki no','orange':'orenji no','rosa':'pinku no',
+    'eins':'ichi','zwei':'ni','drei':'san','vier':'shi','fuenf':'go',
+    'sechs':'roku','sieben':'nana','acht':'hachi','neun':'kyuu','zehn':'juu',
+    'katze':'neko','hund':'inu','fuchs':'kitsune','vogel':'tori','fisch':'sakana',
+    'pferd':'uma','kuh':'ushi','maus':'nezumi','baer':'kuma','wolf':'ookami',
+    'loewe':'raion','elefant':'zou','affe':'saru','hase':'usagi','schlange':'hebi',
+    'wasser':'mizu','kaffee':'koohii','tee':'ocha','milch':'miruku','bier':'biiru',
+    'wein':'wain','saft':'juusu','brot':'pan','kaese':'chiizu','fleisch':'niku',
+    'reis':'gohan','ei':'tamago','zucker':'satou','salz':'shio',
+    'haus':'ie','tuer':'doa','fenster':'mado','zimmer':'heya','tisch':'tsukue',
+    'stuhl':'isu','bett':'beddo','buch':'hon','telefon':'denwa','auto':'kuruma',
+    'zug':'densha','bus':'basu','bahnhof':'eki','flughafen':'kuukou','strasse':'michi',
+    'stadt':'machi','land':'kuni','welt':'sekai','sonne':'taiyou','mond':'tsuki',
+    'stern':'hoshi','regen':'ame','schnee':'yuki','zeit':'jikan','tag':'hi',
+    'nacht':'yoru','morgen':'asa','heute':'kyou','jahr':'toshi','monat':'tsuki',
+    'woche':'shuu','stunde':'jikan','minute':'fun',
+    'mann':'otoko','frau':'onna','kind':'kodomo','freund':'tomodachi','familie':'kazoku',
+    'mutter':'haha','vater':'chichi','bruder':'ani','schwester':'ane',
+    'kopf':'atama','hand':'te','auge':'me','herz':'kokoro','fuss':'ashi',
+    'bitte':'onegai','danke':'arigatou','guten tag':'konnichiwa','auf wiedersehen':'sayounara','ja':'hai',
+    'iie':'iie','entschuldigung':'sumimasen','liebe':'ai','leben':'inochi','name':'namae',
+    'auf':'ue ni','unter':'shita ni','nahe':'chikai','weit':'tooi','naechste':'ichiban chikai',
+    'tasse':'kappu','tastatur':'kiiboodo','liebt':'aisuru','ich moechte':'hoshii desu',
+    'springt':'tobimasu','sitzt':'suwarimasu',
+    'hier':'koko','dort':'asoko','jetzt':'ima','dann':'sorekara',
+    'auch':'mo','nur':'dake','noch':'mada','schon':'mou',
+    'nie':'kesshite','immer':'itsumo','manchmal':'tokidoki','oft':'yoku',
+    'viel':'takusan','einige':'ikutsuka','alle':'subete','jeder':'sorezore',
+    'mehr':'motto','weniger':'sukunai','zurueck':'modoru',
+    'oben':'ue','unten':'shita','links':'hidari','rechts':'migi',
+    'oeffnen':'akeru','schliessen':'shimeru','lesen':'yomu','schauen':'miru',
+    'zuhoeren':'kiku','sprechen':'hanasu','singen':'utau','tanzen':'odoru',
+    'kaufen':'kau','verkaufen':'uru','senden':'okuru','warten':'matsu','stoppen':'tomeru',
+    'drehen':'mawasu','fallen':'ochiru','wachsen':'sodatsu','fliegen':'tobu',
+    'schwimmen':'oyogu','fahren':'unten suru','steigen':'noboru','tragen':'hakobu','halten':'motsu',
+    'brechen':'kowasu','bauen':'tateru','kochen':'ryouri suru','putzen':'souji suru','waschen':'arau',
+    'angenehm':'kimochi yoi','huebsch':'kawaii','stark':'tsuyoi','schwach':'yowai',
+    'reich':'kanemochi','arm':'mazushii','jung':'wakai','schwer':'omoi','leicht':'karui',
+    'dunkel':'kurai','hell':'akarui','suess':'amai','sauer':'suppai',
+    'hart':'katai','ruhig':'shizuka',
+    'schule':'gakkou','lehrer':'sensei','schueler':'seito','musik':'ongaku',
+    'spiel':'geemu','geld':'okane','koenig':'ou','koenigin':'joou',
+    'berg':'yama','fluss':'kawa','meer':'umi','wald':'mori','garten':'niwa',
+    'blume':'hana','baum':'ki','gras':'kusa','stein':'ishi','feuer':'hi',
+    'wind':'kaze','wolke':'kumo','himmel':'sora','erde':'tsuchi'
+  };
+
+  // ja->en (romanized Japanese back to English — this is where drift happens!)
+  const ja_en = {
+    'sono':'that','hitotsu no':'one','desu':'is','deshita':'was',
+    'watashi':'I','anata':'you','kare':'he','kanojo':'she','watashitachi':'we',
+    'watashi no':'my','anata no':'your','kare no':'his','watashitachi no':'our',
+    'kore':'this','korera':'these',
+    'to':'and','matawa':'or','demo':'however','iie':'no','totemo':'extremely',
+    'e':'toward','ni':'at','kara':'from','to issho ni':'together with','no tame ni':'because of','wo tootte':'passing through',
+    'nani':'what','doko':'where','itsu':'when','dou':'how','dare':'who','naze':'why',
+    'tsukuru':'create','motsu':'possess','iru':'exist','iku':'go','kuru':'arrive',
+    'iu':'mention','morau':'receive','ageru':'offer','toru':'capture','miru':'observe',
+    'shiru':'recognize','kangaeru':'contemplate','hoshii':'desire','aisuru':'adore','hitsuyou':'require',
+    'mitsukeru':'discover','oku':'place','tsukau':'employ','kiku':'inquire',
+    'hataraku':'labor','yobu':'summon','kokoromiru':'attempt','dekakeru':'venture out','tamotsu':'preserve',
+    'saseru':'permit','hajimeru':'commence','miseru':'display','asobu':'frolic',
+    'hashiru':'dash','ugoku':'shift','ikiru':'exist','shinjiru':'trust','motteiku':'transport',
+    'tsuku':'reach','kaku':'inscribe','suwaru':'rest','ushinau':'misplace',
+    'harau':'compensate','manabu':'study','kaeru':'transform','tasukeru':'rescue',
+    'taberu':'consume','nomu':'sip','nemuru':'slumber','tobu':'leap',
+    'hayai':'swift','chairo no':'chocolate colored','namakemono no':'slothful','ookii':'enormous','chiisai':'tiny',
+    'yoi':'fine','warui':'wicked','atarashii':'fresh','furui':'ancient','nagai':'lengthy','mijikai':'brief',
+    'atsui':'scorching','samui':'freezing','utsukushii':'gorgeous','minikui':'hideous',
+    'shiawase':'blissful','kanashii':'sorrowful','osoi':'sluggish',
+    'akai':'scarlet','aoi':'azure','midori no':'emerald','shiroi':'ivory','kuroi':'obsidian',
+    'kiiro no':'golden','murasaki no':'violet','orenji no':'tangerine','pinku no':'coral',
+    'ichi':'one','ni':'at','san':'three','shi':'four','go':'five',
+    'roku':'six','nana':'seven','hachi':'eight','kyuu':'nine','juu':'ten',
+    'neko':'feline','inu':'hound','kitsune':'fox spirit','tori':'fowl','sakana':'seafood',
+    'uma':'stallion','ushi':'bovine','nezumi':'rodent','kuma':'grizzly','ookami':'timber wolf',
+    'raion':'jungle cat','zou':'mammoth','saru':'primate','usagi':'bunny','hebi':'viper',
+    'mizu':'liquid','koohii':'espresso','ocha':'herbal brew','miruku':'cream','biiru':'ale',
+    'wain':'grape drink','juusu':'nectar','pan':'loaf','chiizu':'cheddar','niku':'flesh',
+    'gohan':'grain','tamago':'yolk','satou':'sweetener','shio':'brine',
+    'ie':'dwelling','doa':'entrance','mado':'portal','heya':'chamber','tsukue':'workbench',
+    'isu':'seat','beddo':'mattress','hon':'volume','denwa':'receiver','kuruma':'vehicle',
+    'densha':'locomotive','basu':'shuttle','eki':'terminal','kuukou':'airfield','michi':'pathway',
+    'machi':'village','kuni':'nation','sekai':'universe','taiyou':'star','tsuki':'lunar orb',
+    'hoshi':'celestial body','ame':'downpour','yuki':'frost','jikan':'moment','hi':'daylight',
+    'yoru':'evening','asa':'dawn','kyou':'presently','toshi':'era','fun':'instant',
+    'shuu':'cycle',
+    'otoko':'gentleman','onna':'lady','kodomo':'youngster','tomodachi':'companion','kazoku':'household',
+    'haha':'mama','chichi':'papa','ani':'elder brother','ane':'elder sister',
+    'atama':'skull','te':'palm','me':'gaze','kokoro':'soul','ashi':'sole',
+    'onegai':'kindly','arigatou':'gratitude','konnichiwa':'greetings','sayounara':'farewell','hai':'indeed',
+    'sumimasen':'apologies','ai':'affection','inochi':'existence','namae':'title',
+    'ue ni':'above','shita ni':'beneath','chikai':'nearby','tooi':'distant','ichiban chikai':'closest',
+    'kappu':'mug','kiiboodo':'typing device','hoshii desu':'would fancy',
+    'tobimasu':'leaps','suwarimasu':'rests',
+    'koko':'here','asoko':'yonder','ima':'currently','sorekara':'afterward',
+    'mo':'additionally','dake':'merely','mada':'yet','mou':'already',
+    'kesshite':'absolutely never','itsumo':'eternally','tokidoki':'occasionally','yoku':'frequently',
+    'takusan':'abundant','ikutsuka':'several','subete':'entirely','sorezore':'each one',
+    'motto':'further','sukunai':'scarce','modoru':'return',
+    'ue':'upper','shita':'lower','hidari':'port side','migi':'starboard',
+    'akeru':'unseal','shimeru':'seal','yomu':'peruse','hanasu':'converse','utau':'chant','odoru':'groove',
+    'kau':'purchase','uru':'peddle','okuru':'dispatch','matsu':'await','tomeru':'halt',
+    'mawasu':'rotate','ochiru':'plummet','sodatsu':'flourish','oyogu':'paddle',
+    'unten suru':'pilot','noboru':'ascend','hakobu':'haul','arau':'rinse',
+    'kowasu':'demolish','tateru':'erect','ryouri suru':'prepare cuisine','souji suru':'tidy','motsu':'grip',
+    'kimochi yoi':'delightful','kawaii':'adorable','tsuyoi':'mighty','yowai':'feeble',
+    'kanemochi':'wealthy','mazushii':'destitute','wakai':'youthful','omoi':'hefty','karui':'featherweight',
+    'kurai':'murky','akarui':'radiant','amai':'sugary','suppai':'tart',
+    'katai':'rigid','shizuka':'serene',
+    'gakkou':'academy','sensei':'master','seito':'pupil','ongaku':'melody',
+    'geemu':'pastime','okane':'currency','ou':'sovereign','joou':'empress',
+    'yama':'peak','kawa':'stream','umi':'ocean','mori':'woodland','niwa':'courtyard',
+    'hana':'blossom','ki':'timber','kusa':'meadow','ishi':'pebble',
+    'kaze':'breeze','kumo':'mist','sora':'heavens','tsuchi':'soil'
+  };
+
+  const DICTS = [en_es, es_fr, fr_de, de_ja, ja_en];
+
+  /* ===== TRANSLATION ENGINE ===== */
+  function translateStep(text, dict) {
+    // Sort keys by length (longest first) to match multi-word phrases first
+    const keys = Object.keys(dict).sort((a, b) => b.length - a.length);
+    let lower = text.toLowerCase();
+    const result = [];
+    let i = 0;
+
+    while (i < lower.length) {
+      let matched = false;
+      for (const key of keys) {
+        if (lower.startsWith(key, i)) {
+          // Check word boundary
+          const before = i === 0 || /\s/.test(lower[i - 1]);
+          const after = (i + key.length >= lower.length) || /[\s.,!?;:]/.test(lower[i + key.length]);
+          if (before && after) {
+            result.push(dict[key]);
+            i += key.length;
+            matched = true;
+            break;
+          }
+        }
+      }
+      if (!matched) {
+        // Collect the whole word and apply drift
+        if (/[a-zA-Z]/.test(lower[i])) {
+          let word = '';
+          const start = i;
+          while (i < lower.length && /[a-zA-Z]/.test(lower[i])) {
+            word += lower[i];
+            i++;
+          }
+          result.push(applyDrift(word));
+        } else {
+          result.push(lower[i]);
+          i++;
+        }
+      }
+    }
+    return result.join(' ').replace(/\s+/g, ' ').replace(/\s([.,!?;:])/g, '$1').trim();
+  }
+
+  function applyDrift(word) {
+    // Humorous "false cognate" drift for unknown words
+    if (word.length <= 2) return word;
+    const drifts = [
+      w => w.split('').reverse().join(''),
+      w => w.slice(Math.floor(w.length/2)) + w.slice(0, Math.floor(w.length/2)),
+      w => w[0] + w.slice(1).replace(/[aeiou]/g, c => ({a:'o',e:'a',i:'u',o:'e',u:'i'}[c] || c)),
+      w => w + (w.endsWith('o') ? 'ni' : 'etto'),
+      w => w.replace(/th/g,'z').replace(/sh/g,'ch').replace(/tion/g,'cion'),
+    ];
+    const fn = drifts[Math.abs(hashStr(word)) % drifts.length];
+    return fn(word);
+  }
+
+  function hashStr(s) {
+    let h = 0;
+    for (let i = 0; i < s.length; i++) h = ((h << 5) - h + s.charCodeAt(i)) | 0;
+    return h;
+  }
+
+  function translateChain(phrase) {
+    const steps = [phrase];
+    let current = phrase;
+    for (let i = 0; i < DICTS.length; i++) {
+      current = translateStep(current, DICTS[i]);
+      steps.push(current);
+    }
+    return steps;
+  }
+
+  /* ===== DRIFT SCORE ===== */
+  function calcDrift(original, final) {
+    const a = original.toLowerCase().split(/\s+/);
+    const b = final.toLowerCase().split(/\s+/);
+    const setA = new Set(a);
+    const setB = new Set(b);
+    let common = 0;
+    for (const w of setA) if (setB.has(w)) common++;
+    const total = Math.max(setA.size, setB.size, 1);
+    return Math.round((1 - common / total) * 100);
+  }
+
+  /* ===== DOM REFS ===== */
+  const micBtn = document.getElementById('micBtn');
+  const textInput = document.getElementById('textInput');
+  const goBtn = document.getElementById('goBtn');
+  const waveformWrap = document.getElementById('waveformWrap');
+  const waveformCanvas = document.getElementById('waveformCanvas');
+  const chainContainer = document.getElementById('chainContainer');
+  const statusMsg = document.getElementById('statusMsg');
+  const resultsDiv = document.getElementById('results');
+  const originalText = document.getElementById('originalText');
+  const finalText = document.getElementById('finalText');
+  const driftScore = document.getElementById('driftScore');
+  const playAgainBtn = document.getElementById('playAgainBtn');
+
+  /* ===== SPEECH RECOGNITION ===== */
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let recognition = null;
+  let audioCtx = null;
+  let analyser = null;
+  let animFrameId = null;
+  let mediaStream = null;
+
+  if (!SpeechRecognition) {
+    micBtn.classList.add('hidden');
+  } else {
+    recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.interimResults = true;
+    recognition.continuous = false;
+
+    recognition.onresult = (e) => {
+      const transcript = Array.from(e.results).map(r => r[0].transcript).join('');
+      textInput.value = transcript;
+    };
+    recognition.onend = () => {
+      micBtn.classList.remove('recording');
+      stopWaveform();
+    };
+    recognition.onerror = () => {
+      micBtn.classList.remove('recording');
+      stopWaveform();
+    };
+  }
+
+  micBtn.addEventListener('click', () => {
+    if (!recognition) return;
+    if (micBtn.classList.contains('recording')) {
+      recognition.stop();
+      return;
+    }
+    micBtn.classList.add('recording');
+    recognition.start();
+    startWaveform();
+  });
+
+  function startWaveform() {
+    waveformWrap.classList.add('active');
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+      mediaStream = stream;
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 256;
+      const source = audioCtx.createMediaStreamSource(stream);
+      source.connect(analyser);
+      drawWaveform();
+    }).catch(() => {
+      waveformWrap.classList.remove('active');
+    });
+  }
+
+  function drawWaveform() {
+    if (!analyser) return;
+    const canvas = waveformCanvas;
+    const ctx = canvas.getContext('2d');
+    canvas.width = canvas.offsetWidth * 2;
+    canvas.height = canvas.offsetHeight * 2;
+    const bufLen = analyser.frequencyBinCount;
+    const data = new Uint8Array(bufLen);
+
+    function draw() {
+      animFrameId = requestAnimationFrame(draw);
+      analyser.getByteTimeDomainData(data);
+      ctx.fillStyle = '#0f0f23';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#6c63ff';
+      ctx.beginPath();
+      const sliceW = canvas.width / bufLen;
+      let x = 0;
+      for (let i = 0; i < bufLen; i++) {
+        const v = data[i] / 128.0;
+        const y = (v * canvas.height) / 2;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+        x += sliceW;
+      }
+      ctx.lineTo(canvas.width, canvas.height / 2);
+      ctx.stroke();
+    }
+    draw();
+  }
+
+  function stopWaveform() {
+    if (animFrameId) cancelAnimationFrame(animFrameId);
+    if (mediaStream) mediaStream.getTracks().forEach(t => t.stop());
+    if (audioCtx) audioCtx.close().catch(() => {});
+    audioCtx = null;
+    analyser = null;
+    mediaStream = null;
+    waveformWrap.classList.remove('active');
+  }
+
+  /* ===== SPEECH SYNTHESIS ===== */
+  function speak(text, langCode) {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = langCode;
+    utter.rate = 0.9;
+    // Try to find a matching voice
+    const voices = window.speechSynthesis.getVoices();
+    const match = voices.find(v => v.lang.startsWith(langCode));
+    if (match) utter.voice = match;
+    window.speechSynthesis.speak(utter);
+  }
+
+  // Pre-load voices
+  if (window.speechSynthesis) {
+    window.speechSynthesis.getVoices();
+    window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+  }
+
+  /* ===== PRESETS ===== */
+  document.querySelectorAll('.preset-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      textInput.value = btn.dataset.phrase;
+      textInput.focus();
+    });
+  });
+
+  /* ===== RUN TRANSLATION ===== */
+  let isRunning = false;
+
+  goBtn.addEventListener('click', runTranslation);
+  textInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') runTranslation();
+  });
+
+  async function runTranslation() {
+    const phrase = textInput.value.trim();
+    if (!phrase || isRunning) return;
+
+    isRunning = true;
+    goBtn.disabled = true;
+    resultsDiv.classList.remove('visible');
+    chainContainer.innerHTML = '';
+    statusMsg.textContent = 'Translating...';
+
+    const steps = translateChain(phrase);
+
+    // Build chain nodes
+    const nodes = [];
+    for (let i = 0; i < LANGS.length; i++) {
+      if (i > 0) {
+        const arrow = document.createElement('div');
+        arrow.className = 'chain-arrow';
+        arrow.textContent = '\u2192';
+        chainContainer.appendChild(arrow);
+        nodes.push({ type: 'arrow', el: arrow });
+      }
+
+      const node = document.createElement('div');
+      node.className = 'chain-node';
+
+      const circle = document.createElement('div');
+      circle.className = 'node-circle';
+      circle.textContent = LANGS[i].flag;
+      circle.title = 'Click to hear';
+
+      const label = document.createElement('div');
+      label.className = 'node-label';
+      label.textContent = LANGS[i].label;
+
+      const text = document.createElement('div');
+      text.className = 'node-text';
+
+      const listenBtn = document.createElement('button');
+      listenBtn.className = 'listen-btn';
+      listenBtn.textContent = '\uD83D\uDD0A Listen';
+
+      const langVoice = LANGS[i].voice;
+      const stepText = steps[i];
+
+      const speakFn = () => speak(stepText, langVoice);
+      circle.addEventListener('click', speakFn);
+      listenBtn.addEventListener('click', speakFn);
+
+      node.appendChild(circle);
+      node.appendChild(label);
+      node.appendChild(text);
+      node.appendChild(listenBtn);
+      chainContainer.appendChild(node);
+      nodes.push({ type: 'node', el: node, circle, text, stepText, idx: i });
+    }
+
+    // Animate nodes appearing one by one
+    for (const item of nodes) {
+      await delay(300);
+      if (item.type === 'arrow') {
+        item.el.classList.add('visible');
+      } else {
+        item.el.classList.add('visible');
+        item.circle.classList.add('active');
+        // Typewriter effect for text
+        await typewrite(item.text, item.stepText, 25);
+        statusMsg.textContent = `${LANGS[item.idx].label}: "${item.stepText}"`;
+      }
+    }
+
+    // Show results
+    await delay(400);
+    originalText.textContent = `"${steps[0]}"`;
+    finalText.textContent = `"${steps[steps.length - 1]}"`;
+    const drift = calcDrift(steps[0], steps[steps.length - 1]);
+    driftScore.textContent = drift + '%';
+    resultsDiv.classList.add('visible');
+    statusMsg.textContent = 'Translation complete!';
+
+    isRunning = false;
+    goBtn.disabled = false;
+  }
+
+  function delay(ms) {
+    return new Promise(r => setTimeout(r, ms));
+  }
+
+  async function typewrite(el, text, speed) {
+    const truncated = text.length > 50 ? text.slice(0, 47) + '...' : text;
+    el.textContent = '';
+    for (let i = 0; i < truncated.length; i++) {
+      el.textContent += truncated[i];
+      await delay(speed);
+    }
+  }
+
+  /* ===== PLAY AGAIN ===== */
+  playAgainBtn.addEventListener('click', () => {
+    resultsDiv.classList.remove('visible');
+    chainContainer.innerHTML = '';
+    textInput.value = '';
+    textInput.focus();
+    statusMsg.textContent = 'Enter a phrase and hit Translate to begin';
+  });
+
+})();
+</script>
+</body>
+</html>

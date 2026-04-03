@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spectrogram Lab — Acoustic Anomaly Detection</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #1a1a2e;
+  color: #e0e0e0;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.container {
+  width: 800px;
+  max-width: 100%;
+  background: #16213e;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(108,99,255,0.1);
+  overflow: hidden;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid rgba(108,99,255,0.2);
+}
+
+.header h1 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: 0.5px;
+}
+
+.header h1 span { color: #6c63ff; }
+
+.mode-toggle {
+  display: flex;
+  background: #0f1a33;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(108,99,255,0.25);
+}
+
+.mode-btn {
+  padding: 6px 16px;
+  font-size: 13px;
+  font-family: inherit;
+  border: none;
+  background: transparent;
+  color: #8888aa;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.mode-btn.active {
+  background: #6c63ff;
+  color: #fff;
+}
+
+/* Spectrogram area */
+.spectrogram-wrap {
+  padding: 12px 16px 0;
+}
+
+canvas#spectrogram {
+  width: 100%;
+  height: 280px;
+  display: block;
+  border-radius: 8px;
+  background: #000;
+}
+
+canvas#timeline {
+  width: 100%;
+  height: 18px;
+  display: block;
+  margin-top: 4px;
+  border-radius: 4px;
+  background: #0a0a1a;
+}
+
+/* Controls area */
+.controls-area {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 12px 16px 16px;
+}
+
+.panel {
+  background: #0f1a33;
+  border-radius: 10px;
+  padding: 14px;
+  border: 1px solid rgba(108,99,255,0.12);
+}
+
+.panel-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: #6c63ff;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+/* Sliders */
+.slider-group { margin-bottom: 8px; }
+.slider-group:last-child { margin-bottom: 0; }
+
+.slider-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #99a;
+  margin-bottom: 3px;
+}
+
+.slider-label .val { color: #6c63ff; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: #1a1a2e;
+  outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #6c63ff;
+  cursor: pointer;
+  border: 2px solid #fff;
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #6c63ff;
+  cursor: pointer;
+  border: 2px solid #fff;
+}
+
+/* Toggle row */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #99a;
+  margin-bottom: 8px;
+}
+
+.toggle-switch {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  background: #1a1a2e;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.toggle-switch.on { background: #6c63ff; }
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s;
+}
+
+.toggle-switch.on::after { transform: translateX(16px); }
+
+/* Buttons */
+.btn-inject {
+  width: 100%;
+  padding: 8px;
+  margin-top: 4px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #ff4757, #ff6b81);
+  color: #fff;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.2s;
+}
+
+.btn-inject:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(255,71,87,0.35);
+}
+
+.btn-inject:active { transform: translateY(0); }
+
+/* Stats panel */
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
+.stat-row:last-child { border-bottom: none; }
+
+.stat-label { color: #88899a; }
+.stat-val { color: #e0e0e0; font-weight: 600; font-variant-numeric: tabular-nums; }
+.stat-val.anomaly { color: #ff4757; }
+
+.band-select {
+  width: 100%;
+  margin-top: 8px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(108,99,255,0.25);
+  background: #1a1a2e;
+  color: #e0e0e0;
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  outline: none;
+}
+
+.band-select:focus { border-color: #6c63ff; }
+
+/* Mic message */
+.mic-msg {
+  display: none;
+  padding: 8px 16px;
+  background: rgba(255,71,87,0.15);
+  color: #ff6b81;
+  font-size: 12px;
+  text-align: center;
+}
+
+/* Play/stop */
+.btn-play {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 8px;
+  border: 2px solid #6c63ff;
+  border-radius: 8px;
+  background: transparent;
+  color: #6c63ff;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-play:hover { background: rgba(108,99,255,0.1); }
+.btn-play.running { background: #6c63ff; color: #fff; }
+
+@media (max-width: 600px) {
+  .controls-area { grid-template-columns: 1fr; }
+  canvas#spectrogram { height: 200px; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1><span>Spectrogram</span> Lab</h1>
+    <div class="mode-toggle">
+      <button class="mode-btn active" data-mode="synth">Synth</button>
+      <button class="mode-btn" data-mode="mic">Mic</button>
+    </div>
+  </div>
+
+  <div class="mic-msg" id="micMsg">Microphone access denied. Falling back to synthesizer mode.</div>
+
+  <div class="spectrogram-wrap">
+    <canvas id="spectrogram"></canvas>
+    <canvas id="timeline"></canvas>
+  </div>
+
+  <div class="controls-area">
+    <!-- Left: synth controls -->
+    <div class="panel" id="synthPanel">
+      <div class="panel-title">Synthesizer Controls</div>
+
+      <button class="btn-play" id="btnPlay">Start</button>
+
+      <div class="slider-group">
+        <div class="slider-label"><span>Base Frequency</span><span class="val" id="freqVal">440 Hz</span></div>
+        <input type="range" id="freq" min="50" max="2000" value="440" step="1">
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-label"><span>Amplitude</span><span class="val" id="ampVal">0.30</span></div>
+        <input type="range" id="amp" min="0" max="100" value="30" step="1">
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-label"><span>Noise Level</span><span class="val" id="noiseVal">0.05</span></div>
+        <input type="range" id="noise" min="0" max="100" value="5" step="1">
+      </div>
+
+      <div class="toggle-row">
+        <span>Harmonics</span>
+        <div class="toggle-switch" id="harmonicsToggle"></div>
+      </div>
+
+      <button class="btn-inject" id="btnInject">Inject Anomaly</button>
+    </div>
+
+    <!-- Right: stats -->
+    <div class="panel">
+      <div class="panel-title">Detection Stats</div>
+      <div class="stat-row"><span class="stat-label">Current Energy</span><span class="stat-val" id="statEnergy">0.00</span></div>
+      <div class="stat-row"><span class="stat-label">Mean Energy</span><span class="stat-val" id="statMean">0.00</span></div>
+      <div class="stat-row"><span class="stat-label">Threshold</span><span class="stat-val" id="statThresh">0.00</span></div>
+      <div class="stat-row"><span class="stat-label">Anomalies</span><span class="stat-val anomaly" id="statCount">0</span></div>
+      <div class="stat-row"><span class="stat-label">Mode</span><span class="stat-val" id="statMode">Synth</span></div>
+
+      <select class="band-select" id="bandSelect">
+        <option value="all">All Frequencies</option>
+        <option value="low">Low (50 - 500 Hz)</option>
+        <option value="mid">Mid (500 - 2000 Hz)</option>
+        <option value="high">High (2000 - 8000 Hz)</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  // ---- Constants ----
+  const FFT_SIZE = 2048;
+  const SMOOTHING = 0.8;
+  const ANOMALY_SIGMA = 2.0;
+  const HISTORY_LEN = 120; // frames for running stats
+
+  // ---- DOM refs ----
+  const specCanvas = document.getElementById('spectrogram');
+  const tlCanvas = document.getElementById('timeline');
+  const btnPlay = document.getElementById('btnPlay');
+  const btnInject = document.getElementById('btnInject');
+  const freqSlider = document.getElementById('freq');
+  const ampSlider = document.getElementById('amp');
+  const noiseSlider = document.getElementById('noise');
+  const harmonicsToggle = document.getElementById('harmonicsToggle');
+  const bandSelect = document.getElementById('bandSelect');
+  const micMsg = document.getElementById('micMsg');
+  const modeBtns = document.querySelectorAll('.mode-btn');
+  const synthPanel = document.getElementById('synthPanel');
+
+  const statEnergy = document.getElementById('statEnergy');
+  const statMean = document.getElementById('statMean');
+  const statThresh = document.getElementById('statThresh');
+  const statCount = document.getElementById('statCount');
+  const statMode = document.getElementById('statMode');
+
+  const freqVal = document.getElementById('freqVal');
+  const ampVal = document.getElementById('ampVal');
+  const noiseVal = document.getElementById('noiseVal');
+
+  // ---- State ----
+  let mode = 'synth'; // 'synth' | 'mic'
+  let running = false;
+  let audioCtx = null;
+  let analyser = null;
+  let dataArray = null;
+  let animId = null;
+  let anomalyCount = 0;
+  let harmonicsOn = false;
+
+  // Synth nodes
+  let synthGain = null;
+  let oscillators = [];
+  let noiseNode = null;
+  let noiseGain = null;
+
+  // Mic
+  let micStream = null;
+  let micSource = null;
+
+  // Anomaly injection
+  let injecting = false;
+  let injectEnd = 0;
+
+  // Running stats
+  let energyHistory = [];
+
+  // Spectrogram image buffer (scrolling)
+  let specCtx, tlCtx;
+  let specW, specH, tlW, tlH;
+  let spectrogramImg = null;
+
+  // Timeline anomaly data
+  let timelineData = [];
+
+  // ---- Color map (inferno-inspired) ----
+  // black -> indigo -> purple -> red -> orange -> yellow -> white
+  const colorStops = [
+    [0,    0,   0,   4],
+    [0.1,  20,  11,  52],
+    [0.2,  58,  9,   99],
+    [0.3,  96,  19,  110],
+    [0.4,  137, 31,  98],
+    [0.5,  178, 50,  68],
+    [0.6,  213, 82,  39],
+    [0.7,  240, 120, 15],
+    [0.8,  252, 165, 10],
+    [0.9,  252, 212, 64],
+    [1.0,  252, 252, 164]
+  ];
+
+  function colorMap(t) {
+    t = Math.max(0, Math.min(1, t));
+    for (let i = 0; i < colorStops.length - 1; i++) {
+      const [t0, r0, g0, b0] = colorStops[i];
+      const [t1, r1, g1, b1] = colorStops[i + 1];
+      if (t >= t0 && t <= t1) {
+        const f = (t - t0) / (t1 - t0);
+        return [
+          Math.round(r0 + (r1 - r0) * f),
+          Math.round(g0 + (g1 - g0) * f),
+          Math.round(b0 + (b1 - b0) * f)
+        ];
+      }
+    }
+    return [252, 252, 164];
+  }
+
+  // ---- Canvas setup ----
+  function setupCanvases() {
+    const dpr = window.devicePixelRatio || 1;
+
+    specW = specCanvas.clientWidth;
+    specH = specCanvas.clientHeight;
+    specCanvas.width = specW * dpr;
+    specCanvas.height = specH * dpr;
+    specCtx = specCanvas.getContext('2d');
+    specCtx.scale(dpr, dpr);
+
+    tlW = tlCanvas.clientWidth;
+    tlH = tlCanvas.clientHeight;
+    tlCanvas.width = tlW * dpr;
+    tlCanvas.height = tlH * dpr;
+    tlCtx = tlCanvas.getContext('2d');
+    tlCtx.scale(dpr, dpr);
+
+    spectrogramImg = null;
+    timelineData = new Array(specW).fill(false);
+  }
+
+  // ---- Audio context ----
+  function ensureAudioCtx() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+  }
+
+  function createAnalyser() {
+    ensureAudioCtx();
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = FFT_SIZE;
+    analyser.smoothingTimeConstant = SMOOTHING;
+    dataArray = new Uint8Array(analyser.frequencyBinCount);
+  }
+
+  // ---- Synthesizer ----
+  function startSynth() {
+    ensureAudioCtx();
+    createAnalyser();
+    synthGain = audioCtx.createGain();
+    synthGain.gain.value = ampSlider.value / 100;
+    synthGain.connect(analyser);
+    analyser.connect(audioCtx.destination);
+
+    buildOscillators();
+    buildNoise();
+  }
+
+  function buildOscillators() {
+    stopOscillators();
+    const freq = parseFloat(freqSlider.value);
+    const osc = audioCtx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    osc.connect(synthGain);
+    osc.start();
+    oscillators.push(osc);
+
+    if (harmonicsOn) {
+      for (let h = 2; h <= 5; h++) {
+        const ho = audioCtx.createOscillator();
+        ho.type = 'sine';
+        ho.frequency.value = freq * h;
+        const hg = audioCtx.createGain();
+        hg.gain.value = 1 / (h * h);
+        ho.connect(hg);
+        hg.connect(synthGain);
+        ho.start();
+        oscillators.push(ho);
+      }
+    }
+  }
+
+  function stopOscillators() {
+    oscillators.forEach(o => { try { o.stop(); o.disconnect(); } catch(e){} });
+    oscillators = [];
+  }
+
+  function buildNoise() {
+    stopNoise();
+    const bufSize = audioCtx.sampleRate * 2;
+    const buf = audioCtx.createBuffer(1, bufSize, audioCtx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;
+
+    noiseNode = audioCtx.createBufferSource();
+    noiseNode.buffer = buf;
+    noiseNode.loop = true;
+    noiseGain = audioCtx.createGain();
+    noiseGain.gain.value = noiseSlider.value / 100;
+    noiseNode.connect(noiseGain);
+    noiseGain.connect(synthGain);
+    noiseNode.start();
+  }
+
+  function stopNoise() {
+    if (noiseNode) { try { noiseNode.stop(); noiseNode.disconnect(); } catch(e){} noiseNode = null; }
+    if (noiseGain) { try { noiseGain.disconnect(); } catch(e){} noiseGain = null; }
+  }
+
+  function stopSynth() {
+    stopOscillators();
+    stopNoise();
+    if (synthGain) { try { synthGain.disconnect(); } catch(e){} synthGain = null; }
+    if (analyser) { try { analyser.disconnect(); } catch(e){} }
+  }
+
+  // ---- Microphone ----
+  async function startMic() {
+    ensureAudioCtx();
+    createAnalyser();
+    try {
+      micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      micSource = audioCtx.createMediaStreamSource(micStream);
+      micSource.connect(analyser);
+      micMsg.style.display = 'none';
+    } catch (err) {
+      micMsg.style.display = 'block';
+      // Fall back to synth
+      setMode('synth');
+      return false;
+    }
+    return true;
+  }
+
+  function stopMic() {
+    if (micSource) { try { micSource.disconnect(); } catch(e){} micSource = null; }
+    if (micStream) { micStream.getTracks().forEach(t => t.stop()); micStream = null; }
+    if (analyser) { try { analyser.disconnect(); } catch(e){} }
+  }
+
+  // ---- Anomaly injection ----
+  function injectAnomaly() {
+    if (!running || mode !== 'synth') return;
+    ensureAudioCtx();
+
+    const types = ['click', 'screech', 'broadband'];
+    const type = types[Math.floor(Math.random() * types.length)];
+    const duration = 0.15 + Math.random() * 0.2;
+    const now = audioCtx.currentTime;
+
+    if (type === 'click') {
+      const buf = audioCtx.createBuffer(1, Math.floor(audioCtx.sampleRate * 0.02), audioCtx.sampleRate);
+      const d = buf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.exp(-i / (d.length * 0.1));
+      const src = audioCtx.createBufferSource();
+      src.buffer = buf;
+      const g = audioCtx.createGain();
+      g.gain.value = 2.0;
+      src.connect(g);
+      g.connect(synthGain);
+      src.start(now);
+    } else if (type === 'screech') {
+      const osc = audioCtx.createOscillator();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(3000, now);
+      osc.frequency.exponentialRampToValueAtTime(8000, now + duration);
+      const g = audioCtx.createGain();
+      g.gain.setValueAtTime(0.8, now);
+      g.gain.exponentialRampToValueAtTime(0.001, now + duration);
+      osc.connect(g);
+      g.connect(synthGain);
+      osc.start(now);
+      osc.stop(now + duration);
+    } else {
+      const bufSize = Math.floor(audioCtx.sampleRate * duration);
+      const buf = audioCtx.createBuffer(1, bufSize, audioCtx.sampleRate);
+      const d = buf.getChannelData(0);
+      for (let i = 0; i < bufSize; i++) d[i] = (Math.random() * 2 - 1);
+      const src = audioCtx.createBufferSource();
+      src.buffer = buf;
+      const g = audioCtx.createGain();
+      g.gain.value = 1.5;
+      src.connect(g);
+      g.connect(synthGain);
+      src.start(now);
+    }
+  }
+
+  // ---- Frequency band helpers ----
+  function getBandIndices() {
+    if (!analyser || !audioCtx) return { lo: 0, hi: analyser ? analyser.frequencyBinCount : 1 };
+    const nyquist = audioCtx.sampleRate / 2;
+    const binCount = analyser.frequencyBinCount;
+    const band = bandSelect.value;
+    let loHz = 0, hiHz = nyquist;
+    if (band === 'low')  { loHz = 50;   hiHz = 500; }
+    if (band === 'mid')  { loHz = 500;  hiHz = 2000; }
+    if (band === 'high') { loHz = 2000; hiHz = 8000; }
+    return {
+      lo: Math.max(0, Math.floor(loHz / nyquist * binCount)),
+      hi: Math.min(binCount, Math.ceil(hiHz / nyquist * binCount))
+    };
+  }
+
+  // ---- Anomaly detection ----
+  function computeBandEnergy(data, lo, hi) {
+    let sum = 0;
+    for (let i = lo; i < hi; i++) sum += data[i] * data[i];
+    return Math.sqrt(sum / Math.max(1, hi - lo));
+  }
+
+  function detectAnomaly(energy) {
+    energyHistory.push(energy);
+    if (energyHistory.length > HISTORY_LEN) energyHistory.shift();
+    if (energyHistory.length < 10) return { isAnomaly: false, mean: energy, std: 0, threshold: energy };
+
+    const mean = energyHistory.reduce((a, b) => a + b, 0) / energyHistory.length;
+    const variance = energyHistory.reduce((a, b) => a + (b - mean) ** 2, 0) / energyHistory.length;
+    const std = Math.sqrt(variance);
+    const threshold = mean + ANOMALY_SIGMA * std;
+    return { isAnomaly: energy > threshold && std > 1, mean, std, threshold };
+  }
+
+  // ---- Rendering ----
+  function renderFrame() {
+    if (!running) return;
+    animId = requestAnimationFrame(renderFrame);
+
+    analyser.getByteFrequencyData(dataArray);
+
+    const { lo, hi } = getBandIndices();
+    const energy = computeBandEnergy(dataArray, lo, hi);
+    const det = detectAnomaly(energy);
+
+    if (det.isAnomaly) anomalyCount++;
+
+    // Update stats
+    statEnergy.textContent = energy.toFixed(2);
+    statMean.textContent = det.mean.toFixed(2);
+    statThresh.textContent = det.threshold.toFixed(2);
+    statCount.textContent = anomalyCount;
+
+    // ---- Draw spectrogram column (scroll left) ----
+    // Shift existing image left by 1px
+    if (spectrogramImg) {
+      specCtx.putImageData(spectrogramImg, -1, 0);
+    }
+
+    // Draw new column at right edge
+    const binCount = analyser.frequencyBinCount;
+    const colX = specW - 1;
+
+    for (let y = 0; y < specH; y++) {
+      // Map y (0=top=high freq, specH=bottom=low freq) -> bin index
+      const binIdx = Math.floor((1 - y / specH) * binCount);
+      const val = dataArray[Math.min(binIdx, binCount - 1)] / 255;
+      const [r, g, b] = colorMap(val);
+
+      // Check if this frequency is in anomaly band and anomaly is active
+      let ar = r, ag = g, ab = b;
+      if (det.isAnomaly && binIdx >= lo && binIdx < hi) {
+        // Orange-red overlay
+        ar = Math.min(255, r + 80);
+        ag = Math.min(255, Math.floor(g * 0.6 + 30));
+        ab = Math.min(255, Math.floor(b * 0.3));
+      }
+
+      specCtx.fillStyle = `rgb(${ar},${ag},${ab})`;
+      specCtx.fillRect(colX, y, 1, 1);
+    }
+
+    spectrogramImg = specCtx.getImageData(0, 0, specW * (window.devicePixelRatio || 1), specH * (window.devicePixelRatio || 1));
+
+    // ---- Timeline ----
+    timelineData.shift();
+    timelineData.push(det.isAnomaly);
+
+    tlCtx.fillStyle = '#0a0a1a';
+    tlCtx.fillRect(0, 0, tlW, tlH);
+    for (let x = 0; x < timelineData.length; x++) {
+      if (timelineData[x]) {
+        tlCtx.fillStyle = 'rgba(255,71,87,0.85)';
+        tlCtx.fillRect(x, 0, 1, tlH);
+      }
+    }
+  }
+
+  // ---- Start / Stop ----
+  async function start() {
+    if (running) return;
+
+    setupCanvases();
+    energyHistory = [];
+    anomalyCount = 0;
+    statCount.textContent = '0';
+
+    if (mode === 'synth') {
+      startSynth();
+    } else {
+      const ok = await startMic();
+      if (!ok) return;
+    }
+
+    running = true;
+    btnPlay.textContent = 'Stop';
+    btnPlay.classList.add('running');
+    renderFrame();
+  }
+
+  function stop() {
+    running = false;
+    if (animId) cancelAnimationFrame(animId);
+    animId = null;
+
+    if (mode === 'synth') stopSynth();
+    else stopMic();
+
+    btnPlay.textContent = 'Start';
+    btnPlay.classList.remove('running');
+  }
+
+  function setMode(m) {
+    if (running) stop();
+    mode = m;
+    modeBtns.forEach(b => b.classList.toggle('active', b.dataset.mode === m));
+    statMode.textContent = m === 'synth' ? 'Synth' : 'Mic';
+
+    // Show/hide synth controls
+    const controls = synthPanel.querySelectorAll('.slider-group, .toggle-row, .btn-inject');
+    controls.forEach(el => el.style.display = m === 'synth' ? '' : 'none');
+  }
+
+  // ---- Event listeners ----
+  btnPlay.addEventListener('click', () => running ? stop() : start());
+  btnInject.addEventListener('click', injectAnomaly);
+
+  modeBtns.forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
+
+  harmonicsToggle.addEventListener('click', () => {
+    harmonicsOn = !harmonicsOn;
+    harmonicsToggle.classList.toggle('on', harmonicsOn);
+    if (running && mode === 'synth') {
+      buildOscillators();
+    }
+  });
+
+  freqSlider.addEventListener('input', () => {
+    freqVal.textContent = freqSlider.value + ' Hz';
+    if (running && mode === 'synth') {
+      const freq = parseFloat(freqSlider.value);
+      oscillators.forEach((osc, i) => {
+        const mult = i === 0 ? 1 : i + 1;
+        osc.frequency.setValueAtTime(freq * mult, audioCtx.currentTime);
+      });
+    }
+  });
+
+  ampSlider.addEventListener('input', () => {
+    const v = ampSlider.value / 100;
+    ampVal.textContent = v.toFixed(2);
+    if (synthGain) synthGain.gain.setValueAtTime(v, audioCtx.currentTime);
+  });
+
+  noiseSlider.addEventListener('input', () => {
+    const v = noiseSlider.value / 100;
+    noiseVal.textContent = v.toFixed(2);
+    if (noiseGain) noiseGain.gain.setValueAtTime(v, audioCtx.currentTime);
+  });
+
+  // Handle resize
+  window.addEventListener('resize', () => {
+    if (running) {
+      // Preserve state across resize
+      const wasRunning = running;
+      spectrogramImg = null;
+      setupCanvases();
+    }
+  });
+
+  // Initial canvas setup
+  setupCanvases();
+
+  // Draw idle message
+  specCtx.fillStyle = '#0a0a1a';
+  specCtx.fillRect(0, 0, specW, specH);
+  specCtx.fillStyle = '#6c63ff';
+  specCtx.font = '14px "Segoe UI", system-ui, sans-serif';
+  specCtx.textAlign = 'center';
+  specCtx.fillText('Press Start to begin spectrogram analysis', specW / 2, specH / 2);
+})();
+</script>
+
+</body>
+</html>

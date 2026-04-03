@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Language Telephone — Speech Translator — Marian Helcl Øverli</title>
+    <meta name="description" content="A telephone game demonstrating speech translation — watch phrases drift through 5 languages.">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/layout.css">
+    <link rel="stylesheet" href="../css/article.css">
+    <style>
+        .game-wrapper { max-width: 840px; margin: 2rem auto; }
+        .game-frame { width: 100%; aspect-ratio: 4 / 3; border: none; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(108,99,255,0.1); }
+        .game-info { margin-top: 2.5rem; }
+        .game-info h2 { font-size: 1.3rem; margin-bottom: 0.75rem; }
+        .game-info p { color: var(--text-muted); line-height: 1.7; margin-bottom: 1rem; }
+        .game-info table { width: 100%; border-collapse: collapse; margin: 1rem 0 1.5rem; }
+        .game-info th, .game-info td { text-align: left; padding: 0.5rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.08); }
+        .game-info th { color: var(--accent); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .game-info td { color: var(--text-muted); font-size: 0.95rem; }
+        .tech-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="nav-inner">
+        <a href="../index.html" class="logo"><img src="../favicon.svg" alt="MHØ" class="logo-img"></a>
+        <button class="hamburger" aria-label="Menu">&#9776;</button>
+        <ul class="nav-links">
+            <li><a href="../index.html#about">About</a></li>
+            <li><a href="../index.html#projects">Projects</a></li>
+            <li><a href="../index.html#skills">Skills</a></li>
+            <li><a href="../index.html#blog">Writing</a></li>
+            <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+        <a href="../index.html#ai-twin" class="btn btn-primary nav-cta">Chat with My AI Twin</a>
+    </div>
+</nav>
+
+<article class="article">
+    <a href="../index.html#projects" class="article-back">&larr; Back to projects</a>
+
+    <header class="article-header">
+        <h1>Language Telephone — Speech Translator</h1>
+        <p class="article-subtitle">
+            A "telephone game" that demonstrates speech translation — speak or type a phrase
+            and watch it drift through 5 languages, then compare the original to the final result.
+        </p>
+        <div class="tech-tags">
+            <span class="tag">JavaScript</span>
+            <span class="tag">Web Speech API</span>
+            <span class="tag">Web Audio API</span>
+            <span class="tag">Translation</span>
+        </div>
+    </header>
+
+    <div class="game-wrapper">
+        <iframe class="game-frame" src="../speech-translator-demo.html" title="Language Telephone Speech Translator" allowfullscreen></iframe>
+    </div>
+
+    <div class="game-info">
+        <h2>How It Works</h2>
+        <p>
+            Enter a phrase (by speaking or typing), and the demo translates it through a chain of
+            5 languages using built-in phrase dictionaries. Each step is visualized as a node in the
+            chain, and you can hear the translation at each stage via speech synthesis.
+        </p>
+
+        <table>
+            <thead><tr><th>Feature</th><th>Description</th></tr></thead>
+            <tbody>
+                <tr><td>Microphone input</td><td>Speak a phrase (Chrome/Edge, with live waveform)</td></tr>
+                <tr><td>Text input</td><td>Type a phrase (works in all browsers)</td></tr>
+                <tr><td>Translation chain</td><td>EN → ES → FR → DE → JA → EN</td></tr>
+                <tr><td>Listen buttons</td><td>Hear each translation via speech synthesis</td></tr>
+                <tr><td>Preset phrases</td><td>Try common phrases to see the drift effect</td></tr>
+            </tbody>
+        </table>
+
+        <h2>The Concept</h2>
+        <p>
+            Real speech translation pipelines combine ASR (speech-to-text via Whisper), machine
+            translation (LLM or NMT models), and TTS (text-to-speech). The "telephone effect" —
+            where meaning drifts through multiple translations — illustrates why direct translation
+            and context preservation are active research challenges.
+        </p>
+    </div>
+</article>
+
+<script src="../js/main.js"></script>
+</body>
+</html>

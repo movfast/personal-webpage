@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Storyboard Builder | Scene Narrator Demo</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #1a1a2e;
+  color: #e0e0e0;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 24px 16px;
+}
+
+.main-container {
+  width: 100%;
+  max-width: 800px;
+  min-height: 600px;
+  background: #16213e;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(108,99,255,0.1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+.header {
+  padding: 20px 24px 12px;
+  text-align: center;
+  border-bottom: 1px solid rgba(108,99,255,0.15);
+}
+.header h1 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 4px;
+}
+.header h1 span { color: #6c63ff; }
+.header p { font-size: 0.8rem; color: #888; }
+
+/* Scene Gallery */
+.section-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: #6c63ff;
+  padding: 12px 24px 6px;
+}
+
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  padding: 8px 24px 12px;
+}
+
+.scene-card {
+  cursor: grab;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+  background: #0f1a33;
+  position: relative;
+}
+.scene-card:hover {
+  border-color: #6c63ff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(108,99,255,0.2);
+}
+.scene-card.selected { border-color: #6c63ff; }
+.scene-card canvas {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.scene-card .label {
+  font-size: 0.6rem;
+  text-align: center;
+  padding: 4px 2px;
+  color: #ccc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.scene-card[draggable="true"] { user-select: none; }
+.scene-card.dragging { opacity: 0.4; }
+
+/* Storyboard Timeline */
+.timeline-section {
+  padding: 0 24px;
+  min-height: 110px;
+}
+.timeline {
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  min-height: 90px;
+  background: rgba(0,0,0,0.25);
+  border-radius: 10px;
+  border: 2px dashed rgba(108,99,255,0.25);
+  overflow-x: auto;
+  align-items: center;
+  transition: border-color 0.2s, background 0.2s;
+}
+.timeline.drag-over {
+  border-color: #6c63ff;
+  background: rgba(108,99,255,0.05);
+}
+.timeline-empty {
+  width: 100%;
+  text-align: center;
+  color: #555;
+  font-size: 0.75rem;
+  pointer-events: none;
+}
+.timeline-item {
+  flex-shrink: 0;
+  width: 100px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #0f1a33;
+  border: 1px solid rgba(108,99,255,0.3);
+  position: relative;
+  cursor: grab;
+  transition: transform 0.15s;
+}
+.timeline-item:hover { transform: scale(1.04); }
+.timeline-item canvas { width: 100%; display: block; }
+.timeline-item .tl-label {
+  font-size: 0.55rem;
+  text-align: center;
+  padding: 2px;
+  color: #aaa;
+}
+.timeline-item .remove-btn {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: rgba(220,50,50,0.85);
+  color: #fff;
+  font-size: 0.6rem;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.timeline-item:hover .remove-btn { opacity: 1; }
+
+/* Subtitle Track */
+.subtitle-track {
+  display: flex;
+  padding: 4px 24px;
+  gap: 10px;
+  overflow-x: auto;
+  min-height: 22px;
+  align-items: center;
+}
+.timecode {
+  flex-shrink: 0;
+  width: 100px;
+  text-align: center;
+  font-size: 0.55rem;
+  color: #6c63ff;
+  font-family: 'Courier New', monospace;
+  background: rgba(108,99,255,0.08);
+  border-radius: 4px;
+  padding: 2px 0;
+}
+
+/* Lower Panel */
+.lower-panel {
+  flex: 1;
+  display: flex;
+  gap: 12px;
+  padding: 12px 24px 20px;
+  min-height: 160px;
+  overflow: hidden;
+}
+
+/* Narration */
+.narration-panel {
+  flex: 1.2;
+  display: flex;
+  flex-direction: column;
+}
+.narration-panel .section-label { padding: 0 0 6px; }
+.narration-box {
+  flex: 1;
+  background: rgba(0,0,0,0.2);
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: #bbb;
+  overflow-y: auto;
+  min-height: 100px;
+}
+.narration-box .cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background: #6c63ff;
+  margin-left: 2px;
+  animation: blink 0.7s step-end infinite;
+  vertical-align: text-bottom;
+}
+@keyframes blink { 50% { opacity: 0; } }
+.narration-placeholder { color: #555; font-style: italic; }
+
+/* Feature Viz */
+.feature-panel {
+  flex: 0.8;
+  display: flex;
+  flex-direction: column;
+}
+.feature-panel .section-label { padding: 0 0 6px; }
+.feature-content {
+  flex: 1;
+  background: rgba(0,0,0,0.2);
+  border-radius: 10px;
+  padding: 12px;
+  overflow-y: auto;
+}
+.feature-placeholder { color: #555; font-size: 0.75rem; font-style: italic; }
+
+.palette-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 2px solid rgba(255,255,255,0.1);
+  position: relative;
+}
+.swatch::after {
+  content: attr(data-hex);
+  position: absolute;
+  bottom: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.5rem;
+  color: #888;
+  white-space: nowrap;
+}
+
+.brightness-map {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(6, 1fr);
+  gap: 1px;
+  width: 100%;
+  aspect-ratio: 4/3;
+  border-radius: 6px;
+  overflow: hidden;
+  margin: 18px 0 10px;
+}
+.brightness-cell {
+  background: #000;
+  min-height: 4px;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+}
+.tag {
+  font-size: 0.6rem;
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: rgba(108,99,255,0.15);
+  color: #9b95ff;
+  border: 1px solid rgba(108,99,255,0.25);
+}
+
+.feat-label {
+  font-size: 0.6rem;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+/* Responsive */
+@media (max-width: 700px) {
+  .gallery { grid-template-columns: repeat(2, 1fr); }
+  .lower-panel { flex-direction: column; }
+  .main-container { border-radius: 10px; }
+}
+@media (max-width: 480px) {
+  body { padding: 8px; }
+  .gallery { padding: 8px 12px; }
+  .timeline-section { padding: 0 12px; }
+  .lower-panel { padding: 10px 12px 16px; }
+  .section-label { padding-left: 12px; padding-right: 12px; }
+  .subtitle-track { padding: 4px 12px; }
+}
+</style>
+</head>
+<body>
+
+<div class="main-container">
+  <div class="header">
+    <h1><span>Storyboard</span> Builder</h1>
+    <p>Drag scenes to the timeline to auto-generate narration</p>
+  </div>
+
+  <div class="section-label">Scene Gallery</div>
+  <div class="gallery" id="gallery"></div>
+
+  <div class="section-label">Storyboard Timeline</div>
+  <div class="timeline-section">
+    <div class="timeline" id="timeline">
+      <div class="timeline-empty">Drag scenes here to build your storyboard</div>
+    </div>
+  </div>
+  <div class="subtitle-track" id="subtitleTrack"></div>
+
+  <div class="lower-panel">
+    <div class="narration-panel">
+      <div class="section-label">Auto-Narration</div>
+      <div class="narration-box" id="narrationBox">
+        <span class="narration-placeholder">Add 2+ scenes to generate narration...</span>
+      </div>
+    </div>
+    <div class="feature-panel">
+      <div class="section-label">Feature Extraction</div>
+      <div class="feature-content" id="featureContent">
+        <span class="feature-placeholder">Click a scene to analyze</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==================== SCENE DEFINITIONS ====================
+const scenes = [
+  {
+    id: 'sunny-park',
+    name: 'Sunny Park',
+    tags: ['sky', 'grass', 'trees', 'sun', 'bench', 'birds'],
+    palette: ['#87CEEB', '#4CAF50', '#2E7D32', '#FFD700', '#8B4513'],
+    templates: [
+      'A warm afternoon sun cast golden light across the park.',
+      'Birds sang in the old oak trees lining the grassy path.',
+      'The park bench sat invitingly beneath a canopy of green.'
+    ],
+    draw(ctx, w, h) {
+      // Sky
+      let g = ctx.createLinearGradient(0, 0, 0, h * 0.6);
+      g.addColorStop(0, '#5BA3E0'); g.addColorStop(1, '#87CEEB');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, w, h * 0.6);
+      // Sun
+      let sg = ctx.createRadialGradient(w * 0.8, h * 0.15, 5, w * 0.8, h * 0.15, 30);
+      sg.addColorStop(0, '#FFF8B0'); sg.addColorStop(0.4, '#FFD700'); sg.addColorStop(1, 'rgba(255,215,0,0)');
+      ctx.fillStyle = sg; ctx.fillRect(w * 0.5, 0, w * 0.5, h * 0.4);
+      ctx.beginPath(); ctx.arc(w * 0.8, h * 0.15, 14, 0, Math.PI * 2); ctx.fillStyle = '#FFE44D'; ctx.fill();
+      // Ground
+      g = ctx.createLinearGradient(0, h * 0.55, 0, h);
+      g.addColorStop(0, '#6ABF4B'); g.addColorStop(1, '#2E7D32');
+      ctx.fillStyle = g; ctx.fillRect(0, h * 0.55, w, h * 0.45);
+      // Path
+      ctx.beginPath(); ctx.moveTo(w * 0.35, h); ctx.quadraticCurveTo(w * 0.45, h * 0.7, w * 0.55, h * 0.58);
+      ctx.quadraticCurveTo(w * 0.62, h * 0.55, w * 0.7, h * 0.56);
+      ctx.lineTo(w * 0.75, h * 0.56); ctx.lineTo(w * 0.65, h * 0.6);
+      ctx.quadraticCurveTo(w * 0.55, h * 0.65, w * 0.48, h); ctx.fillStyle = '#C9B48C'; ctx.fill();
+      // Trees
+      const drawTree = (x, y, s) => {
+        ctx.fillStyle = '#5D3A1A'; ctx.fillRect(x - 3 * s, y, 6 * s, 18 * s);
+        ctx.beginPath(); ctx.arc(x, y - 4 * s, 16 * s, 0, Math.PI * 2); ctx.fillStyle = '#2E7D32'; ctx.fill();
+        ctx.beginPath(); ctx.arc(x - 8 * s, y + 2 * s, 11 * s, 0, Math.PI * 2); ctx.fillStyle = '#388E3C'; ctx.fill();
+        ctx.beginPath(); ctx.arc(x + 9 * s, y + 1 * s, 12 * s, 0, Math.PI * 2); ctx.fillStyle = '#43A047'; ctx.fill();
+      };
+      drawTree(w * 0.15, h * 0.42, 1); drawTree(w * 0.7, h * 0.38, 1.15); drawTree(w * 0.9, h * 0.44, 0.8);
+      // Bench
+      ctx.fillStyle = '#8B4513';
+      ctx.fillRect(w * 0.38, h * 0.63, 36, 3); ctx.fillRect(w * 0.38, h * 0.67, 36, 3);
+      ctx.fillRect(w * 0.39, h * 0.63, 3, 12); ctx.fillRect(w * 0.56, h * 0.63, 3, 12);
+      ctx.fillRect(w * 0.37, h * 0.60, 2, 18); ctx.fillRect(w * 0.59, h * 0.60, 2, 18);
+      // Birds
+      const drawBird = (x, y) => {
+        ctx.strokeStyle = '#333'; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.moveTo(x - 5, y + 2); ctx.quadraticCurveTo(x - 2, y - 3, x, y);
+        ctx.quadraticCurveTo(x + 2, y - 3, x + 5, y + 2); ctx.stroke();
+      };
+      drawBird(w * 0.3, h * 0.12); drawBird(w * 0.37, h * 0.08); drawBird(w * 0.42, h * 0.14);
+      // Flowers
+      [[w*0.2, h*0.72], [w*0.6, h*0.78], [w*0.8, h*0.7]].forEach(([fx, fy]) => {
+        ctx.beginPath(); ctx.arc(fx, fy, 3, 0, Math.PI*2); ctx.fillStyle = '#FF6B9D'; ctx.fill();
+        ctx.beginPath(); ctx.arc(fx, fy, 1.5, 0, Math.PI*2); ctx.fillStyle = '#FFD700'; ctx.fill();
+      });
+    }
+  },
+  {
+    id: 'city-street',
+    name: 'City Street',
+    tags: ['buildings', 'road', 'cars', 'streetlights', 'sky', 'urban'],
+    palette: ['#2C3E50', '#7F8C8D', '#E74C3C', '#F39C12', '#3498DB'],
+    templates: [
+      'Traffic hummed through the downtown canyon of glass and steel.',
+      'Streetlights blinked on as the city settled into its evening rhythm.',
+      'The skyline rose in sharp angles against the dusky sky.'
+    ],
+    draw(ctx, w, h) {
+      // Sky
+      let g = ctx.createLinearGradient(0, 0, 0, h * 0.45);
+      g.addColorStop(0, '#1a1a3e'); g.addColorStop(1, '#3a4a6e');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, w, h * 0.45);
+      // Stars
+      for (let i = 0; i < 15; i++) {
+        ctx.fillStyle = `rgba(255,255,255,${0.3 + Math.random()*0.5})`;
+        ctx.fillRect(Math.random()*w, Math.random()*h*0.3, 1, 1);
+      }
+      // Buildings
+      const bldgs = [
+        [0, 0.28, 0.15, '#2C3E50'], [0.12, 0.2, 0.13, '#34495E'], [0.22, 0.32, 0.16, '#2C3E50'],
+        [0.36, 0.15, 0.12, '#3B5068'], [0.46, 0.25, 0.14, '#2C3E50'], [0.58, 0.18, 0.11, '#34495E'],
+        [0.67, 0.3, 0.15, '#2C3E50'], [0.8, 0.22, 0.2, '#3B5068']
+      ];
+      bldgs.forEach(([bx, by, bw, c]) => {
+        const bxp = bx * w, byp = by * h, bwp = bw * w, bhp = h * 0.7 - byp;
+        ctx.fillStyle = c; ctx.fillRect(bxp, byp, bwp, bhp + h * 0.01);
+        // Windows
+        for (let wy = byp + 6; wy < byp + bhp - 4; wy += 8) {
+          for (let wx = bxp + 4; wx < bxp + bwp - 4; wx += 7) {
+            ctx.fillStyle = Math.random() > 0.3 ? '#F5D76E' : '#555'; ctx.fillRect(wx, wy, 4, 5);
+          }
+        }
+      });
+      // Road
+      ctx.fillStyle = '#444'; ctx.fillRect(0, h * 0.7, w, h * 0.3);
+      ctx.fillStyle = '#555'; ctx.fillRect(0, h * 0.69, w, h * 0.03);
+      // Road lines
+      ctx.setLineDash([8, 6]); ctx.strokeStyle = '#F39C12'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(0, h * 0.82); ctx.lineTo(w, h * 0.82); ctx.stroke();
+      ctx.setLineDash([]);
+      // Cars
+      const drawCar = (x, y, color) => {
+        ctx.fillStyle = color;
+        ctx.beginPath(); ctx.roundRect(x, y, 24, 10, 3); ctx.fill();
+        ctx.fillStyle = color; ctx.fillRect(x + 4, y - 6, 16, 7);
+        ctx.fillStyle = '#87CEEB'; ctx.fillRect(x + 5, y - 5, 6, 5); ctx.fillRect(x + 13, y - 5, 6, 5);
+        ctx.fillStyle = '#222'; ctx.beginPath(); ctx.arc(x + 6, y + 10, 3, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(x + 18, y + 10, 3, 0, Math.PI * 2); ctx.fill();
+      };
+      drawCar(w * 0.15, h * 0.76, '#E74C3C'); drawCar(w * 0.6, h * 0.86, '#3498DB');
+      // Streetlights
+      [w * 0.25, w * 0.75].forEach(lx => {
+        ctx.fillStyle = '#666'; ctx.fillRect(lx, h * 0.45, 2, h * 0.25);
+        ctx.fillStyle = '#888'; ctx.fillRect(lx - 4, h * 0.44, 10, 3);
+        let lg = ctx.createRadialGradient(lx + 1, h * 0.47, 1, lx + 1, h * 0.47, 15);
+        lg.addColorStop(0, 'rgba(243,156,18,0.5)'); lg.addColorStop(1, 'rgba(243,156,18,0)');
+        ctx.fillStyle = lg; ctx.fillRect(lx - 15, h * 0.35, 32, 25);
+      });
+    }
+  },
+  {
+    id: 'kitchen',
+    name: 'Kitchen',
+    tags: ['counter', 'stove', 'window', 'tiles', 'indoor', 'pots'],
+    palette: ['#F5DEB3', '#8B4513', '#C0C0C0', '#FF6347', '#FFFACD'],
+    templates: [
+      'The kitchen smelled of fresh herbs and simmering broth.',
+      'Morning light streamed through the window above the sink.',
+      'A copper pot sat bubbling gently on the old gas stove.'
+    ],
+    draw(ctx, w, h) {
+      // Wall
+      let g = ctx.createLinearGradient(0, 0, 0, h);
+      g.addColorStop(0, '#FFF8E7'); g.addColorStop(1, '#F0E4CC');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+      // Tiles
+      for (let ty = 0; ty < h * 0.45; ty += 12) {
+        for (let tx = 0; tx < w; tx += 14) {
+          const off = (Math.floor(ty / 12) % 2) * 7;
+          ctx.fillStyle = (tx + ty) % 24 < 12 ? '#E8E0D0' : '#F0E8D8';
+          ctx.fillRect(tx + off, ty, 13, 11);
+          ctx.strokeStyle = '#D5CDB8'; ctx.lineWidth = 0.5;
+          ctx.strokeRect(tx + off, ty, 13, 11);
+        }
+      }
+      // Window
+      ctx.fillStyle = '#87CEEB'; ctx.fillRect(w * 0.35, h * 0.05, w * 0.3, h * 0.3);
+      ctx.strokeStyle = '#DEB887'; ctx.lineWidth = 3; ctx.strokeRect(w * 0.35, h * 0.05, w * 0.3, h * 0.3);
+      ctx.strokeStyle = '#DEB887'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(w * 0.5, h * 0.05); ctx.lineTo(w * 0.5, h * 0.35); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(w * 0.35, h * 0.2); ctx.lineTo(w * 0.65, h * 0.2); ctx.stroke();
+      // Curtains
+      ctx.fillStyle = 'rgba(255,200,200,0.4)';
+      ctx.beginPath(); ctx.moveTo(w * 0.34, h * 0.04); ctx.quadraticCurveTo(w * 0.38, h * 0.2, w * 0.36, h * 0.36); ctx.lineTo(w * 0.34, h * 0.36); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(w * 0.66, h * 0.04); ctx.quadraticCurveTo(w * 0.62, h * 0.2, w * 0.64, h * 0.36); ctx.lineTo(w * 0.66, h * 0.36); ctx.fill();
+      // Counter
+      ctx.fillStyle = '#8B6F47'; ctx.fillRect(0, h * 0.45, w, h * 0.08);
+      g = ctx.createLinearGradient(0, h * 0.53, 0, h);
+      g.addColorStop(0, '#6B4226'); g.addColorStop(1, '#4A2E15');
+      ctx.fillStyle = g; ctx.fillRect(0, h * 0.53, w, h * 0.47);
+      // Cabinet handles
+      [w*0.15, w*0.4, w*0.65, w*0.88].forEach(hx => {
+        ctx.fillStyle = '#C0C0C0'; ctx.fillRect(hx - 6, h * 0.72, 12, 2);
+      });
+      // Stove
+      ctx.fillStyle = '#C0C0C0'; ctx.fillRect(w * 0.55, h * 0.35, w * 0.3, h * 0.12);
+      ctx.fillStyle = '#999'; ctx.fillRect(w * 0.56, h * 0.36, w * 0.28, h * 0.1);
+      // Burners
+      [w*0.63, w*0.77].forEach(bx => {
+        ctx.beginPath(); ctx.arc(bx, h * 0.41, 6, 0, Math.PI * 2);
+        ctx.strokeStyle = '#444'; ctx.lineWidth = 1.5; ctx.stroke();
+        ctx.beginPath(); ctx.arc(bx, h * 0.41, 3, 0, Math.PI * 2);
+        ctx.fillStyle = '#FF6347'; ctx.fill();
+      });
+      // Pot
+      ctx.fillStyle = '#B87333'; ctx.fillRect(w * 0.59, h * 0.28, 18, 10);
+      ctx.fillStyle = '#A06020'; ctx.beginPath(); ctx.ellipse(w * 0.59 + 9, h * 0.28, 10, 3, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#888'; ctx.fillRect(w * 0.59 + 3, h * 0.25, 12, 3);
+      // Steam
+      ctx.strokeStyle = 'rgba(200,200,200,0.3)'; ctx.lineWidth = 1.5;
+      [0, 5, 10].forEach(off => {
+        ctx.beginPath(); ctx.moveTo(w * 0.59 + 6 + off, h * 0.25);
+        ctx.quadraticCurveTo(w * 0.59 + 3 + off, h * 0.18, w * 0.59 + 7 + off, h * 0.12); ctx.stroke();
+      });
+      // Mug
+      ctx.fillStyle = '#DD5544'; ctx.fillRect(w * 0.15, h * 0.38, 12, 10);
+      ctx.strokeStyle = '#DD5544'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(w * 0.15 + 14, h * 0.43, 4, -Math.PI * 0.4, Math.PI * 0.4); ctx.stroke();
+    }
+  },
+  {
+    id: 'beach-sunset',
+    name: 'Beach Sunset',
+    tags: ['ocean', 'sand', 'palm trees', 'sunset', 'sky', 'waves'],
+    palette: ['#FF6B35', '#FFC947', '#1A6B8A', '#F4D6A0', '#FF4444'],
+    templates: [
+      'The sun melted into the ocean, painting the sky in fire.',
+      'Warm sand crunched beneath bare feet as the tide pulled back.',
+      'Palm fronds rustled in the salty evening breeze.'
+    ],
+    draw(ctx, w, h) {
+      // Sky gradient
+      let g = ctx.createLinearGradient(0, 0, 0, h * 0.55);
+      g.addColorStop(0, '#1A0530'); g.addColorStop(0.3, '#6B1D5E'); g.addColorStop(0.6, '#FF4444');
+      g.addColorStop(0.8, '#FF8C00'); g.addColorStop(1, '#FFC947');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, w, h * 0.55);
+      // Sun
+      let sg = ctx.createRadialGradient(w * 0.5, h * 0.42, 8, w * 0.5, h * 0.42, 35);
+      sg.addColorStop(0, '#FFF8DC'); sg.addColorStop(0.3, '#FFD700'); sg.addColorStop(0.7, '#FF8C00'); sg.addColorStop(1, 'rgba(255,140,0,0)');
+      ctx.fillStyle = sg; ctx.beginPath(); ctx.arc(w * 0.5, h * 0.42, 35, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(w * 0.5, h * 0.42, 14, 0, Math.PI * 2); ctx.fillStyle = '#FFF0B0'; ctx.fill();
+      // Ocean
+      g = ctx.createLinearGradient(0, h * 0.5, 0, h * 0.72);
+      g.addColorStop(0, '#FF8855'); g.addColorStop(0.3, '#2980B9'); g.addColorStop(1, '#1A6B8A');
+      ctx.fillStyle = g; ctx.fillRect(0, h * 0.5, w, h * 0.22);
+      // Reflection
+      ctx.fillStyle = 'rgba(255,200,100,0.15)';
+      ctx.beginPath(); ctx.moveTo(w * 0.4, h * 0.5); ctx.lineTo(w * 0.35, h * 0.72);
+      ctx.lineTo(w * 0.65, h * 0.72); ctx.lineTo(w * 0.6, h * 0.5); ctx.fill();
+      // Waves
+      for (let wy = h * 0.5; wy < h * 0.72; wy += 6) {
+        ctx.strokeStyle = `rgba(255,255,255,${0.06 + Math.random()*0.06})`; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(0, wy);
+        for (let wx = 0; wx < w; wx += 20) { ctx.quadraticCurveTo(wx + 10, wy + (Math.random() - 0.5) * 4, wx + 20, wy); }
+        ctx.stroke();
+      }
+      // Sand
+      g = ctx.createLinearGradient(0, h * 0.7, 0, h);
+      g.addColorStop(0, '#F4D6A0'); g.addColorStop(1, '#D4B880');
+      ctx.fillStyle = g; ctx.fillRect(0, h * 0.7, w, h * 0.3);
+      // Palm tree
+      const drawPalm = (px, py) => {
+        ctx.strokeStyle = '#6B4226'; ctx.lineWidth = 5;
+        ctx.beginPath(); ctx.moveTo(px, py); ctx.quadraticCurveTo(px - 8, py - h * 0.25, px + 5, py - h * 0.42); ctx.stroke();
+        const top = [px + 5, py - h * 0.42];
+        [[-30, 15], [-15, -8], [25, 10], [35, -5], [5, -18], [-5, 20]].forEach(([dx, dy]) => {
+          ctx.strokeStyle = '#228B22'; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.moveTo(top[0], top[1]);
+          ctx.quadraticCurveTo(top[0] + dx * 0.5, top[1] + dy * 0.5, top[0] + dx, top[1] + dy); ctx.stroke();
+        });
+      };
+      drawPalm(w * 0.12, h * 0.88); drawPalm(w * 0.85, h * 0.92);
+      // Clouds
+      ctx.fillStyle = 'rgba(255,150,100,0.25)';
+      [[w*0.2, h*0.12, 25], [w*0.7, h*0.08, 20]].forEach(([cx, cy, cr]) => {
+        ctx.beginPath(); ctx.ellipse(cx, cy, cr, cr * 0.4, 0, 0, Math.PI * 2); ctx.fill();
+      });
+    }
+  },
+  {
+    id: 'snowy-mountain',
+    name: 'Snowy Mountain',
+    tags: ['mountains', 'snow', 'pine trees', 'clouds', 'cold', 'peaks'],
+    palette: ['#ECEFF1', '#5C7A99', '#2E4057', '#FFFFFF', '#4A6741'],
+    templates: [
+      'Snow blanketed the peaks in a silence only the wind dared break.',
+      'Pine trees stood like dark sentinels against the white mountainside.',
+      'The air was thin and crystal clear at this altitude.'
+    ],
+    draw(ctx, w, h) {
+      // Sky
+      let g = ctx.createLinearGradient(0, 0, 0, h * 0.6);
+      g.addColorStop(0, '#2E4057'); g.addColorStop(1, '#5C7A99');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+      // Far mountains
+      ctx.fillStyle = '#4A6078';
+      ctx.beginPath(); ctx.moveTo(0, h * 0.5); ctx.lineTo(w * 0.2, h * 0.22); ctx.lineTo(w * 0.4, h * 0.45);
+      ctx.lineTo(w * 0.6, h * 0.18); ctx.lineTo(w * 0.8, h * 0.35); ctx.lineTo(w, h * 0.28); ctx.lineTo(w, h * 0.5); ctx.fill();
+      // Snow caps
+      ctx.fillStyle = '#E8EDF0';
+      ctx.beginPath(); ctx.moveTo(w * 0.15, h * 0.28); ctx.lineTo(w * 0.2, h * 0.22); ctx.lineTo(w * 0.25, h * 0.28); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(w * 0.53, h * 0.25); ctx.lineTo(w * 0.6, h * 0.18); ctx.lineTo(w * 0.67, h * 0.25); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(w * 0.93, h * 0.33); ctx.lineTo(w, h * 0.28); ctx.lineTo(w, h * 0.33); ctx.fill();
+      // Near mountains
+      ctx.fillStyle = '#3A5068';
+      ctx.beginPath(); ctx.moveTo(0, h * 0.6); ctx.lineTo(w * 0.15, h * 0.35); ctx.lineTo(w * 0.35, h * 0.55);
+      ctx.lineTo(w * 0.5, h * 0.3); ctx.lineTo(w * 0.7, h * 0.5); ctx.lineTo(w * 0.85, h * 0.32); ctx.lineTo(w, h * 0.55); ctx.lineTo(w, h * 0.6); ctx.fill();
+      // Near snow
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath(); ctx.moveTo(w * 0.1, h * 0.42); ctx.lineTo(w * 0.15, h * 0.35); ctx.lineTo(w * 0.2, h * 0.42); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(w * 0.44, h * 0.37); ctx.lineTo(w * 0.5, h * 0.3); ctx.lineTo(w * 0.56, h * 0.37); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(w * 0.8, h * 0.38); ctx.lineTo(w * 0.85, h * 0.32); ctx.lineTo(w * 0.9, h * 0.38); ctx.fill();
+      // Snow ground
+      g = ctx.createLinearGradient(0, h * 0.6, 0, h);
+      g.addColorStop(0, '#D0D8E0'); g.addColorStop(1, '#ECEFF1');
+      ctx.fillStyle = g; ctx.fillRect(0, h * 0.58, w, h * 0.42);
+      // Pine trees
+      const drawPine = (px, py, s) => {
+        ctx.fillStyle = '#2A4030'; ctx.fillRect(px - 2 * s, py, 4 * s, 10 * s);
+        [0, 8, 15].forEach((off, i) => {
+          ctx.fillStyle = i === 0 ? '#3A5A41' : i === 1 ? '#4A6741' : '#3A5A41';
+          ctx.beginPath(); ctx.moveTo(px, py - (22 - off) * s);
+          ctx.lineTo(px - (10 + i * 2) * s, py - off * s); ctx.lineTo(px + (10 + i * 2) * s, py - off * s); ctx.fill();
+          // Snow on branches
+          ctx.fillStyle = 'rgba(255,255,255,0.6)';
+          ctx.beginPath(); ctx.moveTo(px, py - (22 - off) * s);
+          ctx.lineTo(px - (6 + i) * s, py - (off + 4) * s); ctx.lineTo(px + (6 + i) * s, py - (off + 4) * s); ctx.fill();
+        });
+      };
+      drawPine(w * 0.1, h * 0.78, 0.7); drawPine(w * 0.25, h * 0.82, 0.9); drawPine(w * 0.42, h * 0.75, 0.6);
+      drawPine(w * 0.65, h * 0.8, 0.85); drawPine(w * 0.88, h * 0.76, 0.75);
+      // Clouds
+      ctx.fillStyle = 'rgba(200,210,220,0.35)';
+      [[w*0.15, h*0.1, 30], [w*0.55, h*0.07, 25], [w*0.85, h*0.13, 20]].forEach(([cx, cy, cr]) => {
+        ctx.beginPath(); ctx.ellipse(cx, cy, cr, cr * 0.35, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(cx + cr * 0.5, cy + 3, cr * 0.6, cr * 0.25, 0, 0, Math.PI * 2); ctx.fill();
+      });
+      // Snowfall
+      ctx.fillStyle = 'rgba(255,255,255,0.6)';
+      for (let i = 0; i < 30; i++) {
+        const sx = Math.random() * w, sy = Math.random() * h, sr = 0.5 + Math.random() * 1.5;
+        ctx.beginPath(); ctx.arc(sx, sy, sr, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+  },
+  {
+    id: 'library',
+    name: 'Library',
+    tags: ['bookshelves', 'desk', 'lamp', 'books', 'indoor', 'study'],
+    palette: ['#5D3A1A', '#8B6914', '#F5DEB3', '#FFD700', '#2E1A0E'],
+    templates: [
+      'Dust motes danced in the lamplight between towering shelves.',
+      'The scent of old paper and leather bindings filled the room.',
+      'A single reading lamp cast a warm circle on the mahogany desk.'
+    ],
+    draw(ctx, w, h) {
+      // Wall
+      ctx.fillStyle = '#3A2A1A'; ctx.fillRect(0, 0, w, h);
+      // Bookshelves
+      const drawShelf = (sx, sy, sw, sh) => {
+        ctx.fillStyle = '#5D3A1A'; ctx.fillRect(sx, sy, sw, sh);
+        // Shelves
+        const shelfCount = 4;
+        for (let i = 0; i <= shelfCount; i++) {
+          const sy2 = sy + (sh / shelfCount) * i;
+          ctx.fillStyle = '#7A4D2A'; ctx.fillRect(sx, sy2, sw, 3);
+          // Books on shelf
+          if (i < shelfCount) {
+            let bx = sx + 3;
+            while (bx < sx + sw - 5) {
+              const bw = 3 + Math.random() * 5;
+              const bh = (sh / shelfCount) - 6 - Math.random() * 4;
+              const colors = ['#C0392B', '#2E86C1', '#27AE60', '#8E44AD', '#D4AC0D', '#E67E22', '#1ABC9C', '#7D3C98'];
+              ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
+              ctx.fillRect(bx, sy2 + 3 + ((sh / shelfCount) - 6 - bh), bw, bh);
+              bx += bw + 1;
+            }
+          }
+        }
+        ctx.strokeStyle = '#4A2A10'; ctx.lineWidth = 2; ctx.strokeRect(sx, sy, sw, sh);
+      };
+      drawShelf(5, 5, w * 0.28, h * 0.75);
+      drawShelf(w * 0.72, 5, w * 0.27, h * 0.75);
+      // Back wall shelves
+      drawShelf(w * 0.32, 5, w * 0.38, h * 0.38);
+      // Floor
+      let g = ctx.createLinearGradient(0, h * 0.78, 0, h);
+      g.addColorStop(0, '#4A3020'); g.addColorStop(1, '#3A2010');
+      ctx.fillStyle = g; ctx.fillRect(0, h * 0.78, w, h * 0.22);
+      // Floor boards
+      ctx.strokeStyle = 'rgba(0,0,0,0.15)'; ctx.lineWidth = 0.5;
+      for (let fx = 0; fx < w; fx += 25) {
+        ctx.beginPath(); ctx.moveTo(fx, h * 0.78); ctx.lineTo(fx, h); ctx.stroke();
+      }
+      // Desk
+      ctx.fillStyle = '#6B4226'; ctx.fillRect(w * 0.3, h * 0.55, w * 0.4, h * 0.08);
+      ctx.fillStyle = '#5A3520'; ctx.fillRect(w * 0.32, h * 0.63, w * 0.08, h * 0.16);
+      ctx.fillStyle = '#5A3520'; ctx.fillRect(w * 0.6, h * 0.63, w * 0.08, h * 0.16);
+      // Desk top details
+      ctx.fillStyle = '#8B6914'; ctx.fillRect(w * 0.34, h * 0.56, 8, 5); // small book
+      ctx.fillStyle = '#C0392B'; ctx.fillRect(w * 0.52, h * 0.50, 14, 8); // open book
+      ctx.fillStyle = '#FAF0E6'; ctx.fillRect(w * 0.525, h * 0.505, 6, 6);
+      ctx.fillStyle = '#FAF0E6'; ctx.fillRect(w * 0.56, h * 0.505, 6, 6);
+      // Lamp
+      ctx.fillStyle = '#C0A030'; ctx.fillRect(w * 0.44, h * 0.53, 3, 2); // base
+      ctx.fillStyle = '#A08020'; ctx.fillRect(w * 0.445, h * 0.38, 2, 15); // pole
+      // Lamp shade
+      ctx.fillStyle = '#D4AA30';
+      ctx.beginPath(); ctx.moveTo(w * 0.42, h * 0.38); ctx.lineTo(w * 0.48, h * 0.38);
+      ctx.lineTo(w * 0.475, h * 0.34); ctx.lineTo(w * 0.425, h * 0.34); ctx.fill();
+      // Lamp glow
+      let lg = ctx.createRadialGradient(w * 0.45, h * 0.45, 5, w * 0.45, h * 0.45, 50);
+      lg.addColorStop(0, 'rgba(255,220,130,0.25)'); lg.addColorStop(1, 'rgba(255,220,130,0)');
+      ctx.fillStyle = lg; ctx.fillRect(w * 0.25, h * 0.3, w * 0.4, h * 0.35);
+      // Chair
+      ctx.fillStyle = '#8B4513';
+      ctx.fillRect(w * 0.43, h * 0.68, w * 0.14, h * 0.03);
+      ctx.fillRect(w * 0.44, h * 0.71, 3, h * 0.08);
+      ctx.fillRect(w * 0.54, h * 0.71, 3, h * 0.08);
+      ctx.fillStyle = '#5A3520'; ctx.fillRect(w * 0.42, h * 0.58, w * 0.02, h * 0.13);
+    }
+  },
+  {
+    id: 'space-station',
+    name: 'Space Station',
+    tags: ['stars', 'station', 'earth', 'space', 'sci-fi', 'orbit'],
+    palette: ['#0A0A2E', '#1E90FF', '#C0C0C0', '#4169E1', '#FFFFFF'],
+    templates: [
+      'The station turned slowly, Earth gleaming in the viewport.',
+      'Stars stretched endlessly beyond the reinforced glass.',
+      'The hum of life-support was the only sound in the void.'
+    ],
+    draw(ctx, w, h) {
+      // Space background
+      let g = ctx.createRadialGradient(w * 0.5, h * 0.5, 0, w * 0.5, h * 0.5, w * 0.8);
+      g.addColorStop(0, '#0F0F30'); g.addColorStop(1, '#050515');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+      // Stars
+      for (let i = 0; i < 80; i++) {
+        const sx = Math.random() * w, sy = Math.random() * h;
+        const br = 0.3 + Math.random() * 0.7;
+        const sr = 0.3 + Math.random() * 1.2;
+        ctx.fillStyle = `rgba(255,255,255,${br})`;
+        ctx.beginPath(); ctx.arc(sx, sy, sr, 0, Math.PI * 2); ctx.fill();
+      }
+      // Nebula hint
+      let ng = ctx.createRadialGradient(w * 0.2, h * 0.3, 5, w * 0.2, h * 0.3, 50);
+      ng.addColorStop(0, 'rgba(100,60,180,0.15)'); ng.addColorStop(1, 'rgba(100,60,180,0)');
+      ctx.fillStyle = ng; ctx.beginPath(); ctx.arc(w * 0.2, h * 0.3, 50, 0, Math.PI * 2); ctx.fill();
+      // Earth
+      let eg = ctx.createRadialGradient(w * 0.78, h * 0.7, 10, w * 0.78, h * 0.7, 40);
+      eg.addColorStop(0, '#4169E1'); eg.addColorStop(0.5, '#1E90FF'); eg.addColorStop(0.85, '#1565C0'); eg.addColorStop(1, '#0D47A1');
+      ctx.fillStyle = eg; ctx.beginPath(); ctx.arc(w * 0.78, h * 0.7, 35, 0, Math.PI * 2); ctx.fill();
+      // Land masses
+      ctx.fillStyle = 'rgba(34,139,34,0.5)';
+      ctx.beginPath(); ctx.ellipse(w * 0.76, h * 0.65, 12, 8, 0.3, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(w * 0.82, h * 0.74, 8, 6, -0.5, 0, Math.PI * 2); ctx.fill();
+      // Atmosphere glow
+      ctx.strokeStyle = 'rgba(100,180,255,0.2)'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(w * 0.78, h * 0.7, 37, 0, Math.PI * 2); ctx.stroke();
+      // Clouds
+      ctx.fillStyle = 'rgba(255,255,255,0.2)';
+      ctx.beginPath(); ctx.ellipse(w * 0.73, h * 0.68, 14, 3, 0.2, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(w * 0.83, h * 0.66, 10, 2, -0.3, 0, Math.PI * 2); ctx.fill();
+      // Station - main body
+      ctx.fillStyle = '#8899AA';
+      ctx.fillRect(w * 0.2, h * 0.33, w * 0.35, h * 0.1);
+      ctx.fillStyle = '#778899'; ctx.fillRect(w * 0.22, h * 0.35, w * 0.31, h * 0.06);
+      // Modules
+      ctx.fillStyle = '#9AABBB'; ctx.fillRect(w * 0.15, h * 0.35, w * 0.07, h * 0.06);
+      ctx.fillStyle = '#9AABBB'; ctx.fillRect(w * 0.53, h * 0.35, w * 0.07, h * 0.06);
+      // Solar panels
+      ctx.fillStyle = '#2244AA';
+      ctx.fillRect(w * 0.08, h * 0.28, w * 0.08, h * 0.02);
+      ctx.fillRect(w * 0.08, h * 0.45, w * 0.08, h * 0.02);
+      ctx.fillRect(w * 0.58, h * 0.28, w * 0.08, h * 0.02);
+      ctx.fillRect(w * 0.58, h * 0.45, w * 0.08, h * 0.02);
+      // Panel supports
+      ctx.strokeStyle = '#667788'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(w * 0.17, h * 0.38); ctx.lineTo(w * 0.12, h * 0.29); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(w * 0.17, h * 0.38); ctx.lineTo(w * 0.12, h * 0.46); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(w * 0.56, h * 0.38); ctx.lineTo(w * 0.62, h * 0.29); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(w * 0.56, h * 0.38); ctx.lineTo(w * 0.62, h * 0.46); ctx.stroke();
+      // Panel grid lines
+      ctx.strokeStyle = 'rgba(100,150,255,0.3)'; ctx.lineWidth = 0.5;
+      for (let px = w * 0.085; px < w * 0.155; px += 4) {
+        ctx.beginPath(); ctx.moveTo(px, h * 0.28); ctx.lineTo(px, h * 0.3); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(px, h * 0.45); ctx.lineTo(px, h * 0.47); ctx.stroke();
+      }
+      // Window lights
+      ctx.fillStyle = '#FFEEBB';
+      for (let wx = w * 0.24; wx < w * 0.52; wx += 10) {
+        ctx.fillRect(wx, h * 0.365, 4, 3);
+      }
+      // Antenna
+      ctx.strokeStyle = '#AABBCC'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(w * 0.37, h * 0.33); ctx.lineTo(w * 0.37, h * 0.22); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(w * 0.35, h * 0.23); ctx.lineTo(w * 0.39, h * 0.23); ctx.stroke();
+      ctx.fillStyle = '#FF4444'; ctx.beginPath(); ctx.arc(w * 0.37, h * 0.22, 2, 0, Math.PI * 2); ctx.fill();
+    }
+  },
+  {
+    id: 'forest-trail',
+    name: 'Forest Trail',
+    tags: ['trees', 'path', 'flowers', 'sunbeams', 'nature', 'forest'],
+    palette: ['#2E5A1E', '#8B6914', '#FFD700', '#4A7A2E', '#3A2010'],
+    templates: [
+      'Sunbeams pierced through the canopy, dappling the mossy trail.',
+      'Wildflowers lined the winding path deeper into the forest.',
+      'The forest hummed with the quiet music of insects and birdsong.'
+    ],
+    draw(ctx, w, h) {
+      // Background canopy
+      let g = ctx.createLinearGradient(0, 0, 0, h);
+      g.addColorStop(0, '#1A3A10'); g.addColorStop(0.4, '#2E5A1E'); g.addColorStop(1, '#1A3A10');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+      // Dense foliage backdrop
+      for (let i = 0; i < 25; i++) {
+        const fx = Math.random() * w, fy = Math.random() * h * 0.5;
+        const fr = 15 + Math.random() * 25;
+        ctx.fillStyle = `rgba(${30 + Math.random()*40}, ${60 + Math.random()*50}, ${20 + Math.random()*30}, 0.5)`;
+        ctx.beginPath(); ctx.arc(fx, fy, fr, 0, Math.PI * 2); ctx.fill();
+      }
+      // Trail
+      ctx.fillStyle = '#6B5030';
+      ctx.beginPath();
+      ctx.moveTo(w * 0.35, h); ctx.quadraticCurveTo(w * 0.4, h * 0.75, w * 0.45, h * 0.55);
+      ctx.quadraticCurveTo(w * 0.48, h * 0.4, w * 0.5, h * 0.25);
+      ctx.lineTo(w * 0.52, h * 0.25);
+      ctx.quadraticCurveTo(w * 0.54, h * 0.4, w * 0.56, h * 0.55);
+      ctx.quadraticCurveTo(w * 0.6, h * 0.75, w * 0.58, h);
+      ctx.fill();
+      // Path texture
+      ctx.fillStyle = 'rgba(90,65,30,0.4)';
+      for (let i = 0; i < 20; i++) {
+        const px = w * 0.38 + Math.random() * w * 0.2;
+        const py = h * 0.3 + Math.random() * h * 0.65;
+        ctx.fillRect(px, py, 2 + Math.random() * 3, 1);
+      }
+      // Ground vegetation
+      g = ctx.createLinearGradient(0, h * 0.6, 0, h);
+      g.addColorStop(0, 'rgba(30,70,20,0.6)'); g.addColorStop(1, 'rgba(20,50,15,0.8)');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, h * 0.65, w * 0.36, h * 0.35);
+      ctx.fillRect(w * 0.57, h * 0.65, w * 0.43, h * 0.35);
+      // Tree trunks
+      const drawTrunk = (tx, tw, th) => {
+        g = ctx.createLinearGradient(tx, 0, tx + tw, 0);
+        g.addColorStop(0, '#3A2010'); g.addColorStop(0.5, '#5A3820'); g.addColorStop(1, '#3A2010');
+        ctx.fillStyle = g; ctx.fillRect(tx, h * 0.1, tw, th);
+        // Bark texture
+        ctx.strokeStyle = 'rgba(0,0,0,0.15)'; ctx.lineWidth = 0.5;
+        for (let by = h * 0.1; by < h * 0.1 + th; by += 8) {
+          ctx.beginPath(); ctx.moveTo(tx + 2, by); ctx.lineTo(tx + tw - 2, by + 3); ctx.stroke();
+        }
+      };
+      drawTrunk(w * 0.05, 14, h * 0.85); drawTrunk(w * 0.22, 10, h * 0.8);
+      drawTrunk(w * 0.72, 12, h * 0.82); drawTrunk(w * 0.88, 15, h * 0.88);
+      // Canopy (top layer)
+      [
+        [w*0.08, -5, 35], [w*0.25, -8, 28], [w*0.5, -3, 25],
+        [w*0.75, -6, 32], [w*0.92, -4, 30]
+      ].forEach(([cx, cy, cr]) => {
+        ctx.fillStyle = `rgba(${25 + Math.random()*20}, ${55 + Math.random()*30}, ${15 + Math.random()*15}, 0.8)`;
+        ctx.beginPath(); ctx.ellipse(cx, cy + 15, cr, cr * 0.7, 0, 0, Math.PI * 2); ctx.fill();
+      });
+      // Sunbeams
+      for (let i = 0; i < 5; i++) {
+        const bx = w * 0.2 + i * w * 0.15;
+        const bg = ctx.createLinearGradient(bx, 0, bx + 8, h);
+        bg.addColorStop(0, 'rgba(255,220,100,0.12)');
+        bg.addColorStop(0.5, 'rgba(255,220,100,0.06)');
+        bg.addColorStop(1, 'rgba(255,220,100,0)');
+        ctx.fillStyle = bg;
+        ctx.beginPath(); ctx.moveTo(bx, 0); ctx.lineTo(bx - 5, h * 0.8);
+        ctx.lineTo(bx + 12, h * 0.8); ctx.lineTo(bx + 8, 0); ctx.fill();
+      }
+      // Flowers
+      const colors = ['#FF6B9D', '#FFD700', '#FF6347', '#DA70D6', '#87CEEB'];
+      for (let i = 0; i < 12; i++) {
+        const fx = Math.random() * w, fy = h * 0.65 + Math.random() * h * 0.3;
+        if (fx > w * 0.34 && fx < w * 0.58) continue;
+        ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
+        ctx.beginPath(); ctx.arc(fx, fy, 2.5, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#2A5A15'; ctx.fillRect(fx - 0.5, fy + 2, 1, 5);
+      }
+      // Mushroom
+      ctx.fillStyle = '#DDD'; ctx.fillRect(w * 0.16, h * 0.82, 3, 5);
+      ctx.fillStyle = '#E74C3C'; ctx.beginPath(); ctx.ellipse(w * 0.165, h * 0.82, 5, 3, 0, Math.PI, 0); ctx.fill();
+      ctx.fillStyle = '#FFF';
+      ctx.beginPath(); ctx.arc(w * 0.16, h * 0.8, 1, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(w * 0.175, h * 0.81, 0.8, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+];
+
+// ==================== TRANSITION PHRASES ====================
+const transitions = [
+  'Meanwhile, in another part of the world...',
+  'Later that day...',
+  'As the hours passed...',
+  'The scene shifted, and suddenly...',
+  'Time moved on, and...',
+  'Elsewhere...',
+  'As the sun traced its arc across the sky...',
+  'The story continued in an unexpected place...',
+  'Not far away...',
+  'And then, a change of scenery...',
+  'When the moment felt right...',
+  'Drawn by some invisible thread...',
+  'The journey took a new turn...',
+  'Before long...',
+];
+
+// ==================== STATE ====================
+let storyboard = [];
+let selectedSceneId = null;
+let typewriterTimer = null;
+
+// ==================== INIT ====================
+const galleryEl = document.getElementById('gallery');
+const timelineEl = document.getElementById('timeline');
+const narrationBox = document.getElementById('narrationBox');
+const featureContent = document.getElementById('featureContent');
+const subtitleTrack = document.getElementById('subtitleTrack');
+
+// Render gallery
+scenes.forEach(scene => {
+  const card = document.createElement('div');
+  card.className = 'scene-card';
+  card.draggable = true;
+  card.dataset.sceneId = scene.id;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = 200; canvas.height = 150;
+  scene.draw(canvas.getContext('2d'), 200, 150);
+
+  const label = document.createElement('div');
+  label.className = 'label';
+  label.textContent = scene.name;
+
+  card.appendChild(canvas);
+  card.appendChild(label);
+  galleryEl.appendChild(card);
+
+  // Click to select
+  card.addEventListener('click', () => {
+    document.querySelectorAll('.scene-card').forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+    selectedSceneId = scene.id;
+    showFeatures(scene);
+  });
+
+  // Drag start
+  card.addEventListener('dragstart', e => {
+    e.dataTransfer.setData('text/plain', scene.id);
+    e.dataTransfer.effectAllowed = 'copy';
+    card.classList.add('dragging');
+  });
+  card.addEventListener('dragend', () => card.classList.remove('dragging'));
+});
+
+// Timeline drop zone
+timelineEl.addEventListener('dragover', e => {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'copy';
+  timelineEl.classList.add('drag-over');
+});
+timelineEl.addEventListener('dragleave', () => timelineEl.classList.remove('drag-over'));
+timelineEl.addEventListener('drop', e => {
+  e.preventDefault();
+  timelineEl.classList.remove('drag-over');
+  const sceneId = e.dataTransfer.getData('text/plain');
+  const scene = scenes.find(s => s.id === sceneId);
+  if (scene) {
+    storyboard.push({ ...scene, uid: Date.now() + Math.random() });
+    renderTimeline();
+    updateNarration();
+    updateSubtitles();
+  }
+});
+
+// ==================== RENDER TIMELINE ====================
+function renderTimeline() {
+  timelineEl.innerHTML = '';
+  if (storyboard.length === 0) {
+    timelineEl.innerHTML = '<div class="timeline-empty">Drag scenes here to build your storyboard</div>';
+    return;
+  }
+  storyboard.forEach((scene, idx) => {
+    const item = document.createElement('div');
+    item.className = 'timeline-item';
+    item.draggable = true;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 200; canvas.height = 150;
+    scene.draw(canvas.getContext('2d'), 200, 150);
+
+    const label = document.createElement('div');
+    label.className = 'tl-label';
+    label.textContent = scene.name;
+
+    const btn = document.createElement('button');
+    btn.className = 'remove-btn';
+    btn.textContent = '\u00d7';
+    btn.addEventListener('click', () => {
+      storyboard.splice(idx, 1);
+      renderTimeline();
+      updateNarration();
+      updateSubtitles();
+    });
+
+    // Reorder drag within timeline
+    item.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('application/timeline-idx', idx.toString());
+      e.dataTransfer.effectAllowed = 'move';
+      item.style.opacity = '0.4';
+    });
+    item.addEventListener('dragend', () => { item.style.opacity = '1'; });
+    item.addEventListener('dragover', e => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+    });
+    item.addEventListener('drop', e => {
+      e.preventDefault();
+      const fromIdx = parseInt(e.dataTransfer.getData('application/timeline-idx'));
+      if (!isNaN(fromIdx) && fromIdx !== idx) {
+        const moved = storyboard.splice(fromIdx, 1)[0];
+        storyboard.splice(idx, 0, moved);
+        renderTimeline();
+        updateNarration();
+        updateSubtitles();
+      }
+    });
+
+    item.appendChild(canvas);
+    item.appendChild(label);
+    item.appendChild(btn);
+    timelineEl.appendChild(item);
+  });
+}
+
+// ==================== NARRATION ====================
+function generateNarration() {
+  if (storyboard.length < 2) return '';
+  const parts = [];
+  storyboard.forEach((scene, idx) => {
+    if (idx > 0) {
+      parts.push(transitions[Math.floor(Math.random() * transitions.length)]);
+    }
+    parts.push(scene.templates[Math.floor(Math.random() * scene.templates.length)]);
+  });
+  return parts.join(' ');
+}
+
+function updateNarration() {
+  if (typewriterTimer) { clearInterval(typewriterTimer); typewriterTimer = null; }
+
+  if (storyboard.length < 2) {
+    narrationBox.innerHTML = '<span class="narration-placeholder">Add 2+ scenes to generate narration...</span>';
+    return;
+  }
+
+  const text = generateNarration();
+  narrationBox.innerHTML = '<span class="cursor"></span>';
+  let i = 0;
+  typewriterTimer = setInterval(() => {
+    if (i >= text.length) {
+      clearInterval(typewriterTimer);
+      typewriterTimer = null;
+      const cursor = narrationBox.querySelector('.cursor');
+      if (cursor) cursor.remove();
+      return;
+    }
+    const cursor = narrationBox.querySelector('.cursor');
+    if (cursor) {
+      cursor.insertAdjacentText('beforebegin', text[i]);
+    }
+    i++;
+    narrationBox.scrollTop = narrationBox.scrollHeight;
+  }, 22);
+}
+
+// ==================== SUBTITLES ====================
+function updateSubtitles() {
+  subtitleTrack.innerHTML = '';
+  storyboard.forEach((scene, idx) => {
+    const tc = document.createElement('div');
+    tc.className = 'timecode';
+    const sec = idx * 5;
+    const mm = String(Math.floor(sec / 60)).padStart(2, '0');
+    const ss = String(sec % 60).padStart(2, '0');
+    tc.textContent = `${mm}:${ss} ${scene.name}`;
+    subtitleTrack.appendChild(tc);
+  });
+}
+
+// ==================== FEATURE EXTRACTION ====================
+function showFeatures(scene) {
+  featureContent.innerHTML = '';
+
+  // Palette
+  const palLabel = document.createElement('div');
+  palLabel.className = 'feat-label';
+  palLabel.textContent = 'Color Palette';
+  featureContent.appendChild(palLabel);
+
+  const palRow = document.createElement('div');
+  palRow.className = 'palette-row';
+  scene.palette.forEach(hex => {
+    const swatch = document.createElement('div');
+    swatch.className = 'swatch';
+    swatch.style.background = hex;
+    swatch.dataset.hex = hex;
+    palRow.appendChild(swatch);
+  });
+  featureContent.appendChild(palRow);
+
+  // Brightness map
+  const bmLabel = document.createElement('div');
+  bmLabel.className = 'feat-label';
+  bmLabel.style.marginTop = '14px';
+  bmLabel.textContent = 'Brightness Map';
+  featureContent.appendChild(bmLabel);
+
+  const bmDiv = document.createElement('div');
+  bmDiv.className = 'brightness-map';
+
+  // Sample from the scene canvas
+  const offscreen = document.createElement('canvas');
+  offscreen.width = 200; offscreen.height = 150;
+  const offCtx = offscreen.getContext('2d');
+  scene.draw(offCtx, 200, 150);
+  const imgData = offCtx.getImageData(0, 0, 200, 150);
+
+  const cols = 8, rows = 6;
+  const cellW = Math.floor(200 / cols), cellH = Math.floor(150 / rows);
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      let total = 0, count = 0;
+      for (let py = r * cellH; py < (r + 1) * cellH; py += 2) {
+        for (let px = c * cellW; px < (c + 1) * cellW; px += 2) {
+          const idx = (py * 200 + px) * 4;
+          total += (imgData.data[idx] * 0.299 + imgData.data[idx+1] * 0.587 + imgData.data[idx+2] * 0.114);
+          count++;
+        }
+      }
+      const brightness = total / count;
+      const cell = document.createElement('div');
+      cell.className = 'brightness-cell';
+      const v = Math.round(brightness);
+      cell.style.background = `rgb(${v},${v},${v})`;
+      bmDiv.appendChild(cell);
+    }
+  }
+  featureContent.appendChild(bmDiv);
+
+  // Tags
+  const tagLabel = document.createElement('div');
+  tagLabel.className = 'feat-label';
+  tagLabel.textContent = 'Detected Elements';
+  featureContent.appendChild(tagLabel);
+
+  const tagsDiv = document.createElement('div');
+  tagsDiv.className = 'tags';
+  scene.tags.forEach(t => {
+    const tag = document.createElement('span');
+    tag.className = 'tag';
+    tag.textContent = t;
+    tagsDiv.appendChild(tag);
+  });
+  featureContent.appendChild(tagsDiv);
+}
+</script>
+</body>
+</html>

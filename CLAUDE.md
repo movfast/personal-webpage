@@ -17,7 +17,18 @@ personal_webpage/
 │   ├── llm-chatbot-security.html
 │   ├── ai-energy-consumption.html
 │   ├── ai-businesses-2026.html
-│   └── prompting-claude-effectively.html
+│   ├── prompting-claude-effectively.html
+│   └── gemini-flex-priority-inference.html
+├── projects/               — interactive project demo pages
+│   ├── meow-master.html
+│   ├── rag-chatbot-demo.html
+│   ├── image-classifier-demo.html
+│   ├── sentiment-analyzer-demo.html
+│   ├── acoustic-anomaly-demo.html
+│   ├── paper-summarizer-demo.html
+│   ├── scene-narrator-demo.html
+│   ├── object-tracker-demo.html
+│   └── speech-translator-demo.html
 ├── css/
 │   ├── base.css            — variables, resets, typography
 │   ├── layout.css          — grid, section layouts, responsive
@@ -54,7 +65,7 @@ personal_webpage/
 ## Key Sections (index.html)
 - **Hero** — intro with profile photo, tagline, CTA buttons, resume download
 - **About** — bio, background (physics → acoustics → AI), detail cards
-- **Projects** — project cards with screenshots, tags, links (includes Wolf Behavior Classification dashboard linked to GitHub Pages)
+- **Projects** — project cards with screenshots, tags, links (includes Wolf and Gull Behavior Classification dashboards linked to GitHub Pages)
 - **Skills** — languages, ML/AI, tools, data
 - **Writing/Blog** — blog post cards linking to full articles in `writing/`
 - **AI News** — live AI news feed (`js/news.js`)

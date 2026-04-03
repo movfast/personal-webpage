@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Draw &amp; Classify — Neural Network Demo</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #1a1a2e;
+  color: #e0e0e0;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.container {
+  width: 100%;
+  max-width: 1100px;
+  background: #1a1a40;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(108,99,255,0.1);
+  padding: 28px 32px 32px;
+  overflow: hidden;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+header h1 {
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.02em;
+}
+
+header h1 span { color: #6c63ff; }
+
+header p {
+  font-size: 0.82rem;
+  color: #888;
+  margin-top: 4px;
+}
+
+.main-grid {
+  display: grid;
+  grid-template-columns: 280px 1fr 220px;
+  gap: 24px;
+  align-items: start;
+}
+
+/* ----- Drawing Panel ----- */
+.draw-panel { display: flex; flex-direction: column; gap: 12px; }
+
+.canvas-wrap {
+  position: relative;
+  width: 280px;
+  height: 280px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid #2a2a5a;
+  cursor: crosshair;
+  background: #000;
+}
+
+#drawCanvas { display: block; width: 280px; height: 280px; touch-action: none; }
+
+.controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+.btn {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 8px;
+  background: #2a2a5a;
+  color: #ccc;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  font-family: inherit;
+}
+
+.btn:hover { background: #6c63ff; color: #fff; }
+.btn.active { background: #6c63ff; color: #fff; }
+
+.brush-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  color: #888;
+}
+
+.brush-group input[type="range"] {
+  width: 72px;
+  accent-color: #6c63ff;
+}
+
+.gallery-label {
+  font-size: 0.72rem;
+  color: #777;
+  margin-top: 4px;
+}
+
+.gallery {
+  display: flex;
+  gap: 6px;
+}
+
+.gallery canvas {
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  border: 1.5px solid #2a2a5a;
+  cursor: pointer;
+  transition: border-color 0.2s, transform 0.15s;
+  background: #000;
+}
+
+.gallery canvas:hover {
+  border-color: #6c63ff;
+  transform: scale(1.08);
+}
+
+/* ----- Network Viz ----- */
+.network-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 380px;
+}
+
+#networkCanvas { display: block; width: 100%; height: 380px; }
+
+/* ----- Probability Bars ----- */
+.prob-panel { display: flex; flex-direction: column; gap: 6px; }
+
+.prob-panel h3 {
+  font-size: 0.82rem;
+  color: #aaa;
+  margin-bottom: 4px;
+  text-align: center;
+}
+
+.prob-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.prob-label {
+  width: 18px;
+  text-align: right;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #bbb;
+}
+
+.prob-bar-bg {
+  flex: 1;
+  height: 18px;
+  background: #2a2a5a;
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+
+.prob-bar-fill {
+  height: 100%;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #6c63ff, #a78bfa);
+  width: 0%;
+  transition: width 0.18s ease;
+}
+
+.prob-value {
+  width: 38px;
+  font-size: 0.72rem;
+  color: #888;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.predicted-label {
+  text-align: center;
+  margin-top: 10px;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #6c63ff;
+  min-height: 2em;
+}
+
+/* ----- Responsive ----- */
+@media (max-width: 900px) {
+  .main-grid {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+  .network-panel { width: 100%; min-height: 260px; }
+  #networkCanvas { height: 260px; }
+  .prob-panel { width: 280px; }
+}
+
+@media (max-width: 400px) {
+  .container { padding: 16px; }
+  .canvas-wrap, #drawCanvas { width: 240px; height: 240px; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>Draw &amp; <span>Classify</span></h1>
+    <p>Sketch a digit (0-9) and watch a tiny neural network think in real time</p>
+  </header>
+
+  <div class="main-grid">
+    <!-- Left: Drawing -->
+    <div class="draw-panel">
+      <div class="canvas-wrap">
+        <canvas id="drawCanvas" width="280" height="280"></canvas>
+      </div>
+      <div class="controls">
+        <button class="btn" id="clearBtn">Clear</button>
+        <button class="btn" id="eraserBtn">Eraser</button>
+        <div class="brush-group">
+          Brush
+          <input type="range" id="brushSize" min="8" max="28" value="16">
+        </div>
+      </div>
+      <div class="gallery-label">Try an example:</div>
+      <div class="gallery" id="gallery"></div>
+    </div>
+
+    <!-- Center: Network Diagram -->
+    <div class="network-panel">
+      <canvas id="networkCanvas"></canvas>
+    </div>
+
+    <!-- Right: Probabilities -->
+    <div class="prob-panel">
+      <h3>Prediction</h3>
+      <div id="probBars"></div>
+      <div class="predicted-label" id="predictedLabel">Draw something!</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// =====================================================================
+//  Tiny Neural Network — 784 -> 64 (ReLU) -> 10 (Softmax)
+//  Weights are hand-crafted pattern detectors + Xavier random noise
+// =====================================================================
+
+// --- Seeded PRNG for reproducibility ---
+function mulberry32(a) {
+  return function() {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    var t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+const rng = mulberry32(42);
+
+function randn() {
+  let u = 0, v = 0;
+  while (u === 0) u = rng();
+  while (v === 0) v = rng();
+  return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+}
+
+// Xavier init helper
+function xavierMatrix(rows, cols) {
+  const std = Math.sqrt(2.0 / (rows + cols));
+  const m = new Float32Array(rows * cols);
+  for (let i = 0; i < m.length; i++) m[i] = randn() * std;
+  return m;
+}
+
+function zerosArray(n) { return new Float32Array(n); }
+
+// --- Network weights ---
+const W1 = xavierMatrix(64, 784);  // hidden weights
+const b1 = zerosArray(64);
+const W2 = xavierMatrix(10, 64);   // output weights
+const b2 = zerosArray(10);
+
+// Inject structured pattern detectors into first ~20 hidden neurons
+// so the visualization shows meaningful differential activations.
+(function injectPatterns() {
+  // Each pattern is a simple spatial template on the 28x28 grid.
+  // We define rectangular "hot zones" that certain digits tend to activate.
+  const patterns = [
+    // Horizontal strokes at various y positions
+    { yMin: 0, yMax: 4, xMin: 4, xMax: 24, weight: 0.15 },   // top bar (7, certain 2s)
+    { yMin: 12, yMax: 16, xMin: 4, xMax: 24, weight: 0.15 },  // middle bar (4,8)
+    { yMin: 23, yMax: 27, xMin: 4, xMax: 24, weight: 0.15 },  // bottom bar (2,6)
+    // Vertical strokes
+    { yMin: 4, yMax: 24, xMin: 2, xMax: 7, weight: 0.15 },    // left vertical
+    { yMin: 4, yMax: 24, xMin: 21, xMax: 26, weight: 0.15 },   // right vertical
+    // Center mass
+    { yMin: 8, yMax: 20, xMin: 8, xMax: 20, weight: 0.18 },   // center blob (0,8)
+    // Diagonals approximated as boxes
+    { yMin: 2, yMax: 10, xMin: 16, xMax: 24, weight: 0.12 },  // top-right (7,1)
+    { yMin: 18, yMax: 26, xMin: 4, xMax: 12, weight: 0.12 },  // bottom-left
+    // Top half / bottom half
+    { yMin: 0, yMax: 14, xMin: 2, xMax: 26, weight: 0.06 },   // top half
+    { yMin: 14, yMax: 28, xMin: 2, xMax: 26, weight: 0.06 },  // bottom half
+    // Narrow vertical center (1)
+    { yMin: 2, yMax: 26, xMin: 11, xMax: 17, weight: 0.14 },
+    // Left-right balance detectors
+    { yMin: 4, yMax: 24, xMin: 2, xMax: 13, weight: 0.08 },
+    { yMin: 4, yMax: 24, xMin: 15, xMax: 26, weight: -0.08 },
+    // Ring / outline detector (edges)
+    // top edge
+    { yMin: 2, yMax: 6, xMin: 6, xMax: 22, weight: 0.1 },
+    // bottom edge
+    { yMin: 22, yMax: 26, xMin: 6, xMax: 22, weight: 0.1 },
+    // Quadrant detectors
+    { yMin: 0, yMax: 14, xMin: 0, xMax: 14, weight: 0.07 },
+    { yMin: 0, yMax: 14, xMin: 14, xMax: 28, weight: 0.07 },
+    { yMin: 14, yMax: 28, xMin: 0, xMax: 14, weight: 0.07 },
+    { yMin: 14, yMax: 28, xMin: 14, xMax: 28, weight: 0.07 },
+    // Overall density
+    { yMin: 0, yMax: 28, xMin: 0, xMax: 28, weight: 0.03 },
+  ];
+
+  for (let p = 0; p < patterns.length && p < 20; p++) {
+    const pat = patterns[p];
+    for (let y = pat.yMin; y < pat.yMax; y++) {
+      for (let x = pat.xMin; x < pat.xMax; x++) {
+        W1[p * 784 + y * 28 + x] += pat.weight;
+      }
+    }
+    b1[p] = -0.5; // slight negative bias so neurons are selective
+  }
+})();
+
+// --- Forward pass ---
+let hiddenAct = zerosArray(64);
+let outputAct = zerosArray(10);
+
+function forward(input) {
+  // Hidden layer
+  for (let j = 0; j < 64; j++) {
+    let sum = b1[j];
+    const off = j * 784;
+    for (let i = 0; i < 784; i++) sum += W1[off + i] * input[i];
+    hiddenAct[j] = sum > 0 ? sum : 0; // ReLU
+  }
+
+  // Output layer
+  let maxVal = -Infinity;
+  for (let k = 0; k < 10; k++) {
+    let sum = b2[k];
+    const off = k * 64;
+    for (let j = 0; j < 64; j++) sum += W2[off + j] * hiddenAct[j];
+    outputAct[k] = sum;
+    if (sum > maxVal) maxVal = sum;
+  }
+
+  // Softmax
+  let expSum = 0;
+  for (let k = 0; k < 10; k++) {
+    outputAct[k] = Math.exp(outputAct[k] - maxVal);
+    expSum += outputAct[k];
+  }
+  for (let k = 0; k < 10; k++) outputAct[k] /= expSum;
+
+  return outputAct;
+}
+
+// =====================================================================
+//  Drawing Canvas
+// =====================================================================
+const drawCanvas = document.getElementById('drawCanvas');
+const drawCtx = drawCanvas.getContext('2d');
+drawCtx.fillStyle = '#000';
+drawCtx.fillRect(0, 0, 280, 280);
+drawCtx.lineCap = 'round';
+drawCtx.lineJoin = 'round';
+
+let isDrawing = false;
+let isEraser = false;
+let brushRadius = 16;
+let lastX = null, lastY = null;
+let hasDrawn = false;
+
+function setStroke() {
+  drawCtx.strokeStyle = isEraser ? '#000000' : '#ffffff';
+  drawCtx.lineWidth = brushRadius;
+}
+setStroke();
+
+function getPos(e) {
+  const rect = drawCanvas.getBoundingClientRect();
+  const scaleX = 280 / rect.width;
+  const scaleY = 280 / rect.height;
+  if (e.touches) {
+    return [
+      (e.touches[0].clientX - rect.left) * scaleX,
+      (e.touches[0].clientY - rect.top) * scaleY
+    ];
+  }
+  return [(e.clientX - rect.left) * scaleX, (e.clientY - rect.top) * scaleY];
+}
+
+function startDraw(e) {
+  e.preventDefault();
+  isDrawing = true;
+  const [x, y] = getPos(e);
+  lastX = x; lastY = y;
+  // Draw a dot
+  drawCtx.beginPath();
+  drawCtx.arc(x, y, brushRadius / 2, 0, Math.PI * 2);
+  drawCtx.fillStyle = isEraser ? '#000' : '#fff';
+  drawCtx.fill();
+  hasDrawn = true;
+  scheduleClassify();
+}
+
+function moveDraw(e) {
+  if (!isDrawing) return;
+  e.preventDefault();
+  const [x, y] = getPos(e);
+  setStroke();
+  drawCtx.beginPath();
+  drawCtx.moveTo(lastX, lastY);
+  drawCtx.lineTo(x, y);
+  drawCtx.stroke();
+  lastX = x; lastY = y;
+  hasDrawn = true;
+  scheduleClassify();
+}
+
+function stopDraw() { isDrawing = false; lastX = null; lastY = null; }
+
+drawCanvas.addEventListener('mousedown', startDraw);
+drawCanvas.addEventListener('mousemove', moveDraw);
+drawCanvas.addEventListener('mouseup', stopDraw);
+drawCanvas.addEventListener('mouseleave', stopDraw);
+drawCanvas.addEventListener('touchstart', startDraw, { passive: false });
+drawCanvas.addEventListener('touchmove', moveDraw, { passive: false });
+drawCanvas.addEventListener('touchend', stopDraw);
+
+// Controls
+document.getElementById('clearBtn').addEventListener('click', () => {
+  drawCtx.fillStyle = '#000';
+  drawCtx.fillRect(0, 0, 280, 280);
+  hasDrawn = false;
+  outputAct.fill(0.1);
+  hiddenAct.fill(0);
+  updateProbBars();
+  drawNetwork();
+  document.getElementById('predictedLabel').textContent = 'Draw something!';
+});
+
+const eraserBtn = document.getElementById('eraserBtn');
+eraserBtn.addEventListener('click', () => {
+  isEraser = !isEraser;
+  eraserBtn.classList.toggle('active', isEraser);
+  drawCanvas.style.cursor = isEraser ? 'cell' : 'crosshair';
+});
+
+document.getElementById('brushSize').addEventListener('input', (e) => {
+  brushRadius = parseInt(e.target.value);
+});
+
+// =====================================================================
+//  Downsample & Classify
+// =====================================================================
+let classifyTimer = null;
+function scheduleClassify() {
+  if (classifyTimer) return;
+  classifyTimer = requestAnimationFrame(() => {
+    classifyTimer = null;
+    classify();
+  });
+}
+
+const smallCanvas = document.createElement('canvas');
+smallCanvas.width = 28; smallCanvas.height = 28;
+const smallCtx = smallCanvas.getContext('2d', { willReadFrequently: true });
+
+function classify() {
+  if (!hasDrawn) return;
+  smallCtx.clearRect(0, 0, 28, 28);
+  smallCtx.drawImage(drawCanvas, 0, 0, 28, 28);
+  const imgData = smallCtx.getImageData(0, 0, 28, 28);
+  const input = new Float32Array(784);
+  for (let i = 0; i < 784; i++) {
+    input[i] = imgData.data[i * 4] / 255.0; // red channel (grayscale)
+  }
+  forward(input);
+  updateProbBars();
+  drawNetwork();
+}
+
+// =====================================================================
+//  Probability Bars
+// =====================================================================
+const probBarsEl = document.getElementById('probBars');
+(function buildBars() {
+  for (let i = 0; i < 10; i++) {
+    const row = document.createElement('div');
+    row.className = 'prob-row';
+    row.innerHTML =
+      `<span class="prob-label">${i}</span>` +
+      `<div class="prob-bar-bg"><div class="prob-bar-fill" id="bar${i}"></div></div>` +
+      `<span class="prob-value" id="val${i}">0%</span>`;
+    probBarsEl.appendChild(row);
+  }
+})();
+
+function updateProbBars() {
+  let maxIdx = 0, maxP = 0;
+  for (let i = 0; i < 10; i++) {
+    const p = outputAct[i] || 0;
+    document.getElementById('bar' + i).style.width = (p * 100).toFixed(1) + '%';
+    document.getElementById('val' + i).textContent = (p * 100).toFixed(1) + '%';
+    if (p > maxP) { maxP = p; maxIdx = i; }
+
+    // Highlight the top prediction bar
+    const fill = document.getElementById('bar' + i);
+    if (p === maxP) {
+      fill.style.background = 'linear-gradient(90deg, #6c63ff, #a78bfa)';
+    } else {
+      fill.style.background = 'linear-gradient(90deg, #3d3874, #5a4f99)';
+    }
+  }
+  // Re-highlight the actual max
+  for (let i = 0; i < 10; i++) {
+    const fill = document.getElementById('bar' + i);
+    fill.style.background = (i === maxIdx)
+      ? 'linear-gradient(90deg, #6c63ff, #a78bfa)'
+      : 'linear-gradient(90deg, #3d3874, #5a4f99)';
+  }
+
+  const label = document.getElementById('predictedLabel');
+  if (hasDrawn) {
+    label.textContent = `Prediction: ${maxIdx}`;
+    label.style.color = '#6c63ff';
+  }
+}
+
+// =====================================================================
+//  Network Visualization (Canvas)
+// =====================================================================
+const netCanvas = document.getElementById('networkCanvas');
+const netCtx = netCanvas.getContext('2d');
+let netW, netH;
+
+function resizeNetCanvas() {
+  const rect = netCanvas.parentElement.getBoundingClientRect();
+  netCanvas.width = rect.width * devicePixelRatio;
+  netCanvas.height = rect.height * devicePixelRatio;
+  netW = rect.width;
+  netH = rect.height;
+  netCtx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+  drawNetwork();
+}
+window.addEventListener('resize', resizeNetCanvas);
+
+// Layer positions (x fractions)
+const layerX = [0.12, 0.5, 0.88];
+// Neuron counts to draw (abbreviated)
+const inputShow = 8;  // show 8 of 784
+const hiddenShow = 12; // show 12 of 64
+const outputShow = 10;
+
+function neuronY(layerIdx, idx, count) {
+  const spacing = Math.min(28, (netH - 60) / (count + 1));
+  const totalH = spacing * (count - 1);
+  const startY = (netH - totalH) / 2;
+  return startY + idx * spacing;
+}
+
+let animPhase = 0;
+let animFrame = null;
+
+function drawNetwork() {
+  if (!netW) return;
+  netCtx.clearRect(0, 0, netW, netH);
+
+  animPhase += 0.02;
+
+  const x0 = layerX[0] * netW;
+  const x1 = layerX[1] * netW;
+  const x2 = layerX[2] * netW;
+
+  // Compute positions
+  const inputNeurons = [];
+  for (let i = 0; i < inputShow; i++) {
+    inputNeurons.push({ x: x0, y: neuronY(0, i, inputShow) });
+  }
+  const hiddenNeurons = [];
+  // Pick the 12 most-active hidden neurons for display
+  const hiddenIndices = Array.from({ length: 64 }, (_, i) => i);
+  hiddenIndices.sort((a, b) => hiddenAct[b] - hiddenAct[a]);
+  const topHidden = hiddenIndices.slice(0, hiddenShow);
+  topHidden.sort((a, b) => a - b); // sort by index for stable layout
+  for (let i = 0; i < hiddenShow; i++) {
+    hiddenNeurons.push({
+      x: x1,
+      y: neuronY(1, i, hiddenShow),
+      act: hiddenAct[topHidden[i]] || 0,
+      idx: topHidden[i]
+    });
+  }
+  const outputNeurons = [];
+  for (let i = 0; i < outputShow; i++) {
+    outputNeurons.push({ x: x2, y: neuronY(2, i, outputShow), act: outputAct[i] || 0 });
+  }
+
+  // --- Draw connections ---
+  // Input -> Hidden
+  for (let h = 0; h < hiddenNeurons.length; h++) {
+    const hn = hiddenNeurons[h];
+    const alpha = Math.min(1, 0.03 + 0.15 * (hn.act / (maxHiddenAct() + 0.001)));
+    for (let i = 0; i < inputNeurons.length; i++) {
+      const inp = inputNeurons[i];
+      netCtx.beginPath();
+      netCtx.moveTo(inp.x, inp.y);
+      netCtx.lineTo(hn.x, hn.y);
+      netCtx.strokeStyle = `rgba(108,99,255,${alpha})`;
+      netCtx.lineWidth = 0.5;
+      netCtx.stroke();
+    }
+  }
+
+  // Hidden -> Output
+  for (let o = 0; o < outputNeurons.length; o++) {
+    const on = outputNeurons[o];
+    const alpha = Math.min(1, 0.03 + 0.4 * on.act);
+    for (let h = 0; h < hiddenNeurons.length; h++) {
+      const hn = hiddenNeurons[h];
+      const connAlpha = alpha * Math.min(1, 0.1 + 0.9 * (hn.act / (maxHiddenAct() + 0.001)));
+      netCtx.beginPath();
+      netCtx.moveTo(hn.x, hn.y);
+      netCtx.lineTo(on.x, on.y);
+      netCtx.strokeStyle = `rgba(108,99,255,${connAlpha})`;
+      netCtx.lineWidth = 0.5 + 1.5 * on.act;
+      netCtx.stroke();
+    }
+  }
+
+  // --- Draw neurons ---
+  // Input layer
+  for (let i = 0; i < inputNeurons.length; i++) {
+    const n = inputNeurons[i];
+    drawNeuron(n.x, n.y, 5, 0.3, '#6c63ff');
+  }
+  // Ellipsis
+  const ey = neuronY(0, inputShow, inputShow) + 16;
+  netCtx.fillStyle = '#555';
+  netCtx.font = '10px sans-serif';
+  netCtx.textAlign = 'center';
+  netCtx.fillText('... 784', x0, ey);
+
+  // Hidden layer
+  const hMax = maxHiddenAct();
+  for (let i = 0; i < hiddenNeurons.length; i++) {
+    const n = hiddenNeurons[i];
+    const intensity = hMax > 0 ? n.act / hMax : 0;
+    drawNeuron(n.x, n.y, 6, 0.2 + 0.8 * intensity, '#6c63ff');
+  }
+  netCtx.fillStyle = '#555';
+  netCtx.fillText('64 neurons (ReLU)', x1, neuronY(1, hiddenShow, hiddenShow) + 18);
+
+  // Output layer
+  for (let i = 0; i < outputNeurons.length; i++) {
+    const n = outputNeurons[i];
+    drawNeuron(n.x, n.y, 7, 0.15 + 0.85 * n.act, '#6c63ff');
+    netCtx.fillStyle = '#aaa';
+    netCtx.font = '10px sans-serif';
+    netCtx.textAlign = 'left';
+    netCtx.fillText(i, n.x + 12, n.y + 4);
+  }
+  netCtx.fillStyle = '#555';
+  netCtx.textAlign = 'center';
+  netCtx.fillText('Softmax', x2, neuronY(2, outputShow, outputShow) + 18);
+
+  // Layer labels
+  netCtx.fillStyle = '#666';
+  netCtx.font = '11px sans-serif';
+  netCtx.textAlign = 'center';
+  netCtx.fillText('Input', x0, 16);
+  netCtx.fillText('Hidden', x1, 16);
+  netCtx.fillText('Output', x2, 16);
+}
+
+function maxHiddenAct() {
+  let m = 0;
+  for (let i = 0; i < 64; i++) if (hiddenAct[i] > m) m = hiddenAct[i];
+  return m;
+}
+
+function drawNeuron(x, y, r, intensity, color) {
+  // Glow
+  const glow = netCtx.createRadialGradient(x, y, 0, x, y, r * 3);
+  glow.addColorStop(0, `rgba(108,99,255,${intensity * 0.4})`);
+  glow.addColorStop(1, 'rgba(108,99,255,0)');
+  netCtx.beginPath();
+  netCtx.arc(x, y, r * 3, 0, Math.PI * 2);
+  netCtx.fillStyle = glow;
+  netCtx.fill();
+
+  // Body
+  netCtx.beginPath();
+  netCtx.arc(x, y, r, 0, Math.PI * 2);
+  const bright = Math.round(60 + 195 * intensity);
+  netCtx.fillStyle = `rgb(${bright}, ${Math.round(bright * 0.9)}, 255)`;
+  netCtx.fill();
+  netCtx.strokeStyle = `rgba(108,99,255,${0.4 + 0.6 * intensity})`;
+  netCtx.lineWidth = 1.2;
+  netCtx.stroke();
+}
+
+// =====================================================================
+//  Gallery — Pre-drawn digit examples
+// =====================================================================
+const galleryDigits = [
+  // Each is a 28x28 "drawing" encoded as simple stroke coords on 280x280
+  { label: '1', strokes: [[{x:140,y:40},{x:130,y:80},{x:135,y:140},{x:138,y:200},{x:140,y:250}]] },
+  { label: '0', strokes: [[{x:140,y:40},{x:100,y:60},{x:80,y:110},{x:80,y:170},{x:100,y:220},{x:140,y:245},{x:180,y:220},{x:200,y:170},{x:200,y:110},{x:180,y:60},{x:140,y:40}]] },
+  { label: '7', strokes: [[{x:80,y:50},{x:140,y:50},{x:200,y:50}],[{x:200,y:50},{x:170,y:120},{x:150,y:190},{x:135,y:250}]] },
+  { label: '4', strokes: [[{x:170,y:40},{x:100,y:170},{x:200,y:170}],[{x:170,y:40},{x:170,y:250}]] },
+  { label: '3', strokes: [[{x:90,y:60},{x:140,y:40},{x:190,y:60},{x:190,y:110},{x:140,y:140},{x:190,y:170},{x:190,y:220},{x:140,y:245},{x:90,y:225}]] },
+];
+
+const galleryEl = document.getElementById('gallery');
+galleryDigits.forEach((digit, di) => {
+  const c = document.createElement('canvas');
+  c.width = 280; c.height = 280;
+  c.style.width = '48px'; c.style.height = '48px';
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, 280, 280);
+  ctx.strokeStyle = '#fff';
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.lineWidth = 20;
+  digit.strokes.forEach(stroke => {
+    if (stroke.length < 2) return;
+    ctx.beginPath();
+    ctx.moveTo(stroke[0].x, stroke[0].y);
+    for (let i = 1; i < stroke.length; i++) ctx.lineTo(stroke[i].x, stroke[i].y);
+    ctx.stroke();
+  });
+
+  c.title = `Load digit ${digit.label}`;
+  c.addEventListener('click', () => {
+    // Copy to draw canvas
+    drawCtx.fillStyle = '#000';
+    drawCtx.fillRect(0, 0, 280, 280);
+    drawCtx.drawImage(c, 0, 0);
+    hasDrawn = true;
+    classify();
+  });
+  galleryEl.appendChild(c);
+});
+
+// =====================================================================
+//  Init
+// =====================================================================
+resizeNetCanvas();
+// Initial uniform probabilities display
+outputAct.fill(0.1);
+updateProbBars();
+document.getElementById('predictedLabel').textContent = 'Draw something!';
+drawNetwork();
+</script>
+</body>
+</html>

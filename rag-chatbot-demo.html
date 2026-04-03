@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAG Pipeline Visualizer — Space Colony Handbook</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #1a1a2e;
+  color: #e0e0e0;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 24px 16px;
+  line-height: 1.5;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #1a1a40; }
+::-webkit-scrollbar-thumb { background: #6c63ff55; border-radius: 3px; }
+
+.container {
+  width: 100%;
+  max-width: 1100px;
+  min-height: 600px;
+  background: linear-gradient(135deg, #1a1a40 0%, #16163a 100%);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(108,99,255,0.1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Title bar */
+.title-bar {
+  background: linear-gradient(90deg, #6c63ff22, #6c63ff11);
+  border-bottom: 1px solid #6c63ff33;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.title-bar .dots { display: flex; gap: 6px; }
+.title-bar .dot {
+  width: 10px; height: 10px; border-radius: 50%;
+}
+.dot.r { background: #ff5f57; }
+.dot.y { background: #ffbd2e; }
+.dot.g { background: #28c840; }
+.title-bar h1 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #b0b0d0;
+  letter-spacing: 0.5px;
+  flex: 1;
+  text-align: center;
+}
+.title-bar .badge {
+  font-size: 10px;
+  background: #6c63ff33;
+  color: #6c63ff;
+  padding: 2px 8px;
+  border-radius: 8px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* Main layout */
+.main {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Left panel — knowledge base */
+.kb-panel {
+  width: 320px;
+  min-width: 280px;
+  border-right: 1px solid #6c63ff22;
+  display: flex;
+  flex-direction: column;
+  background: #1a1a3a;
+  flex-shrink: 0;
+}
+.kb-header {
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid #ffffff0a;
+}
+.kb-header h2 {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: #8888aa;
+  margin-bottom: 4px;
+}
+.kb-header p {
+  font-size: 11px;
+  color: #6c63ff99;
+}
+.kb-grid {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  align-content: start;
+}
+
+.chunk-card {
+  background: #2a2a5a;
+  border: 1px solid #3a3a6a;
+  border-radius: 8px;
+  padding: 10px;
+  cursor: pointer;
+  transition: all 0.35s ease;
+  position: relative;
+  overflow: hidden;
+}
+.chunk-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: #6c63ff;
+  transform: scaleX(0);
+  transition: transform 0.35s ease;
+}
+.chunk-card:hover {
+  border-color: #6c63ff66;
+  background: #32326a;
+  transform: translateY(-1px);
+}
+.chunk-card:hover::before { transform: scaleX(1); }
+.chunk-card.retrieved {
+  border-color: #6c63ff;
+  background: #3a3a7a;
+  box-shadow: 0 0 16px rgba(108,99,255,0.25);
+}
+.chunk-card.retrieved::before { transform: scaleX(1); }
+.chunk-card .chunk-id {
+  font-size: 9px;
+  color: #6c63ff99;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.chunk-card .chunk-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: #d0d0e8;
+  margin-bottom: 3px;
+  line-height: 1.3;
+}
+.chunk-card .chunk-preview {
+  font-size: 10px;
+  color: #8888aa;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.chunk-card .sim-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  font-size: 9px;
+  font-weight: 700;
+  color: #6c63ff;
+  background: #6c63ff22;
+  padding: 1px 5px;
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.chunk-card.scored .sim-badge { opacity: 1; }
+
+/* Right panel — pipeline */
+.pipeline-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 16px 20px;
+  gap: 14px;
+}
+
+/* Query input area */
+.query-section { display: flex; flex-direction: column; gap: 8px; }
+.query-input-row { display: flex; gap: 8px; }
+.query-input {
+  flex: 1;
+  background: #2a2a5a;
+  border: 1px solid #3a3a6a;
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: #e0e0e0;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.3s;
+}
+.query-input:focus { border-color: #6c63ff; }
+.query-input::placeholder { color: #666688; }
+.run-btn {
+  background: #6c63ff;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s;
+  white-space: nowrap;
+  font-family: inherit;
+}
+.run-btn:hover { background: #7b73ff; transform: translateY(-1px); }
+.run-btn:active { transform: translateY(0); }
+.run-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.preset-btn {
+  background: #2a2a5a;
+  border: 1px solid #3a3a6a;
+  color: #9999bb;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+.preset-btn:hover {
+  border-color: #6c63ff88;
+  color: #c0c0e0;
+  background: #32326a;
+}
+
+/* Slider */
+.slider-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 2px;
+}
+.slider-row label {
+  font-size: 11px;
+  color: #8888aa;
+  white-space: nowrap;
+}
+.slider-row input[type=range] {
+  flex: 1;
+  -webkit-appearance: none;
+  background: #2a2a5a;
+  height: 4px;
+  border-radius: 2px;
+  outline: none;
+}
+.slider-row input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: #6c63ff;
+  cursor: pointer;
+  border: 2px solid #1a1a40;
+}
+.slider-row .topk-val {
+  font-size: 12px;
+  font-weight: 700;
+  color: #6c63ff;
+  min-width: 18px;
+  text-align: center;
+}
+
+/* Pipeline stages */
+.stage {
+  background: #1e1e44;
+  border: 1px solid #2a2a5a;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: all 0.4s;
+}
+.stage.active {
+  border-color: #6c63ff55;
+  box-shadow: 0 0 20px rgba(108,99,255,0.08);
+}
+.stage-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: #22224a;
+  border-bottom: 1px solid #2a2a5a;
+}
+.stage-num {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: #2a2a5a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: #6666aa;
+  transition: all 0.3s;
+}
+.stage.active .stage-num {
+  background: #6c63ff;
+  color: #fff;
+}
+.stage.done .stage-num {
+  background: #28c840;
+  color: #fff;
+}
+.stage-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #b0b0d0;
+  flex: 1;
+}
+.stage-status {
+  font-size: 10px;
+  color: #6666aa;
+  font-weight: 500;
+}
+.stage.active .stage-status { color: #6c63ff; }
+.stage.done .stage-status { color: #28c840; }
+.stage-body {
+  padding: 12px 14px;
+  min-height: 36px;
+  font-size: 12px;
+  color: #9999bb;
+}
+
+/* Embedding visualization */
+.embed-bars {
+  display: flex;
+  gap: 2px;
+  align-items: flex-end;
+  height: 40px;
+}
+.embed-bar {
+  flex: 1;
+  background: #6c63ff;
+  border-radius: 2px 2px 0 0;
+  min-width: 3px;
+  max-width: 6px;
+  transition: height 0.3s ease;
+  opacity: 0.7;
+}
+
+/* Similarity chart */
+.sim-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.sim-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+}
+.sim-row .sim-label {
+  width: 100px;
+  color: #9999bb;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.sim-row .sim-bar-bg {
+  flex: 1;
+  height: 10px;
+  background: #2a2a5a;
+  border-radius: 5px;
+  overflow: hidden;
+}
+.sim-row .sim-bar-fill {
+  height: 100%;
+  background: #6c63ff;
+  border-radius: 5px;
+  transition: width 0.6s ease;
+}
+.sim-row .sim-score {
+  width: 34px;
+  text-align: right;
+  color: #6c63ff;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+/* Context window */
+.context-chunks {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ctx-chunk {
+  background: #2a2a5a;
+  border-left: 3px solid #6c63ff;
+  padding: 8px 10px;
+  border-radius: 0 6px 6px 0;
+  font-size: 11px;
+  color: #c0c0e0;
+  line-height: 1.4;
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: all 0.4s ease;
+}
+.ctx-chunk.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Response area */
+.response-text {
+  font-size: 13px;
+  color: #d8d8f0;
+  line-height: 1.6;
+  min-height: 40px;
+}
+.response-text .cursor {
+  display: inline-block;
+  width: 2px;
+  height: 14px;
+  background: #6c63ff;
+  vertical-align: text-bottom;
+  animation: blink 0.7s infinite;
+}
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+/* Connector arrows between stages */
+.connector {
+  display: flex;
+  justify-content: center;
+  padding: 2px 0;
+}
+.connector svg { opacity: 0.3; }
+
+/* Chunk detail modal */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(10,10,30,0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal {
+  background: #1e1e44;
+  border: 1px solid #6c63ff44;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 480px;
+  width: 90%;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  transform: translateY(20px);
+  transition: transform 0.3s;
+}
+.modal-overlay.open .modal { transform: translateY(0); }
+.modal h3 {
+  font-size: 15px;
+  color: #e0e0f0;
+  margin-bottom: 6px;
+}
+.modal .modal-id {
+  font-size: 10px;
+  color: #6c63ff99;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
+.modal .modal-body {
+  font-size: 13px;
+  color: #b0b0cc;
+  line-height: 1.6;
+  margin-bottom: 14px;
+}
+.modal .modal-keywords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 16px;
+}
+.modal .kw-tag {
+  font-size: 10px;
+  background: #6c63ff22;
+  color: #6c63ff;
+  padding: 2px 8px;
+  border-radius: 8px;
+}
+.modal-close {
+  background: #2a2a5a;
+  color: #b0b0d0;
+  border: 1px solid #3a3a6a;
+  padding: 6px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+.modal-close:hover { border-color: #6c63ff; color: #fff; }
+
+/* Particle canvas */
+#particle-canvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 50;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  body { padding: 8px; }
+  .main { flex-direction: column; }
+  .kb-panel {
+    width: 100%;
+    min-width: unset;
+    max-height: 240px;
+    border-right: none;
+    border-bottom: 1px solid #6c63ff22;
+  }
+  .kb-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+  .pipeline-panel { padding: 12px 14px; }
+  .presets { gap: 4px; }
+}
+@media (max-width: 480px) {
+  .kb-grid { grid-template-columns: 1fr 1fr; }
+  .query-input-row { flex-direction: column; }
+  .run-btn { width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="particle-canvas"></canvas>
+
+<div class="container">
+  <div class="title-bar">
+    <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+    <h1>RAG Pipeline Visualizer</h1>
+    <span class="badge">INTERACTIVE</span>
+  </div>
+
+  <div class="main">
+    <!-- Knowledge Base panel -->
+    <div class="kb-panel">
+      <div class="kb-header">
+        <h2>Knowledge Base</h2>
+        <p>Space Colony Handbook &mdash; 20 chunks</p>
+      </div>
+      <div class="kb-grid" id="kb-grid"></div>
+    </div>
+
+    <!-- Pipeline panel -->
+    <div class="pipeline-panel">
+      <!-- Query input -->
+      <div class="query-section">
+        <div class="query-input-row">
+          <input class="query-input" id="query-input" type="text" placeholder="Ask about the Space Colony Handbook..." />
+          <button class="run-btn" id="run-btn">Run RAG</button>
+        </div>
+        <div class="presets" id="presets"></div>
+        <div class="slider-row">
+          <label>Top-K retrieval:</label>
+          <input type="range" id="topk-slider" min="1" max="5" value="3" />
+          <span class="topk-val" id="topk-val">3</span>
+        </div>
+      </div>
+
+      <!-- Stage 1: Embedding -->
+      <div class="stage" id="stage-embed">
+        <div class="stage-header">
+          <div class="stage-num">1</div>
+          <div class="stage-title">Query Embedding</div>
+          <div class="stage-status" id="status-embed">Waiting</div>
+        </div>
+        <div class="stage-body" id="body-embed">
+          <span style="color:#555577">Enter a query to begin...</span>
+        </div>
+      </div>
+
+      <div class="connector"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M8 2v10M4 8l4 4 4-4" stroke="#6c63ff" stroke-width="1.5" fill="none"/></svg></div>
+
+      <!-- Stage 2: Retrieval -->
+      <div class="stage" id="stage-retrieve">
+        <div class="stage-header">
+          <div class="stage-num">2</div>
+          <div class="stage-title">Nearest-Neighbor Search</div>
+          <div class="stage-status" id="status-retrieve">Waiting</div>
+        </div>
+        <div class="stage-body" id="body-retrieve">
+          <span style="color:#555577">Similarity scores will appear here...</span>
+        </div>
+      </div>
+
+      <div class="connector"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M8 2v10M4 8l4 4 4-4" stroke="#6c63ff" stroke-width="1.5" fill="none"/></svg></div>
+
+      <!-- Stage 3: Context assembly -->
+      <div class="stage" id="stage-context">
+        <div class="stage-header">
+          <div class="stage-num">3</div>
+          <div class="stage-title">LLM Context Window</div>
+          <div class="stage-status" id="status-context">Waiting</div>
+        </div>
+        <div class="stage-body" id="body-context">
+          <span style="color:#555577">Retrieved chunks will be injected here...</span>
+        </div>
+      </div>
+
+      <div class="connector"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M8 2v10M4 8l4 4 4-4" stroke="#6c63ff" stroke-width="1.5" fill="none"/></svg></div>
+
+      <!-- Stage 4: Generation -->
+      <div class="stage" id="stage-generate">
+        <div class="stage-header">
+          <div class="stage-num">4</div>
+          <div class="stage-title">LLM Generation</div>
+          <div class="stage-status" id="status-generate">Waiting</div>
+        </div>
+        <div class="stage-body" id="body-generate">
+          <span style="color:#555577">Response will stream here...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Chunk detail modal -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-id" id="modal-id"></div>
+    <h3 id="modal-title"></h3>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-keywords" id="modal-keywords"></div>
+    <button class="modal-close" id="modal-close">Close</button>
+  </div>
+</div>
+
+<script>
+// ── Knowledge Base ──────────────────────────────────────────
+const KB = [
+  {
+    id: "SCH-001", title: "Primary Life Support Overview",
+    text: "The colony's primary life support system uses a closed-loop atmospheric processor that recycles 98.7% of breathable air. Oxygen is generated through electrolysis of reclaimed water and supplemented by hydroponic photosynthesis modules. Carbon dioxide scrubbers operate continuously in three redundant cycles.",
+    keywords: ["life support", "oxygen", "atmosphere", "air", "breathing", "co2", "carbon dioxide", "scrubber", "recycle", "closed loop"]
+  },
+  {
+    id: "SCH-002", title: "Water Reclamation Systems",
+    text: "Water reclamation operates via a four-stage filtration process: mechanical pre-filtering, reverse osmosis, UV sterilization, and mineral rebalancing. The colony recovers 99.2% of all water, including humidity condensation, wastewater, and crew perspiration. Storage tanks hold a 90-day emergency reserve.",
+    keywords: ["water", "reclamation", "filtration", "reverse osmosis", "uv", "sterilization", "humidity", "wastewater", "reserve"]
+  },
+  {
+    id: "SCH-003", title: "Hydroponic Bay Alpha",
+    text: "Hydroponic Bay Alpha grows leafy greens, tomatoes, and legumes using nutrient film technique (NFT). LED arrays simulate a 16/8 light cycle optimized for photosynthesis. The bay produces approximately 40% of the colony's fresh food supply and is tended by agricultural drones and a rotating crew of botanists.",
+    keywords: ["hydroponics", "food", "grow", "farm", "plant", "vegetable", "led", "agriculture", "botanist", "crop", "nutrition"]
+  },
+  {
+    id: "SCH-004", title: "Hydroponic Bay Beta — Staple Crops",
+    text: "Bay Beta focuses on calorie-dense staple crops: rice, wheat, and potatoes grown in vertical aeroponic towers. Automated harvesting robots collect yields on a 60-day cycle. Bay Beta accounts for 35% of total food production and operates under slightly higher CO2 concentrations to boost growth rates.",
+    keywords: ["hydroponics", "food", "grow", "rice", "wheat", "potato", "aeroponic", "harvest", "crop", "staple", "calorie"]
+  },
+  {
+    id: "SCH-005", title: "Artificial Gravity — Centrifuge Ring",
+    text: "Artificial gravity is produced by the colony's centrifuge habitat ring, a 480-meter-diameter torus rotating at 1.7 RPM to simulate 0.85g. Magnetic bearings eliminate mechanical friction. Crew quarters, cafeterias, and exercise areas are all located within the ring to minimize bone-density loss.",
+    keywords: ["gravity", "centrifuge", "rotation", "torus", "ring", "rpm", "simulate", "bone", "habitat", "artificial"]
+  },
+  {
+    id: "SCH-006", title: "Microgravity Research Labs",
+    text: "The central hub maintains near-zero gravity for materials science and biomedical research. Labs are accessed via pressurized spoke elevators. Experiments include protein crystal growth, fluid dynamics studies, and next-generation alloy fabrication in vacuum conditions.",
+    keywords: ["microgravity", "research", "lab", "zero gravity", "science", "experiment", "crystal", "alloy", "hub"]
+  },
+  {
+    id: "SCH-007", title: "Radiation Shielding — Primary Hull",
+    text: "The outer hull comprises a 2.4-meter regolith-filled shell backed by a polyethylene hydrogen-rich layer. This combination blocks 99.5% of galactic cosmic rays and virtually all solar particle events. Radiation monitors in every compartment trigger automatic shelter alerts if dose rates exceed 0.5 mSv/hr.",
+    keywords: ["radiation", "shielding", "hull", "cosmic ray", "solar", "regolith", "polyethylene", "protection", "shelter", "dose"]
+  },
+  {
+    id: "SCH-008", title: "Solar Storm Emergency Protocol",
+    text: "During a solar storm event, colony-wide alarms initiate the SHELTER protocol: crew proceed to the inner-ring storm shelters within 8 minutes. Shelters have additional 1.5m water shielding. Non-essential systems power down to reinforce electromagnetic shielding. Average shelter duration: 4-18 hours.",
+    keywords: ["solar storm", "emergency", "shelter", "alarm", "radiation", "protocol", "electromagnetic", "power down"]
+  },
+  {
+    id: "SCH-009", title: "Communication Array — Deep Space",
+    text: "The deep-space communication array uses a 12-meter parabolic dish combined with a phased-array laser transmitter. Earth-colony signal latency ranges from 4 to 24 minutes depending on orbital position. Data throughput peaks at 250 Mbps via laser link and 15 Mbps via radio backup.",
+    keywords: ["communication", "antenna", "dish", "laser", "transmitter", "signal", "latency", "radio", "deep space", "data"]
+  },
+  {
+    id: "SCH-010", title: "Internal Communication Network",
+    text: "Intra-colony communications run on a mesh Wi-Fi 7 network with fiber-optic backbone. Every module has intercom panels for voice, video, and emergency broadcast. Personal wrist-comms provide location tracking, biometric monitoring, and instant messaging for all crew members.",
+    keywords: ["communication", "network", "wifi", "intercom", "mesh", "internal", "wrist", "biometric", "broadcast", "fiber"]
+  },
+  {
+    id: "SCH-011", title: "Colony Governance Structure",
+    text: "The colony operates under a council-based democracy. The Colony Council consists of seven elected members serving two-year terms, plus the Mission Commander (appointed by Earth Space Agency). Decisions require simple majority; emergency powers can be invoked by a 5/7 supermajority vote.",
+    keywords: ["governance", "council", "democracy", "elected", "commander", "vote", "political", "law", "authority", "decision"]
+  },
+  {
+    id: "SCH-012", title: "Legal Framework & Dispute Resolution",
+    text: "Colony law follows the Outer Space Settlement Charter. Civil disputes are mediated by trained arbitrators. Criminal matters are adjudicated by a three-person tribunal. Serious offenses may result in restricted duties or, in extreme cases, confinement to quarters pending Earth review.",
+    keywords: ["legal", "law", "dispute", "charter", "tribunal", "criminal", "mediation", "governance", "arbitrator"]
+  },
+  {
+    id: "SCH-013", title: "Emergency Evacuation — Escape Pods",
+    text: "The colony maintains 24 escape pods, each seating 12 crew. Pods are pressurized, carry 72-hour life support, and feature autonomous navigation to designated safe-orbit rendezvous points. Full evacuation can be completed in under 20 minutes. Monthly evacuation drills are mandatory for all personnel.",
+    keywords: ["evacuation", "escape pod", "emergency", "protocol", "drill", "pressurized", "navigation", "crew", "safety", "rendezvous"]
+  },
+  {
+    id: "SCH-014", title: "Fire Suppression Systems",
+    text: "Each compartment has dual fire suppression: halon-replacement gas flooding and fine water mist sprinklers. Smoke detectors use multi-spectrum optical sensors. In the event of fire, affected sections can be automatically sealed and vented to vacuum as a last resort, after crew evacuation confirmation.",
+    keywords: ["fire", "suppression", "emergency", "safety", "smoke", "detector", "halon", "sprinkler", "vacuum", "seal"]
+  },
+  {
+    id: "SCH-015", title: "Medical Bay & Health Services",
+    text: "The medical bay includes a surgical theater, diagnostic imaging (MRI and CT), a pharmacy, and a quarantine isolation ward. Two chief medical officers and four nurses provide 24/7 care. Telemedicine consults with Earth specialists are available during communication windows.",
+    keywords: ["medical", "health", "doctor", "surgery", "hospital", "nurse", "quarantine", "imaging", "pharmacy", "care"]
+  },
+  {
+    id: "SCH-016", title: "Power Generation — Fusion Reactor",
+    text: "The colony is powered by a deuterium-tritium tokamak fusion reactor producing 450 MW of continuous power. Solar panel arrays provide supplementary power and serve as emergency backup. Power distribution uses a superconducting grid with automatic load balancing across all modules.",
+    keywords: ["power", "energy", "fusion", "reactor", "solar", "electricity", "tokamak", "grid", "generator", "megawatt"]
+  },
+  {
+    id: "SCH-017", title: "Waste Management & Recycling",
+    text: "All solid waste is sorted by automated conveyors into recyclables, compostables, and residuals. Organic waste feeds anaerobic digesters producing methane for auxiliary power. Non-recyclable residuals are processed in a plasma arc furnace that reduces mass by 95% and recovers rare metals.",
+    keywords: ["waste", "recycling", "compost", "methane", "plasma", "furnace", "environment", "disposal", "organic", "metal"]
+  },
+  {
+    id: "SCH-018", title: "Recreation & Mental Health",
+    text: "Recreation facilities include a zero-g sports arena, a VR entertainment center, a library, and a biodome park with real trees and a small pond. Psychological support includes mandatory monthly counseling sessions and a peer-support buddy system to combat isolation-related stress.",
+    keywords: ["recreation", "mental health", "sport", "entertainment", "park", "vr", "counseling", "stress", "morale", "biodome"]
+  },
+  {
+    id: "SCH-019", title: "Docking & Cargo Operations",
+    text: "The docking hub accommodates up to four vessels simultaneously via universal docking adapters. Cargo is moved by autonomous rail carts through pressurized tunnels. Supply ships arrive on a six-month cycle carrying equipment, luxury goods, and biological samples. Turnaround time averages 72 hours.",
+    keywords: ["docking", "cargo", "ship", "supply", "vessel", "port", "rail", "transport", "logistics", "delivery"]
+  },
+  {
+    id: "SCH-020", title: "Exterior Maintenance & EVA",
+    text: "Extravehicular activity (EVA) teams perform hull inspections, antenna repairs, and solar panel maintenance on a rotating schedule. EVA suits are rated for 8-hour operations and feature micro-thruster mobility packs. Robotic arms assist with heavy component handling on the outer hull.",
+    keywords: ["eva", "spacewalk", "maintenance", "hull", "repair", "exterior", "suit", "robot", "inspection", "antenna"]
+  }
+];
+
+// ── Preset questions ────────────────────────────────────────
+const PRESETS = [
+  "How does the life support system work?",
+  "What are the emergency evacuation protocols?",
+  "How is food grown in the colony?",
+  "What communication methods are used?",
+  "How is artificial gravity maintained?"
+];
+
+// ── Pre-written responses keyed to top chunks ───────────────
+const RESPONSES = {
+  "SCH-001": "The colony's life support relies on a closed-loop atmospheric processor that recycles nearly 99% of breathable air. Oxygen production combines water electrolysis with photosynthesis from the hydroponic bays, while triple-redundant CO2 scrubbers run continuously to keep the atmosphere safe.",
+  "SCH-002": "Water reclamation is achieved through a sophisticated four-stage process including mechanical filtration, reverse osmosis, UV sterilization, and mineral rebalancing. The system recovers over 99% of all water sources, and emergency reserves can sustain the colony for 90 days.",
+  "SCH-003": "Food production in the colony centers on two hydroponic bays. Bay Alpha uses nutrient film technique to grow leafy greens, tomatoes, and legumes under optimized LED light cycles, producing about 40% of the colony's fresh food with help from agricultural drones.",
+  "SCH-004": "Bay Beta complements Alpha by growing calorie-dense staples like rice, wheat, and potatoes in vertical aeroponic towers. Together, the two bays provide roughly 75% of the colony's food supply, with automated harvesting on 60-day cycles.",
+  "SCH-005": "Artificial gravity is generated by a massive 480-meter centrifuge ring rotating at 1.7 RPM to simulate 0.85g. The ring houses crew quarters, dining facilities, and exercise areas to help colonists maintain bone density and muscle mass during long-duration stays.",
+  "SCH-007": "Radiation protection uses a multi-layer approach: the 2.4-meter regolith-filled outer hull blocks galactic cosmic rays, while an inner polyethylene layer absorbs residual particles. Real-time monitors in every compartment alert crew if radiation levels become dangerous.",
+  "SCH-008": "During solar storm emergencies, the SHELTER protocol requires all crew to reach inner-ring storm shelters within 8 minutes. These shelters have additional water shielding and can sustain occupants for up to 18 hours while electromagnetic defenses are maximized.",
+  "SCH-009": "Deep-space communication uses a 12-meter dish and laser transmitter achieving up to 250 Mbps throughput. Signal latency to Earth varies from 4 to 24 minutes depending on orbital positions, with a 15 Mbps radio link available as backup.",
+  "SCH-010": "Internal communications run on a fiber-optic backbone with Wi-Fi 7 mesh coverage. Every crew member wears a wrist-comm for location tracking, biometrics, and messaging, while intercom panels in each module provide voice, video, and emergency broadcast capability.",
+  "SCH-011": "The colony is governed by a seven-member elected council serving two-year terms, alongside an Earth-appointed Mission Commander. Day-to-day decisions pass by simple majority, while emergency powers require five of seven votes to invoke.",
+  "SCH-013": "Emergency evacuation is supported by 24 escape pods, each seating 12 crew with 72 hours of life support. The pods navigate autonomously to safe-orbit rendezvous points. Full colony evacuation can be completed in under 20 minutes, and monthly drills keep everyone prepared.",
+  "SCH-014": "Fire suppression uses dual systems in every compartment: halon-replacement gas flooding and water mist sprinklers. Multi-spectrum optical smoke detectors provide early warning. As a last resort, affected sections can be sealed and vented to vacuum after confirming crew evacuation.",
+  "SCH-016": "The colony draws its main power from a 450 MW deuterium-tritium tokamak fusion reactor, with solar arrays as supplementary and emergency backup. A superconducting distribution grid automatically balances loads across all modules to ensure uninterrupted power.",
+  "SCH-018": "Recreation facilities are vital for long-duration missions. The colony offers a zero-g sports arena, VR entertainment, a library, and a biodome park with real vegetation. Mandatory monthly counseling and a peer buddy system help maintain crew mental health.",
+  "SCH-020": "Hull maintenance is performed by rotating EVA teams equipped with 8-hour-rated suits and micro-thruster packs. They inspect the hull, repair antennas, and service solar panels on a regular schedule, assisted by robotic arms for heavy components."
+};
+
+// Default fallback response builder
+function buildResponse(topChunks) {
+  const first = topChunks[0];
+  if (RESPONSES[first.id]) return RESPONSES[first.id];
+  // Fallback: combine snippets
+  let r = "Based on the Space Colony Handbook, ";
+  r += topChunks.map(c => {
+    const s = c.text.split('. ');
+    return s[0].toLowerCase() + (s[1] ? '. ' + s[1] : '');
+  }).join('. Additionally, ') + '.';
+  return r;
+}
+
+// ── TF-IDF Cosine Similarity ────────────────────────────────
+function tokenize(text) {
+  return text.toLowerCase().replace(/[^a-z0-9\s-]/g, '').split(/\s+/).filter(w => w.length > 2);
+}
+
+// Build vocabulary from all chunks
+const allKeywords = new Set();
+KB.forEach(c => c.keywords.forEach(k => tokenize(k).forEach(w => allKeywords.add(w))));
+const vocab = [...allKeywords];
+const vocabIndex = {};
+vocab.forEach((w, i) => vocabIndex[w] = i);
+
+// IDF
+const docFreq = new Array(vocab.length).fill(0);
+KB.forEach(chunk => {
+  const seen = new Set();
+  chunk.keywords.forEach(k => tokenize(k).forEach(w => {
+    if (vocabIndex[w] !== undefined && !seen.has(w)) { docFreq[vocabIndex[w]]++; seen.add(w); }
+  }));
+});
+const idf = docFreq.map(df => df > 0 ? Math.log(KB.length / df) + 1 : 0);
+
+function vectorize(tokens) {
+  const tf = new Array(vocab.length).fill(0);
+  tokens.forEach(w => { if (vocabIndex[w] !== undefined) tf[vocabIndex[w]]++; });
+  return tf.map((t, i) => t * idf[i]);
+}
+
+function cosineSim(a, b) {
+  let dot = 0, na = 0, nb = 0;
+  for (let i = 0; i < a.length; i++) { dot += a[i]*b[i]; na += a[i]*a[i]; nb += b[i]*b[i]; }
+  const denom = Math.sqrt(na) * Math.sqrt(nb);
+  return denom === 0 ? 0 : dot / denom;
+}
+
+// Pre-compute chunk vectors
+const chunkVectors = KB.map(c => {
+  const tokens = [];
+  c.keywords.forEach(k => tokenize(k).forEach(w => tokens.push(w)));
+  // Also include title words
+  tokenize(c.title).forEach(w => tokens.push(w));
+  return vectorize(tokens);
+});
+
+function search(query, topK) {
+  const qTokens = tokenize(query);
+  const qVec = vectorize(qTokens);
+  const scores = KB.map((chunk, i) => ({ ...chunk, index: i, score: cosineSim(qVec, chunkVectors[i]) }));
+  scores.sort((a, b) => b.score - a.score);
+  return scores.slice(0, topK);
+}
+
+// ── Particles ───────────────────────────────────────────────
+const canvas = document.getElementById('particle-canvas');
+const ctx = canvas.getContext('2d');
+let particles = [];
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+function spawnParticles(fromEl, toEl, count) {
+  const fromRect = fromEl.getBoundingClientRect();
+  const toRect = toEl.getBoundingClientRect();
+  for (let i = 0; i < count; i++) {
+    particles.push({
+      x: fromRect.left + fromRect.width / 2 + (Math.random() - 0.5) * 40,
+      y: fromRect.top + fromRect.height / 2 + (Math.random() - 0.5) * 20,
+      tx: toRect.left + toRect.width / 2 + (Math.random() - 0.5) * 60,
+      ty: toRect.top + Math.random() * toRect.height,
+      progress: 0,
+      speed: 0.008 + Math.random() * 0.012,
+      size: 2 + Math.random() * 2,
+      alpha: 1
+    });
+  }
+}
+
+function animateParticles() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  particles = particles.filter(p => p.alpha > 0.01);
+  particles.forEach(p => {
+    p.progress += p.speed;
+    if (p.progress >= 1) { p.alpha -= 0.05; p.progress = 1; }
+    const t = p.progress;
+    const ease = t < 0.5 ? 2*t*t : -1+(4-2*t)*t;
+    const cx = p.x + (p.tx - p.x) * ease;
+    const cy = p.y + (p.ty - p.y) * ease;
+    ctx.beginPath();
+    ctx.arc(cx, cy, p.size, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(108,99,255,${p.alpha * 0.8})`;
+    ctx.fill();
+    // glow
+    ctx.beginPath();
+    ctx.arc(cx, cy, p.size * 2.5, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(108,99,255,${p.alpha * 0.15})`;
+    ctx.fill();
+  });
+  requestAnimationFrame(animateParticles);
+}
+animateParticles();
+
+// ── UI Setup ────────────────────────────────────────────────
+const kbGrid = document.getElementById('kb-grid');
+const queryInput = document.getElementById('query-input');
+const runBtn = document.getElementById('run-btn');
+const presetsEl = document.getElementById('presets');
+const topkSlider = document.getElementById('topk-slider');
+const topkVal = document.getElementById('topk-val');
+const modalOverlay = document.getElementById('modal-overlay');
+
+// Build KB grid
+KB.forEach((chunk, i) => {
+  const card = document.createElement('div');
+  card.className = 'chunk-card';
+  card.dataset.index = i;
+  card.innerHTML = `
+    <div class="chunk-id">${chunk.id}</div>
+    <div class="chunk-title">${chunk.title}</div>
+    <div class="chunk-preview">${chunk.text.substring(0, 70)}...</div>
+    <div class="sim-badge"></div>
+  `;
+  card.addEventListener('click', () => openModal(chunk));
+  kbGrid.appendChild(card);
+});
+
+// Build presets
+PRESETS.forEach(q => {
+  const btn = document.createElement('button');
+  btn.className = 'preset-btn';
+  btn.textContent = q;
+  btn.addEventListener('click', () => {
+    queryInput.value = q;
+    runPipeline();
+  });
+  presetsEl.appendChild(btn);
+});
+
+// Top-K slider
+topkSlider.addEventListener('input', () => {
+  topkVal.textContent = topkSlider.value;
+});
+
+// Modal
+function openModal(chunk) {
+  document.getElementById('modal-id').textContent = chunk.id;
+  document.getElementById('modal-title').textContent = chunk.title;
+  document.getElementById('modal-body').textContent = chunk.text;
+  const kwContainer = document.getElementById('modal-keywords');
+  kwContainer.innerHTML = chunk.keywords.map(k => `<span class="kw-tag">${k}</span>`).join('');
+  modalOverlay.classList.add('open');
+}
+document.getElementById('modal-close').addEventListener('click', () => modalOverlay.classList.remove('open'));
+modalOverlay.addEventListener('click', e => { if (e.target === modalOverlay) modalOverlay.classList.remove('open'); });
+
+// ── Pipeline execution ──────────────────────────────────────
+let running = false;
+
+runBtn.addEventListener('click', runPipeline);
+queryInput.addEventListener('keydown', e => { if (e.key === 'Enter') runPipeline(); });
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function setStage(id, state, statusText) {
+  const el = document.getElementById(`stage-${id}`);
+  el.classList.remove('active', 'done');
+  if (state) el.classList.add(state);
+  document.getElementById(`status-${id}`).textContent = statusText || '';
+}
+
+function resetAllStages() {
+  ['embed', 'retrieve', 'context', 'generate'].forEach(id => {
+    setStage(id, null, 'Waiting');
+    const body = document.getElementById(`body-${id}`);
+    body.innerHTML = '<span style="color:#555577">Waiting...</span>';
+  });
+  document.querySelectorAll('.chunk-card').forEach(c => {
+    c.classList.remove('retrieved', 'scored');
+    c.querySelector('.sim-badge').textContent = '';
+  });
+}
+
+async function runPipeline() {
+  const query = queryInput.value.trim();
+  if (!query || running) return;
+  running = true;
+  runBtn.disabled = true;
+  const topK = parseInt(topkSlider.value);
+
+  resetAllStages();
+  await sleep(200);
+
+  // ── Stage 1: Embedding ──
+  setStage('embed', 'active', 'Embedding...');
+  const embedBody = document.getElementById('body-embed');
+
+  // Build animated embedding bars
+  const barCount = 48;
+  const qVec = vectorize(tokenize(query));
+  // Normalize for display
+  const maxVal = Math.max(...qVec.map(Math.abs), 0.001);
+  let barsHTML = '<div class="embed-bars">';
+  for (let i = 0; i < barCount; i++) {
+    const vi = Math.floor(i * qVec.length / barCount);
+    const h = Math.max(3, Math.abs(qVec[vi]) / maxVal * 38);
+    barsHTML += `<div class="embed-bar" style="height:0px" data-h="${h}"></div>`;
+  }
+  barsHTML += '</div>';
+  embedBody.innerHTML = `<div style="margin-bottom:6px;font-size:11px;color:#7777aa">Query: "<span style="color:#b0b0d0">${query}</span>" &rarr; ${vocab.length}-dim vector</div>${barsHTML}`;
+
+  // Animate bars
+  await sleep(100);
+  embedBody.querySelectorAll('.embed-bar').forEach((bar, i) => {
+    setTimeout(() => { bar.style.height = bar.dataset.h + 'px'; }, i * 15);
+  });
+  await sleep(barCount * 15 + 300);
+  setStage('embed', 'done', 'Done');
+
+  // ── Stage 2: Retrieval ──
+  setStage('retrieve', 'active', 'Searching...');
+  const retrieveBody = document.getElementById('body-retrieve');
+
+  // Compute all scores
+  const allScores = KB.map((chunk, i) => ({
+    ...chunk, index: i, score: cosineSim(qVec, chunkVectors[i])
+  }));
+  allScores.sort((a, b) => b.score - a.score);
+
+  // Show scores on chunk cards (top 8 at least)
+  const showCount = Math.max(topK + 3, 8);
+  const cardsEls = document.querySelectorAll('.chunk-card');
+  for (let i = 0; i < Math.min(showCount, allScores.length); i++) {
+    const item = allScores[i];
+    if (item.score < 0.01) continue;
+    const card = cardsEls[item.index];
+    card.classList.add('scored');
+    card.querySelector('.sim-badge').textContent = (item.score * 100).toFixed(0) + '%';
+  }
+  await sleep(300);
+
+  // Highlight top-K
+  const topResults = allScores.slice(0, topK);
+  topResults.forEach((item, i) => {
+    setTimeout(() => {
+      cardsEls[item.index].classList.add('retrieved');
+      spawnParticles(cardsEls[item.index], document.getElementById('stage-context'), 5);
+    }, i * 250);
+  });
+  await sleep(topK * 250 + 200);
+
+  // Similarity bar chart
+  const topForChart = allScores.slice(0, 7).filter(s => s.score > 0);
+  let chartHTML = '<div class="sim-chart">';
+  topForChart.forEach(item => {
+    const pct = Math.min(item.score * 100, 100);
+    const isTop = topResults.find(r => r.index === item.index);
+    chartHTML += `
+      <div class="sim-row">
+        <span class="sim-label" title="${item.title}">${item.title}</span>
+        <div class="sim-bar-bg"><div class="sim-bar-fill" style="width:0%;${isTop ? '' : 'opacity:0.35;'}"></div></div>
+        <span class="sim-score">${pct.toFixed(1)}%</span>
+      </div>`;
+  });
+  chartHTML += '</div>';
+  retrieveBody.innerHTML = chartHTML;
+
+  // Animate bars
+  await sleep(50);
+  retrieveBody.querySelectorAll('.sim-bar-fill').forEach((bar, i) => {
+    const pct = Math.min(topForChart[i].score * 100, 100);
+    setTimeout(() => { bar.style.width = pct + '%'; }, i * 80);
+  });
+  await sleep(topForChart.length * 80 + 400);
+  setStage('retrieve', 'done', `${topK} chunks retrieved`);
+
+  // ── Stage 3: Context Assembly ──
+  setStage('context', 'active', 'Assembling...');
+  const contextBody = document.getElementById('body-context');
+
+  let ctxHTML = '<div class="context-chunks">';
+  topResults.forEach((item, i) => {
+    ctxHTML += `<div class="ctx-chunk" data-delay="${i}" id="ctx-${i}">
+      <strong style="color:#6c63ff;font-size:10px">[${item.id}]</strong> ${item.text.substring(0, 120)}...
+    </div>`;
+  });
+  ctxHTML += '</div>';
+  contextBody.innerHTML = ctxHTML;
+
+  for (let i = 0; i < topResults.length; i++) {
+    await sleep(300);
+    document.getElementById(`ctx-${i}`).classList.add('visible');
+  }
+  await sleep(300);
+  setStage('context', 'done', `${topK} chunks loaded`);
+
+  // ── Stage 4: Generation ──
+  setStage('generate', 'active', 'Generating...');
+  const genBody = document.getElementById('body-generate');
+
+  spawnParticles(document.getElementById('stage-context'), document.getElementById('stage-generate'), 8);
+  await sleep(400);
+
+  const response = buildResponse(topResults);
+  genBody.innerHTML = '<div class="response-text"><span class="cursor"></span></div>';
+  const textEl = genBody.querySelector('.response-text');
+  const cursorEl = textEl.querySelector('.cursor');
+
+  // Token-by-token streaming
+  const words = response.split(' ');
+  let currentText = '';
+  for (let i = 0; i < words.length; i++) {
+    currentText += (i > 0 ? ' ' : '') + words[i];
+    textEl.innerHTML = currentText + '<span class="cursor"></span>';
+    await sleep(25 + Math.random() * 40);
+  }
+  // Remove cursor after done
+  await sleep(300);
+  textEl.innerHTML = currentText;
+
+  setStage('generate', 'done', `${words.length} tokens`);
+
+  running = false;
+  runBtn.disabled = false;
+}
+</script>
+</body>
+</html>

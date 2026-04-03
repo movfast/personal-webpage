@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sentiment Heatmap Analyzer</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:#1a1a2e;
+  font-family:'Segoe UI',system-ui,sans-serif;
+  color:#e0e0e0;
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  padding:24px 12px;
+}
+.container{
+  width:100%;
+  max-width:800px;
+  min-height:600px;
+  background:#16213e;
+  border-radius:16px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.5),0 0 40px rgba(108,99,255,0.1);
+  overflow-y:auto;
+  overflow-x:hidden;
+  padding:28px 32px 24px;
+}
+h1{
+  font-size:1.5rem;
+  font-weight:700;
+  color:#fff;
+  margin-bottom:4px;
+  display:flex;align-items:center;gap:10px;
+}
+h1 .accent{color:#6c63ff}
+.subtitle{font-size:.82rem;color:#888;margin-bottom:16px}
+
+/* Preset buttons */
+.presets{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.presets button{
+  background:#1a1a2e;
+  border:1px solid #333;
+  color:#ccc;
+  padding:5px 12px;
+  border-radius:20px;
+  font-size:.75rem;
+  cursor:pointer;
+  transition:all .2s;
+}
+.presets button:hover{border-color:#6c63ff;color:#fff;background:#1f1f3a}
+.presets button.active{border-color:#6c63ff;background:#6c63ff33;color:#fff}
+
+/* Mode toggle */
+.mode-toggle{
+  display:flex;align-items:center;gap:8px;margin-bottom:14px;
+}
+.mode-toggle label{font-size:.8rem;color:#aaa;cursor:pointer}
+.toggle-switch{
+  position:relative;width:40px;height:22px;
+}
+.toggle-switch input{opacity:0;width:0;height:0}
+.toggle-slider{
+  position:absolute;inset:0;background:#333;border-radius:11px;cursor:pointer;transition:.3s;
+}
+.toggle-slider::before{
+  content:'';position:absolute;left:3px;top:3px;width:16px;height:16px;
+  background:#888;border-radius:50%;transition:.3s;
+}
+.toggle-switch input:checked+.toggle-slider{background:#6c63ff55}
+.toggle-switch input:checked+.toggle-slider::before{transform:translateX(18px);background:#6c63ff}
+
+/* Main analysis area */
+.analysis-area{display:flex;gap:16px;margin-bottom:16px}
+.input-col,.output-col{flex:1;min-width:0}
+.input-col textarea{
+  width:100%;height:160px;
+  background:#1a1a2e;
+  border:1px solid #333;
+  border-radius:10px;
+  color:#e0e0e0;
+  padding:12px;
+  font-size:.88rem;
+  line-height:1.5;
+  resize:vertical;
+  font-family:inherit;
+  transition:border-color .2s;
+}
+.input-col textarea:focus{outline:none;border-color:#6c63ff}
+.input-col textarea::placeholder{color:#555}
+.col-label{font-size:.75rem;color:#777;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+
+/* Heatmap output */
+.heatmap-box{
+  background:#1a1a2e;
+  border:1px solid #333;
+  border-radius:10px;
+  padding:12px;
+  min-height:160px;
+  line-height:1.8;
+  font-size:.88rem;
+  overflow-y:auto;
+  max-height:200px;
+  position:relative;
+}
+.heatmap-box .word{
+  display:inline-block;
+  padding:2px 5px;
+  margin:1px;
+  border-radius:4px;
+  cursor:pointer;
+  transition:all .15s;
+  position:relative;
+}
+.heatmap-box .word:hover{transform:scale(1.12);z-index:2}
+.heatmap-box .placeholder{color:#555;font-style:italic}
+
+/* Tooltip */
+.word-tooltip{
+  position:fixed;
+  background:#0f0f23;
+  border:1px solid #6c63ff;
+  border-radius:8px;
+  padding:8px 12px;
+  font-size:.78rem;
+  color:#e0e0e0;
+  pointer-events:none;
+  z-index:999;
+  opacity:0;
+  transition:opacity .15s;
+  white-space:nowrap;
+  box-shadow:0 4px 16px rgba(0,0,0,.5);
+}
+.word-tooltip.visible{opacity:1}
+.word-tooltip .score-val{color:#6c63ff;font-weight:700}
+.word-tooltip .score-label{font-size:.7rem;color:#888}
+
+/* Gauge + stats row */
+.bottom-row{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap}
+.gauge-container{flex:0 0 200px;text-align:center}
+.gauge-container svg{display:block;margin:0 auto}
+.gauge-label{font-size:.82rem;color:#aaa;margin-top:4px;font-weight:600}
+.gauge-score{font-size:1.1rem;font-weight:700;color:#fff}
+
+/* Stats panel */
+.stats-panel{flex:1;min-width:180px}
+.stats-panel h3{font-size:.82rem;color:#999;margin-bottom:8px;text-transform:uppercase;letter-spacing:.4px}
+.stat-row{
+  display:flex;align-items:center;gap:8px;margin-bottom:6px;
+}
+.stat-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.stat-bar-bg{
+  flex:1;height:8px;background:#1a1a2e;border-radius:4px;overflow:hidden;
+}
+.stat-bar{
+  height:100%;border-radius:4px;transition:width .4s ease;
+}
+.stat-label{font-size:.75rem;color:#aaa;width:60px}
+.stat-count{font-size:.75rem;color:#ccc;width:28px;text-align:right}
+
+/* Comparison mode */
+.comparison-area{display:none;gap:16px}
+.comparison-area.active{display:flex}
+.compare-col{flex:1;min-width:0}
+.compare-col textarea{
+  width:100%;height:100px;
+  background:#1a1a2e;border:1px solid #333;border-radius:10px;
+  color:#e0e0e0;padding:10px;font-size:.85rem;line-height:1.4;
+  resize:vertical;font-family:inherit;transition:border-color .2s;
+}
+.compare-col textarea:focus{outline:none;border-color:#6c63ff}
+.compare-heatmap{
+  background:#1a1a2e;border:1px solid #333;border-radius:10px;
+  padding:10px;min-height:60px;max-height:120px;overflow-y:auto;
+  line-height:1.7;font-size:.84rem;margin-top:8px;
+}
+.compare-heatmap .word{
+  display:inline-block;padding:2px 4px;margin:1px;border-radius:4px;cursor:pointer;
+  transition:all .15s;position:relative;
+}
+.compare-heatmap .word:hover{transform:scale(1.1);z-index:2}
+.compare-bar-section{margin-top:10px}
+.compare-stacked-bar{
+  height:20px;border-radius:6px;overflow:hidden;display:flex;
+  background:#1a1a2e;border:1px solid #333;
+}
+.compare-stacked-bar div{height:100%;transition:width .4s ease}
+.compare-bar-label{font-size:.7rem;color:#777;margin-top:3px;display:flex;justify-content:space-between}
+.compare-overall{font-size:.85rem;font-weight:600;margin-top:6px;text-align:center}
+
+/* Responsive */
+@media(max-width:700px){
+  .container{padding:20px 16px}
+  .analysis-area{flex-direction:column}
+  .comparison-area{flex-direction:column}
+  .bottom-row{flex-direction:column;align-items:center}
+  .gauge-container{flex:none}
+  h1{font-size:1.25rem}
+}
+@media(max-width:500px){
+  .presets{gap:4px}
+  .presets button{font-size:.7rem;padding:4px 9px}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1><span class="accent">&#9632;</span> Sentiment Heatmap</h1>
+  <p class="subtitle">Type or paste a product review to see real-time word-level sentiment analysis</p>
+
+  <div class="presets">
+    <button data-preset="5star">&#11088; 5-Star</button>
+    <button data-preset="1star">&#128078; 1-Star</button>
+    <button data-preset="mixed">&#x2696; Mixed</button>
+    <button data-preset="neutral">&#128221; Neutral</button>
+    <button data-preset="sarcastic">&#128580; Sarcastic</button>
+  </div>
+
+  <div class="mode-toggle">
+    <label for="compareToggle">Single</label>
+    <div class="toggle-switch">
+      <input type="checkbox" id="compareToggle">
+      <span class="toggle-slider"></span>
+    </div>
+    <label for="compareToggle">Compare</label>
+  </div>
+
+  <!-- Single analysis mode -->
+  <div class="analysis-area" id="singleMode">
+    <div class="input-col">
+      <div class="col-label">Input</div>
+      <textarea id="mainInput" placeholder="Type or paste a product review here..."></textarea>
+    </div>
+    <div class="output-col">
+      <div class="col-label">Heatmap</div>
+      <div class="heatmap-box" id="mainHeatmap"><span class="placeholder">Words will appear here with sentiment coloring...</span></div>
+    </div>
+  </div>
+
+  <!-- Comparison mode -->
+  <div class="comparison-area" id="compareMode">
+    <div class="compare-col">
+      <div class="col-label">Review A</div>
+      <textarea id="compareInputA" placeholder="Paste first review..."></textarea>
+      <div class="compare-heatmap" id="compareHeatmapA"></div>
+      <div class="compare-bar-section">
+        <div class="compare-stacked-bar" id="compareBarA"></div>
+        <div class="compare-bar-label"><span>Negative</span><span>Neutral</span><span>Positive</span></div>
+      </div>
+      <div class="compare-overall" id="compareOverallA">--</div>
+    </div>
+    <div class="compare-col">
+      <div class="col-label">Review B</div>
+      <textarea id="compareInputB" placeholder="Paste second review..."></textarea>
+      <div class="compare-heatmap" id="compareHeatmapB"></div>
+      <div class="compare-bar-section">
+        <div class="compare-stacked-bar" id="compareBarB"></div>
+        <div class="compare-bar-label"><span>Negative</span><span>Neutral</span><span>Positive</span></div>
+      </div>
+      <div class="compare-overall" id="compareOverallB">--</div>
+    </div>
+  </div>
+
+  <!-- Gauge + Stats -->
+  <div class="bottom-row" id="bottomRow">
+    <div class="gauge-container">
+      <svg width="180" height="110" viewBox="0 0 180 110">
+        <defs>
+          <linearGradient id="gaugeGrad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#ff4444"/>
+            <stop offset="25%" stop-color="#ff8844"/>
+            <stop offset="50%" stop-color="#888"/>
+            <stop offset="75%" stop-color="#88cc44"/>
+            <stop offset="100%" stop-color="#44cc44"/>
+          </linearGradient>
+        </defs>
+        <path d="M 20 95 A 70 70 0 0 1 160 95" fill="none" stroke="#222" stroke-width="12" stroke-linecap="round"/>
+        <path d="M 20 95 A 70 70 0 0 1 160 95" fill="none" stroke="url(#gaugeGrad)" stroke-width="12" stroke-linecap="round" opacity="0.3"/>
+        <!-- needle -->
+        <line id="gaugeNeedle" x1="90" y1="95" x2="90" y2="32" stroke="#6c63ff" stroke-width="3" stroke-linecap="round" style="transition:transform .6s cubic-bezier(.4,2,.3,1);transform-origin:90px 95px"/>
+        <circle cx="90" cy="95" r="6" fill="#6c63ff"/>
+        <!-- labels -->
+        <text x="12" y="108" fill="#ff6666" font-size="8" font-family="inherit">Very Neg</text>
+        <text x="128" y="108" fill="#66cc66" font-size="8" font-family="inherit">Very Pos</text>
+      </svg>
+      <div class="gauge-label" id="gaugeLabel">Neutral</div>
+      <div class="gauge-score" id="gaugeScore">0.0</div>
+    </div>
+    <div class="stats-panel">
+      <h3>Word Breakdown</h3>
+      <div class="stat-row">
+        <span class="stat-dot" style="background:#44cc44"></span>
+        <span class="stat-label">Positive</span>
+        <div class="stat-bar-bg"><div class="stat-bar" id="barPos" style="width:0;background:#44cc44"></div></div>
+        <span class="stat-count" id="countPos">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-dot" style="background:#888"></span>
+        <span class="stat-label">Neutral</span>
+        <div class="stat-bar-bg"><div class="stat-bar" id="barNeu" style="width:0;background:#888"></div></div>
+        <span class="stat-count" id="countNeu">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-dot" style="background:#ff4444"></span>
+        <span class="stat-label">Negative</span>
+        <div class="stat-bar-bg"><div class="stat-bar" id="barNeg" style="width:0;background:#ff4444"></div></div>
+        <span class="stat-count" id="countNeg">0</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Tooltip -->
+<div class="word-tooltip" id="tooltip"></div>
+
+<script>
+// ===== SENTIMENT LEXICON (~1500 words) =====
+const LEX = {};
+
+// Helper to add multiple words with same score
+function addWords(words, score) { words.forEach(w => LEX[w] = score); }
+
+// ---- POSITIVE words ----
+// +5: strongest positive
+addWords(['amazing','astounding','awesome','breathtaking','brilliant','exceptional','extraordinary',
+  'fabulous','fantastic','flawless','glorious','incredible','magnificent','marvelous','masterpiece',
+  'outstanding','perfect','phenomenal','remarkable','sensational','spectacular','splendid','stellar',
+  'stunning','sublime','superb','supreme','terrific','tremendous','unbeatable','unbelievable',
+  'unmatched','unparalleled','unsurpassed','wonderful','wondrous','exquisite','immaculate',
+  'impeccable','transcendent','mind-blowing','life-changing','groundbreaking','revolutionary'], 5);
+
+// +4
+addWords(['beautiful','captivating','charming','dazzling','delightful','divine','dreamy','elegant',
+  'enchanting','excellent','exciting','exhilarating','eye-catching','fascinating','first-rate',
+  'generous','gorgeous','graceful','great','heavenly','heroic','impressive','inspirational',
+  'inspiring','joyful','joyous','legendary','liberating','lively','lovely','luxurious','majestic',
+  'miraculous','noble','passionate','peerless','polished','premium','pristine','prodigious',
+  'radiant','ravishing','refined','refreshing','resplendent','riveting','shining','sleek',
+  'thrilling','top-notch','triumphant','uplifting','vibrant','victorious','vivid','world-class',
+  'zesty','exuberant','blissful','ecstatic','elated','euphoric','gratifying','harmonious',
+  'idyllic','jubilant','luminous','mesmerizing','opulent','paradisiacal','picturesque',
+  'resounding','spellbinding','sumptuous','transcendental','wholesome'], 4);
+
+// +3
+addWords(['able','accomplished','admirable','advanced','advantageous','affectionate','agreeable',
+  'appealing','attractive','balanced','beloved','beneficial','best','bold','brave','bright',
+  'brilliant','calm','capable','caring','cheerful','clean','clear','clever','comfortable',
+  'commendable','compassionate','competent','confident','convenient','cool','courageous','cozy',
+  'creative','crisp','cute','daring','decent','dedicated','dependable','desirable','devoted',
+  'dynamic','eager','effective','efficient','effortless','empowering','energetic','engaging',
+  'enjoyable','entertaining','enthusiastic','enviable','essential','ethical','exceeded',
+  'expectations','exceptional','expert','extraordinary','fair','faithful','favorable','fine',
+  'fit','flexible','flowing','focused','fond','friendly','fulfilled','fun','functional','genius',
+  'genuine','gifted','glad','gleaming','golden','good','goodness','gracious','grateful','handy',
+  'happy','hardy','healthy','heartfelt','heartwarming','helpful','honest','hopeful','humorous',
+  'ideal','imaginative','immersive','incredible','innovative','insightful','intelligent',
+  'intuitive','invaluable','inventive','inviting','irresistible','keen','kind','laudable',
+  'likable','lovable','love','loved','loving','loyal','lucky','meaningful','merry','mindful',
+  'modern','motivated','natural','neat','nice','nifty','noteworthy','nurturing','optimistic',
+  'organic','overjoyed','paradise','peaceful','pleasant','pleased','pleasing','plentiful',
+  'positive','powerful','practical','praiseworthy','precious','professional','proficient',
+  'profitable','progressive','promising','prompt','proper','prosperous','proud','pure','quality',
+  'quick','quiet','rapid','rational','ready','reasonable','reassuring','recommended','relaxed',
+  'relaxing','reliable','resilient','resourceful','respected','responsive','rewarding','rich',
+  'right','robust','safe','satisfying','seamless','secure','sharp','shiny','simple','sincere',
+  'skilled','smart','smooth','solid','sophisticated','soothing','special','speedy','stable',
+  'strong','stylish','succeed','successful','sufficient','super','supportive','sure','surprising',
+  'sweet','swift','talented','tenacious','tender','thankful','thorough','thoughtful','tidy',
+  'timely','top','tough','tranquil','transparent','treasured','trendy','triumphant','true',
+  'trusted','trustworthy','ultimate','unconditional','underrated','unique','useful','user-friendly',
+  'valuable','versatile','warm','wealthy','welcoming','well-built','well-designed','well-made',
+  'willing','wise','witty','worthy','youthful','zen'], 3);
+
+// +2
+addWords(['above-average','acceptable','accessible','adequate','affordable','alright','ample',
+  'appropriate','apt','authentic','available','basic','better','bought','budget-friendly',
+  'classic','coherent','compact','compatible','complete','comprehensive','consistent','content',
+  'correct','cost-effective','credible','customizable','durable','easy','economical','educational',
+  'eligible','enough','equipped','established','exact','expected','experienced','explored',
+  'extensive','extra','familiar','fast','feasible','fresh','full','functional','good-looking',
+  'handy','healthy','honest','improved','inclusive','informative','intact','interesting',
+  'justified','legitimate','light','lightweight','manageable','mature','measured','merit',
+  'modest','notable','okay','operative','orderly','organized','original','participatory',
+  'passable','patience','patient','perceptive','persistent','plausible','polite','popular',
+  'portable','precise','presentable','productive','punctual','purposeful','rational',
+  'reachable','readable','real','realistic','recognizable','regular','relatable','relevant',
+  'reputable','satisfactory','simple','sizable','snug','sorted','sound','spacious','standard',
+  'steady','straightforward','structured','substantial','suitable','tidy','tolerable','typical',
+  'understandable','uniform','updated','upbeat','usable','valid','viable','visible','warm',
+  'welcome','well','whole','wide','willing','workable','working','worthwhile'], 2);
+
+// +1
+addWords(['accept','accommodate','acknowledge','add','agree','allow','anticipate','apply',
+  'approach','assist','attempt','attend','average','believe','calm','can','certain','change',
+  'choose','claim','common','communicate','compare','consider','continue','contribute','cope',
+  'cover','deal','deliver','describe','develop','discuss','earn','enable','encourage','engage',
+  'ensure','evolve','exist','expand','expect','explain','express','extend','facilitate','feature',
+  'feel','fill','find','fit','follow','gain','gather','generate','give','grant','grow','guide',
+  'handle','help','hold','hope','identify','implement','include','increase','indicate','inform',
+  'initiate','integrate','intend','introduce','invest','involve','issue','join','justify','keep',
+  'last','launch','lead','learn','lend','link','list','live','maintain','manage','match','matter',
+  'meet','mention','move','need','note','notice','obtain','offer','open','operate','option',
+  'order','outline','overcome','own','participate','pass','pay','perform','permit','pick','place',
+  'plan','play','point','possess','prepare','present','preserve','process','produce','promote',
+  'protect','provide','pursue','raise','reach','realize','receive','recognize','reflect',
+  'regard','relate','release','remain','report','represent','request','require','resolve',
+  'respond','result','retain','return','reveal','run','save','seek','select','send','serve',
+  'set','share','shift','show','simplify','solve','sort','speak','stand','start','state',
+  'stay','step','stick','store','strengthen','submit','suggest','supply','sustain','take',
+  'target','teach','tend','test','think','track','trade','train','transfer','treat','try',
+  'turn','understand','unite','update','upgrade','use','utilize','verify','view','visit',
+  'volunteer','want','watch','win','wish','wonder','work','write','yield'], 1);
+
+// ---- NEGATIVE words ----
+// -5: strongest negative
+addWords(['abhorrent','abominable','abysmal','appalling','atrocious','catastrophic','deplorable',
+  'despicable','detestable','devastating','dreadful','egregious','execrable','ghastly','godawful',
+  'heinous','horrendous','horrible','horrific','horrifying','inexcusable','insufferable',
+  'loathsome','monstrous','nightmarish','outrageous','reprehensible','repugnant','repulsive',
+  'revolting','ruinous','scam','sickening','terrible','unacceptable','unforgivable','vile',
+  'villainous','wretched','abyssal','godawful','unbearable','disgraceful','contemptible',
+  'fraud','fraudulent'], -5);
+
+// -4
+addWords(['aggravating','agonizing','alarming','anger','angry','annoying','antagonistic','awful',
+  'bitter','bleak','broken','brutal','callous','chaotic','coarse','cold','corrupt','crap',
+  'crappy','crippling','cruel','crushing','cursed','damaged','dangerous','dead','deadly',
+  'deceitful','deceptive','defective','deficient','degrading','demoralizing','depressing',
+  'desolate','desperate','destructive','detrimental','dire','dirty','disastrous','disgraceful',
+  'disgusting','dishonest','dismal','dismaying','distracting','disturbing','dreadful','enraging',
+  'evil','exhausting','exploitative','extreme','failing','fake','fatal','fear','fearful',
+  'filthy','foolish','forced','foul','frightening','frustrating','furious','gloomy','grave',
+  'grim','grotesque','gruesome','gut-wrenching','harsh','hateful','hazardous','heartbreaking',
+  'heartless','helpless','hopeless','hostile','hurtful','ignorant','immoral','impaired',
+  'incompetent','indecent','inexcusable','inferior','infuriating','insane','insulting',
+  'intolerable','irrational','irritating','junk','laughable','lethal','lifeless','lousy',
+  'malicious','manipulative','meaningless','menacing','merciless','miserable','misleading',
+  'mockery','morbid','nasty','neglectful','negligent','noxious','obnoxious','offensive',
+  'ominous','oppressive','painful','pathetic','pitiful','poison','poisonous','polluted','poor',
+  'predatory','problematic','putrid','rancid','reckless','repellent','resentful','rotten',
+  'rubbish','rude','ruthless','savage','scandalous','scary','shameful','shocking','shoddy',
+  'sinister','sleazy','sloppy','sluggish','sordid','sour','stale','stingy','stinking','stinky',
+  'stressful','stupid','subpar','suffering','suspicious','tasteless','terrifying','threatening',
+  'torturous','toxic','tragic','trash','trashy','traumatic','troubled','ugly','unbearable',
+  'unethical','unfair','unfortunate','unhealthy','unjust','unkind','unpleasant','unprofessional',
+  'unsafe','unstable','unsupported','vicious','vindictive','violent','volatile','vulgar',
+  'wasteful','weak','worthless'], -4);
+
+// -3
+addWords(['absurd','ambiguous','annoyed','anxious','apologize','backward','bad','bland','bored',
+  'boring','bothersome','buggy','bulky','bumpy','burden','burdensome','careless','cheap',
+  'clumsy','complicated','concern','concerned','confusing','costly','cracked','cramped','creaky',
+  'dated','delay','delayed','denied','dent','dented','difficult','dim','dingy','disadvantage',
+  'disappoint','disappointed','disappointing','disappointment','disconnect','disconnected',
+  'discouraged','discouraging','dislike','disliked','disorder','disorganized','displeasure',
+  'dispute','dissatisfied','distorted','distress','doubt','doubtful','downgrade','downside',
+  'drain','drained','dreary','drop','dropped','dull','dusty','embarrass','embarrassing','error',
+  'erratic','excessive','exhausted','expense','expensive','fail','failed','failure','fault',
+  'faulty','flaw','flawed','flimsy','fragile','freeze','frozen','glitch','glitchy','gone',
+  'gripe','grumpy','gutted','hard','harm','harmful','hate','hated','heavy','hesitant','hurt',
+  'imbalanced','imperfect','impractical','improper','inaccurate','inadequate','incomplete',
+  'inconvenient','incorrect','ineffective','inefficient','inflexible','insecure','insensitive',
+  'insignificant','insufficient','interference','irregular','issue','lack','lacking','lag',
+  'laggy','lame','late','leak','leaking','leaky','limited','limp','long','loose','loss','lost',
+  'low','mediocre','mess','messy','minor','misguided','missing','mistake','mistaken','mixed',
+  'mold','moldy','monotonous','moody','muddy','murky','narrow','negative','neglect','neglected',
+  'noise','noisy','nonfunctional','nonsense','obscure','obsolete','odd','off','outage','outdated',
+  'overcharged','overcomplicated','overdue','overflow','overhead','overheated','overlook',
+  'overlooked','overpriced','oversized','overtime','overwhelming','owe','peeling','penalize',
+  'penalty','picky','plain','pointless','poorly','powerless','premature','pressure','pricey',
+  'problem','questionable','refund','regret','regretful','reject','rejected','reluctant',
+  'repetitive','restless','restricted','rigid','risk','risky','rough','rust','rusty','sad',
+  'scratch','scratched','scratchy','shaky','shame','short','shortage','shrink','sick','skeptical',
+  'skip','slow','small','smelly','snag','sparse','split','squeak','squeaky','stagnant','stain',
+  'stained','steep','sticky','stiff','strain','strange','stress','stuck','stumble','substandard',
+  'suffer','suspect','swollen','tangle','tangled','tedious','tense','thick','thin','tight',
+  'tired','tiresome','torn','tricky','trouble','troublesome','uncomfortable','underperform',
+  'undersized','undesirable','uneasy','unexpected','unfavorable','unfriendly','unhappy',
+  'uninspired','unlikely','unnecessary','unreliable','unresponsive','unsatisfactory','unsatisfied',
+  'unsettling','unsure','untidy','unwanted','unwelcome','upset','useless','vague','void',
+  'vulnerable','wait','warn','warning','waste','wasted','wear','weary','weird','wobble',
+  'wobbly','worn','worried','worry','worse','worst','wrong'], -3);
+
+// -2
+addWords(['absence','absent','accusation','ache','aging','average','barrier','block','blocked',
+  'blurry','bother','bottleneck','break','broke','bumped','capped','caution','cease','changed',
+  'clash','clog','clogged','close','closed','clunky','cold','collapse','collision','complaint',
+  'complex','condition','conflict','congestion','constraint','contradiction','controversy',
+  'convert','crack','crash','creak','critical','criticism','critique','crowd','crowded','cut',
+  'dark','deadline','debate','debt','decline','decrease','default','defect','deficit','degrade',
+  'demand','demote','deny','deplete','deprecate','deteriorate','deviate','devoid','diminish',
+  'disable','disabled','discard','discomfort','discontinue','discount','discourage','displace',
+  'disrupt','disruption','dissent','divide','divided','dock','dormant','down','downfall',
+  'downtime','drag','drift','dry','dumb','duplicate','edge','eliminate','empty','end','endure',
+  'erode','escape','evade','evict','exclude','exhaust','exit','expire','expose','exposure',
+  'external','extract','extreme','fade','fall','false','fatigue','fence','fire','flat','flaw',
+  'flop','fluctuate','fog','foggy','forbid','forget','forgotten','formal','gap','generic',
+  'halt','hang','hanging','haze','hazy','hesitate','hide','hinder','hurdle','idle','ignore',
+  'imbalance','immature','immobile','impact','impede','impose','impound','inability',
+  'inaccessible','inactive','incapable','incident','inconsistent','inconvenience',
+  'indifferent','indirect','inevitable','inexperienced','inflated','insist','interrupt',
+  'interruption','isolate','isolated','jam','jammed','jumble','lag','lapse','lean','leave',
+  'leftover','lengthy','less','lesser','liable','limit','limitation','lock','locked',
+  'lonely','loop','misalign','misfire','mishap','misplace','misread','miss','moderate',
+  'modify','moot','mute','nag','neglect','none','null','obstacle','offset','old','omit',
+  'oppose','outage','outweigh','overload','overlap','override','overshadow','oversight',
+  'partial','pause','peak','pending','persist','pit','plateau','plug','pop','postpone',
+  'pour','precaution','prevent','prior','probe','prohibit','prolong','prone','protest',
+  'pull','push','quit','quota','ration','raw','recede','recess','reclaim','reduce',
+  'reduction','redundant','regress','rehash','relapse','removal','remove','repeal','replace',
+  'repress','reproach','resistance','restrain','restrict','retreat','retract','reversal',
+  'reverse','revoke','risk','rollback','ruin','sacrifice','scrape','scrap','scratch',
+  'seal','separate','setback','settle','severe','shed','shift','shock','shorten','shrink',
+  'shut','sideline','sink','sit','skip','slack','slide','slip','slow','slump','snag','snap',
+  'sore','spill','split','spoil','squeeze','stagger','stale','stall','standstill','starve',
+  'steal','steep','stem','stop','strain','strand','strip','struggle','stumble','subject',
+  'subtract','suppress','surge','surplus','surrender','suspend','swamp','sway','taint',
+  'tear','temper','tension','terminate','threat','toll','topple','trap','trim','tumble',
+  'turbulence','undercut','undermine','undo','unfold','unload','unplug','unravel',
+  'unwind','uproot','urge','vacant','vanish','void','waive','wane','warp','wash',
+  'water','waver','weaken','wedge','wilt','withdraw','withhold','wreck','yank'], -2);
+
+// -1
+addWords(['abstract','adjust','admit','affect','ago','alter','although','apart','aside',
+  'assume','attempt','avoid','bare','basic','behalf','behind','below','beneath','beside',
+  'bind','bit','blur','border','bound','brief','broad','burden','busy','but','bypass',
+  'case','cast','catch','cause','center','chain','challenge','chapter','charge','check',
+  'circle','cite','claim','clear','climb','clip','clone','cluster','code','coil','collect',
+  'column','combine','commit','compare','compile','complain','compose','compress',
+  'compute','conclude','conduct','confess','confine','confirm','connect','consent',
+  'consume','contain','context','contract','control','convention','convert','convince',
+  'corner','correct','cost','count','counter','couple','course','court','cover','craft',
+  'cross','crowd','crush','curb','cure','curve','cycle','dare','deal','debate',
+  'declare','deep','defer','define','delay','deliberate','deliver','demand','depend',
+  'deploy','derive','design','detect','determine','differ','dig','dimension','direct',
+  'disappear','discipline','discover','display','dispose','distance','distinguish',
+  'distribute','disturb','dive','divide','dock','dodge','domain','dose','double','doubt',
+  'draft','drag','draw','dress','drift','drill','drive','drown','dry','dump','dust',
+  'dwell','earn','ease','echo','edit','effort','elect','embed','emerge','emit','employ',
+  'encounter','enforce','engage','engineer','enhance','enter','equal','equip','err',
+  'escape','establish','evaluate','evidence','evolve','exact','examine','exceed','exchange',
+  'exclude','excuse','execute','exercise','exhibit','exist','exit','expand','experiment',
+  'exploit','explore','export','expose','extend','extract','eye','face','factor','fade',
+  'fail','fair','fall','farm','fashion','favor','fear','figure','file','filter','final',
+  'finance','finger','firm','fix','flag','flame','flash','fleet','flesh','flip','float',
+  'flood','floor','flow','fly','fold','fool','foot','forecast','forget','form','formal',
+  'formula','forth','fortune','forward','foster','found','fraction','fragment','frame',
+  'frequency','front','fuel','function','fund','further','fuse','gain','gap','gate',
+  'gauge','gear','grade','grain','grant','grasp','grave','grip','gross','ground','guard',
+  'guess','gym','habit','halt','hand','handle','hang','harbor','haste','haul','hazard',
+  'headline','heap','hedge','hence','host','house','however','hurry','impose','impress',
+  'impulse','inch','incline','index','influence','initial','inner','input','insert',
+  'inspect','install','instance','instinct','institute','insure','intent','interior',
+  'internal','interpret','intervene','interview','intimate','invent','invest','involve',
+  'isolate','item','jam','jet','job','joint','journal','journey','judge','jump','junior',
+  'jury','keen','kick','label','labor','ladder','land','lane','lap','largely','laser',
+  'lately','lateral','latter','layer','layout','lecture','legacy','lens','lesson','level',
+  'lever','liberal','license','lift','likewise','line','link','load','lobby','local',
+  'lodge','log','logic','long','loop','lot','lower','luck','lump','luxury','machine',
+  'magic','mainstream','maker','mandate','manual','map','march','margin','marine','mark',
+  'mask','mass','master','matrix','maximum','meanwhile','mechanism','medium','merely',
+  'merge','method','middle','mild','mill','mine','minimize','minor','minus','mirror',
+  'mission','mix','mobile','mode','model','module','moment','monitor','mood','moral',
+  'moreover','motion','mount','multiple','mutual','mystery','nail','namely','narrative',
+  'narrow','native','navy','nearby','necessarily','nerve','nest','net','nevertheless',
+  'nonetheless','norm','notion','novel','nowhere','numerous','nurse','object','observe',
+  'obtain','obvious','occupy','occur','odd','odds','offend','ongoing','onset','onto',
+  'oppose','option','orbit','organic','orient','otherwise','ought','outer','outline',
+  'output','outright','outside','overcome','overlook','overseas','owe','pace','pack',
+  'palm','pan','panel','parallel','parcel','partly','passage','passive','patch','path',
+  'pattern','pause','peer','penalty','pending','perceive','percent','perhaps','period',
+  'permanent','permit','persist','perspective','petition','phrase','pile','pilot','pin',
+  'pioneer','pitch','pit','plain','plate','platform','plead','plot','plunge','plus',
+  'pocket','pole','poll','pool','pop','populate','port','portion','pose','possess',
+  'post','pot','potential','pound','pour','powder','preach','precede','predict','premise',
+  'premium','prescribe','presence','press','presume','prevail','previously','primarily',
+  'prime','principal','print','priority','prison','probe','proceed','proclaim','procure'], -1);
+
+// Additional sentiment modifiers
+const NEGATORS = new Set(['not','no','never','neither','nor','nobody','nothing','nowhere',
+  'hardly','barely','scarcely','seldom','rarely',"don't","doesn't","didn't","won't",
+  "wouldn't","shouldn't","couldn't","can't","cannot","isn't","aren't","wasn't","weren't",
+  "haven't","hasn't","hadn't"]);
+
+const INTENSIFIERS = {very:1.5,really:1.5,extremely:2,incredibly:1.8,absolutely:2,
+  totally:1.5,completely:1.8,utterly:2,highly:1.5,super:1.5,truly:1.5,remarkably:1.5,
+  exceptionally:1.8,especially:1.3,particularly:1.3,so:1.3,quite:1.2,rather:1.1,
+  pretty:1.2,somewhat:0.8,slightly:0.6,barely:0.4,hardly:0.4,a_bit:0.7,a_little:0.7};
+
+const DIMINISHERS = new Set(['somewhat','slightly','barely','hardly','a','bit','little','kind','sort','of']);
+
+// Presets
+const PRESETS = {
+  '5star': "Absolutely love this product! The quality is outstanding and it exceeded all my expectations. Best purchase I've made this year.",
+  '1star': "Terrible waste of money. Broke after two days. The worst product I've ever bought. Completely disappointed and frustrated.",
+  'mixed': "The design is beautiful and sleek, but the battery life is disappointing. Good value for the price though.",
+  'neutral': "The package arrived on Tuesday. It contains the items listed. The color matches the description.",
+  'sarcastic': "Oh great, another product that claims to be revolutionary. At least the box was nice."
+};
+
+// ===== ANALYSIS ENGINE =====
+function tokenize(text) {
+  // Split into tokens preserving punctuation info
+  return text.split(/(\s+)/).filter(t => t.length > 0);
+}
+
+function cleanWord(w) {
+  return w.toLowerCase().replace(/[^a-z'-]/g, '');
+}
+
+function analyzeText(text) {
+  if (!text.trim()) return { words: [], overall: 0, counts: {pos:0,neg:0,neu:0} };
+
+  const tokens = tokenize(text);
+  const results = [];
+  let scoreSum = 0;
+  let scoredCount = 0;
+  let counts = {pos:0, neg:0, neu:0};
+
+  // First pass: identify words and raw scores
+  const wordData = [];
+  for (const token of tokens) {
+    const clean = cleanWord(token);
+    if (!clean) {
+      wordData.push({raw: token, clean: '', score: 0, isSpace: /^\s+$/.test(token)});
+      continue;
+    }
+    const rawScore = LEX[clean] || 0;
+    wordData.push({raw: token, clean, score: rawScore, isSpace: false});
+  }
+
+  // Second pass: apply negation and intensifiers
+  for (let i = 0; i < wordData.length; i++) {
+    const d = wordData[i];
+    if (d.isSpace || !d.clean) {
+      results.push({text: d.raw, score: 0, isSpace: true, clean: ''});
+      continue;
+    }
+
+    let finalScore = d.score;
+
+    // Check for negation in previous 1-3 content words
+    let negated = false;
+    let lookback = 0;
+    for (let j = i - 1; j >= 0 && lookback < 3; j--) {
+      if (wordData[j].isSpace || !wordData[j].clean) continue;
+      lookback++;
+      if (NEGATORS.has(wordData[j].clean)) {
+        negated = true;
+        break;
+      }
+    }
+    if (negated && finalScore !== 0) {
+      finalScore = -finalScore * 0.75;
+    }
+
+    // Check for intensifier in previous content word
+    let prevClean = '';
+    for (let j = i - 1; j >= 0; j--) {
+      if (wordData[j].clean) { prevClean = wordData[j].clean; break; }
+    }
+    if (INTENSIFIERS[prevClean] && finalScore !== 0) {
+      finalScore *= INTENSIFIERS[prevClean];
+    }
+
+    // Clamp to [-5, 5]
+    finalScore = Math.max(-5, Math.min(5, finalScore));
+
+    if (finalScore > 0.5) counts.pos++;
+    else if (finalScore < -0.5) counts.neg++;
+    else counts.neu++;
+
+    scoreSum += finalScore;
+    scoredCount++;
+
+    results.push({text: d.raw, score: finalScore, isSpace: false, clean: d.clean});
+  }
+
+  const overall = scoredCount > 0 ? scoreSum / scoredCount : 0;
+  return {words: results, overall, counts};
+}
+
+// ===== RENDERING =====
+function scoreToColor(score) {
+  // Map score (-5 to 5) to color
+  if (Math.abs(score) < 0.3) return 'rgba(150,150,150,0.3)';
+
+  const t = Math.min(Math.abs(score) / 5, 1);
+  const alpha = 0.25 + t * 0.55;
+
+  if (score > 0) {
+    // Green spectrum
+    if (t > 0.6) return `rgba(68,204,68,${alpha})`; // #44cc44
+    if (t > 0.3) return `rgba(136,204,68,${alpha})`; // #88cc44
+    return `rgba(136,204,68,${alpha * 0.7})`;
+  } else {
+    // Red spectrum
+    if (t > 0.6) return `rgba(255,68,68,${alpha})`; // #ff4444
+    if (t > 0.3) return `rgba(255,136,68,${alpha})`; // #ff8844
+    return `rgba(255,136,68,${alpha * 0.7})`;
+  }
+}
+
+function scoreToTextColor(score) {
+  if (Math.abs(score) < 0.3) return '#aaa';
+  if (score > 0) return score > 2.5 ? '#44cc44' : '#88cc44';
+  return score < -2.5 ? '#ff4444' : '#ff8844';
+}
+
+function renderHeatmap(container, words) {
+  container.innerHTML = '';
+  if (words.length === 0) {
+    container.innerHTML = '<span class="placeholder">Words will appear here with sentiment coloring...</span>';
+    return;
+  }
+
+  for (const w of words) {
+    if (w.isSpace) {
+      container.appendChild(document.createTextNode(w.text));
+      continue;
+    }
+    const span = document.createElement('span');
+    span.className = 'word';
+    span.textContent = w.text;
+    span.style.background = scoreToColor(w.score);
+    span.style.color = scoreToTextColor(w.score);
+    span.dataset.score = w.score.toFixed(2);
+    span.dataset.clean = w.clean;
+    container.appendChild(span);
+  }
+}
+
+function updateGauge(overall) {
+  const needle = document.getElementById('gaugeNeedle');
+  // Map overall from [-5,5] to [-90,90] degrees
+  const angle = (overall / 5) * 85;
+  needle.style.transform = `rotate(${angle}deg)`;
+
+  const label = document.getElementById('gaugeLabel');
+  const scoreEl = document.getElementById('gaugeScore');
+  scoreEl.textContent = overall.toFixed(2);
+
+  if (overall > 2) label.textContent = 'Very Positive';
+  else if (overall > 0.5) label.textContent = 'Positive';
+  else if (overall > -0.5) label.textContent = 'Neutral';
+  else if (overall > -2) label.textContent = 'Negative';
+  else label.textContent = 'Very Negative';
+
+  label.style.color = scoreToTextColor(overall);
+}
+
+function updateStats(counts) {
+  const total = counts.pos + counts.neg + counts.neu || 1;
+  document.getElementById('barPos').style.width = (counts.pos / total * 100) + '%';
+  document.getElementById('barNeu').style.width = (counts.neu / total * 100) + '%';
+  document.getElementById('barNeg').style.width = (counts.neg / total * 100) + '%';
+  document.getElementById('countPos').textContent = counts.pos;
+  document.getElementById('countNeu').textContent = counts.neu;
+  document.getElementById('countNeg').textContent = counts.neg;
+}
+
+// ===== TOOLTIP =====
+const tooltip = document.getElementById('tooltip');
+function showTooltip(e, word) {
+  const score = parseFloat(word.dataset.score);
+  const label = score > 0.5 ? 'Positive' : score < -0.5 ? 'Negative' : 'Neutral';
+  tooltip.innerHTML = `<strong>${word.dataset.clean}</strong><br><span class="score-label">${label}</span> <span class="score-val">${score > 0 ? '+' : ''}${score.toFixed(2)}</span>`;
+  tooltip.classList.add('visible');
+  const rect = word.getBoundingClientRect();
+  tooltip.style.left = (rect.left + rect.width/2 - tooltip.offsetWidth/2) + 'px';
+  tooltip.style.top = (rect.top - tooltip.offsetHeight - 8) + 'px';
+}
+
+document.addEventListener('click', function(e) {
+  const word = e.target.closest('.word');
+  if (word && word.dataset.score !== undefined) {
+    showTooltip(e, word);
+    setTimeout(() => tooltip.classList.remove('visible'), 2000);
+  } else {
+    tooltip.classList.remove('visible');
+  }
+});
+
+// ===== MAIN ANALYSIS LOOP =====
+const mainInput = document.getElementById('mainInput');
+const mainHeatmap = document.getElementById('mainHeatmap');
+
+let analyzeTimeout;
+mainInput.addEventListener('input', function() {
+  clearTimeout(analyzeTimeout);
+  analyzeTimeout = setTimeout(() => {
+    const result = analyzeText(mainInput.value);
+    renderHeatmap(mainHeatmap, result.words);
+    updateGauge(result.overall);
+    updateStats(result.counts);
+  }, 100);
+});
+
+// ===== PRESETS =====
+document.querySelectorAll('.presets button').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.presets button').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    const key = this.dataset.preset;
+    if (PRESETS[key]) {
+      mainInput.value = PRESETS[key];
+      mainInput.dispatchEvent(new Event('input'));
+
+      // Also fill comparison inputs if in compare mode
+      if (document.getElementById('compareToggle').checked) {
+        const a = document.getElementById('compareInputA');
+        if (!a.value) { a.value = PRESETS[key]; a.dispatchEvent(new Event('input')); }
+        else {
+          const b = document.getElementById('compareInputB');
+          b.value = PRESETS[key];
+          b.dispatchEvent(new Event('input'));
+        }
+      }
+    }
+  });
+});
+
+// ===== COMPARISON MODE =====
+const compareToggle = document.getElementById('compareToggle');
+const singleMode = document.getElementById('singleMode');
+const compareMode = document.getElementById('compareMode');
+
+compareToggle.addEventListener('change', function() {
+  if (this.checked) {
+    singleMode.style.display = 'none';
+    compareMode.classList.add('active');
+  } else {
+    singleMode.style.display = 'flex';
+    compareMode.classList.remove('active');
+  }
+});
+
+function renderCompareBar(barEl, counts) {
+  const total = counts.pos + counts.neg + counts.neu || 1;
+  const negPct = (counts.neg / total * 100);
+  const neuPct = (counts.neu / total * 100);
+  const posPct = (counts.pos / total * 100);
+  barEl.innerHTML = `<div style="width:${negPct}%;background:#ff4444"></div><div style="width:${neuPct}%;background:#555"></div><div style="width:${posPct}%;background:#44cc44"></div>`;
+}
+
+function overallLabel(score) {
+  let label, color;
+  if (score > 2) { label = 'Very Positive'; color = '#44cc44'; }
+  else if (score > 0.5) { label = 'Positive'; color = '#88cc44'; }
+  else if (score > -0.5) { label = 'Neutral'; color = '#aaa'; }
+  else if (score > -2) { label = 'Negative'; color = '#ff8844'; }
+  else { label = 'Very Negative'; color = '#ff4444'; }
+  return `<span style="color:${color}">${label} (${score > 0 ? '+' : ''}${score.toFixed(2)})</span>`;
+}
+
+['A','B'].forEach(side => {
+  const input = document.getElementById('compareInput' + side);
+  const heatmap = document.getElementById('compareHeatmap' + side);
+  const bar = document.getElementById('compareBar' + side);
+  const overall = document.getElementById('compareOverall' + side);
+
+  let timeout;
+  input.addEventListener('input', function() {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => {
+      const result = analyzeText(input.value);
+      renderHeatmap(heatmap, result.words);
+      renderCompareBar(bar, result.counts);
+      overall.innerHTML = input.value.trim() ? overallLabel(result.overall) : '--';
+    }, 100);
+  });
+});
+
+// ===== INIT =====
+updateGauge(0);
+updateStats({pos:0,neg:0,neu:0});
+</script>
+</body>
+</html>
