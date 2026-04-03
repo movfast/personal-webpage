@@ -1,0 +1,1683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meow Master! — Cat Clicker Training Simulator</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #1a1a2e; display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    overflow: hidden;
+  }
+  #game-container {
+    position: relative; width: 800px; height: 600px;
+    border-radius: 16px; overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(255,180,100,0.1);
+  }
+  canvas { display: block; width: 100%; height: 100%; }
+
+  .overlay {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    background: rgba(20, 20, 40, 0.85); z-index: 10; transition: opacity 0.4s;
+  }
+  .overlay.hidden { opacity: 0; pointer-events: none; }
+
+  .panel {
+    background: rgba(255,255,255,0.08); backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.15); border-radius: 20px;
+    padding: 40px 50px; text-align: center; color: #fff;
+    max-width: 460px;
+  }
+  .panel h1 { font-size: 38px; margin-bottom: 6px; }
+  .panel h1 span { color: #ffb347; }
+  .panel .subtitle {
+    font-size: 14px; color: rgba(255,255,255,0.6); margin-bottom: 24px;
+    letter-spacing: 1px; text-transform: uppercase;
+  }
+  .panel p { font-size: 15px; color: rgba(255,255,255,0.75); line-height: 1.6; margin-bottom: 20px; }
+  .panel .keys { font-size: 13px; color: rgba(255,255,255,0.45); margin-top: 16px; }
+  .panel .keys kbd {
+    background: rgba(255,255,255,0.12); padding: 2px 8px; border-radius: 4px;
+    font-family: inherit; border: 1px solid rgba(255,255,255,0.2);
+  }
+
+  .btn {
+    display: inline-block; padding: 14px 40px; border-radius: 12px; border: none;
+    font-size: 17px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+    background: linear-gradient(135deg, #ffb347, #ff6b6b); color: #fff;
+    box-shadow: 0 4px 15px rgba(255,107,107,0.3);
+  }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,107,107,0.4); }
+  .btn:active { transform: translateY(0); }
+
+  #naming-input {
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 10px; padding: 12px 20px; color: #fff; font-size: 18px;
+    width: 100%; text-align: center; outline: none; margin-bottom: 16px;
+    font-family: inherit;
+  }
+  #naming-input:focus { border-color: #ffb347; }
+  #naming-input::placeholder { color: rgba(255,255,255,0.3); }
+
+  @media (max-width: 840px) {
+    #game-container { width: 100vw; height: 75vw; border-radius: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div id="game-container">
+  <canvas id="canvas" width="800" height="600"></canvas>
+
+  <div id="title-screen" class="overlay">
+    <div class="panel">
+      <h1>Meow <span>Master!</span></h1>
+      <div class="subtitle">Cat Clicker Training Simulator</div>
+      <p>Train a cat using real machine learning! Watch the AI learn which tricks you reward. Press <kbd>Space</kbd> when you see the target behavior.</p>
+      <p style="font-size:13px; color:rgba(255,255,255,0.5)">Powered by Bayesian Thompson Sampling</p>
+      <button class="btn" id="start-btn">Start Training</button>
+      <div class="keys">
+        <kbd>Space</kbd> / Click cat = Reward &nbsp;&bull;&nbsp;
+        <kbd>Esc</kbd> = Pause
+      </div>
+    </div>
+  </div>
+
+  <div id="naming-screen" class="overlay hidden">
+    <div class="panel">
+      <h2 style="font-size:28px; margin-bottom:8px" id="naming-title">Trick Learned!</h2>
+      <p id="naming-desc">Your cat learned a new trick! Give it a name:</p>
+      <input type="text" id="naming-input" maxlength="20" placeholder="Enter trick name..." autocomplete="off">
+      <br>
+      <button class="btn" id="naming-confirm">Confirm</button>
+      <div class="keys" style="margin-top:12px">Press <kbd>Enter</kbd> to confirm &bull; <kbd>Esc</kbd> for default name</div>
+    </div>
+  </div>
+
+  <div id="gameover-screen" class="overlay hidden">
+    <div class="panel">
+      <h2 style="font-size:28px; margin-bottom:8px">Out of Treats!</h2>
+      <p id="gameover-stats"></p>
+      <button class="btn" id="restart-btn">Try Again</button>
+    </div>
+  </div>
+
+  <div id="pause-screen" class="overlay hidden">
+    <div class="panel">
+      <h2 style="font-size:28px; margin-bottom:8px">Paused</h2>
+      <p>Press <kbd>Esc</kbd> to resume or</p>
+      <button class="btn" id="resume-btn" style="margin-top:12px">Resume</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+//  MEOW MASTER! — Cat Clicker Training Simulator
+//  A portfolio-ready ML game using Bayesian Thompson Sampling
+// ============================================================
+
+const W = 800, H = 600;
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+// roundRect polyfill for older browsers
+if (!ctx.roundRect) {
+  CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+    r = typeof r === 'number' ? r : (r && r[0]) || 0;
+    this.moveTo(x + r, y);
+    this.arcTo(x + w, y, x + w, y + h, r);
+    this.arcTo(x + w, y + h, x, y + h, r);
+    this.arcTo(x, y + h, x, y, r);
+    this.arcTo(x, y, x + w, y, r);
+    this.closePath();
+  };
+}
+
+// ======================== MATH UTILS ========================
+function randn() {
+  const u1 = Math.random(), u2 = Math.random();
+  return Math.sqrt(-2 * Math.log(u1 || 1e-10)) * Math.cos(2 * Math.PI * u2);
+}
+function gammaSample(alpha) {
+  if (alpha < 1) return gammaSample(alpha + 1) * Math.pow(Math.random() || 1e-10, 1 / alpha);
+  const d = alpha - 1/3, c = 1 / Math.sqrt(9 * d);
+  for (;;) {
+    let x, v;
+    do { x = randn(); v = 1 + c * x; } while (v <= 0);
+    v = v * v * v;
+    const u = Math.random();
+    if (u < 1 - 0.0331 * x * x * x * x) return d * v;
+    if (Math.log(u || 1e-10) < 0.5 * x * x + d * (1 - v + Math.log(v))) return d * v;
+  }
+}
+function betaSample(a, b) {
+  const x = gammaSample(a), y = gammaSample(b);
+  return x / (x + y + 1e-10);
+}
+function lerp(a, b, t) { return a + (b - a) * t; }
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+function softmax(arr, temp = 1) {
+  const max = Math.max(...arr);
+  const exps = arr.map(v => Math.exp((v - max) / temp));
+  const sum = exps.reduce((a, b) => a + b, 0);
+  return exps.map(v => v / sum);
+}
+function randInt(lo, hi) { return lo + Math.floor(Math.random() * (hi - lo + 1)); }
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+// ======================== AUDIO ENGINE ========================
+class AudioEngine {
+  constructor() { this.ctx = null; }
+  init() {
+    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  _osc(freq, type, dur, vol, ramp) {
+    if (!this.ctx) return;
+    const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+    o.connect(g); g.connect(this.ctx.destination);
+    o.type = type; const t = this.ctx.currentTime;
+    if (typeof freq === 'number') { o.frequency.setValueAtTime(freq, t); }
+    else { freq(o.frequency, t); }
+    g.gain.setValueAtTime(vol, t);
+    if (ramp) ramp(g.gain, t);
+    else g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    o.start(t); o.stop(t + dur);
+  }
+  click() {
+    this._osc((f, t) => { f.setValueAtTime(1200, t); f.exponentialRampToValueAtTime(1800, t + 0.03); },
+      'sine', 0.08, 0.15);
+  }
+  treat() {
+    this._osc((f, t) => {
+      f.setValueAtTime(500, t); f.exponentialRampToValueAtTime(900, t + 0.12);
+    }, 'sine', 0.18, 0.12);
+  }
+  miss() {
+    this._osc((f, t) => { f.setValueAtTime(180, t); }, 'sawtooth', 0.15, 0.1);
+  }
+  meow() {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+    o.connect(g); g.connect(this.ctx.destination);
+    o.type = 'sine';
+    o.frequency.setValueAtTime(600, t);
+    o.frequency.exponentialRampToValueAtTime(900, t + 0.08);
+    o.frequency.exponentialRampToValueAtTime(500, t + 0.25);
+    o.frequency.exponentialRampToValueAtTime(350, t + 0.4);
+    g.gain.setValueAtTime(0.15, t);
+    g.gain.linearRampToValueAtTime(0.2, t + 0.06);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+    o.start(t); o.stop(t + 0.4);
+  }
+  levelUp() {
+    if (!this.ctx) return;
+    [0, 4, 7, 12].forEach((note, i) => {
+      const freq = 523 * Math.pow(2, note / 12);
+      const t = this.ctx.currentTime + i * 0.1;
+      const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+      o.connect(g); g.connect(this.ctx.destination);
+      o.frequency.setValueAtTime(freq, t);
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(0.15, t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+      o.start(t); o.stop(t + 0.25);
+    });
+  }
+  purr() {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+    const lfo = this.ctx.createOscillator(), lg = this.ctx.createGain();
+    lfo.frequency.setValueAtTime(26, t); lg.gain.setValueAtTime(25, t);
+    lfo.connect(lg); lg.connect(o.frequency);
+    o.connect(g); g.connect(this.ctx.destination);
+    o.frequency.setValueAtTime(75, t);
+    g.gain.setValueAtTime(0.08, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.6);
+    o.start(t); lfo.start(t); o.stop(t + 0.6); lfo.stop(t + 0.6);
+  }
+}
+const audio = new AudioEngine();
+
+// ======================== BEHAVIORS ========================
+const BEHAVIORS = {
+  wander:   { name: 'Wander',   duration: 80,  points: 0,  ideal: 0,  color: '#888' },
+  sit:      { name: 'Sit',      duration: 50,  points: 50, ideal: 22, color: '#4CAF50' },
+  stretch:  { name: 'Stretch',  duration: 60,  points: 60, ideal: 28, color: '#FF9800' },
+  paw:      { name: 'Paw',      duration: 45,  points: 55, ideal: 18, color: '#2196F3' },
+  roll:     { name: 'Roll',     duration: 55,  points: 70, ideal: 25, color: '#9C27B0' },
+  jump:     { name: 'Jump',     duration: 40,  points: 80, ideal: 16, color: '#F44336', unlock: 3 },
+  headbutt: { name: 'Headbutt', duration: 35,  points: 65, ideal: 14, color: '#00BCD4', unlock: 5 },
+  purr:     { name: 'Purr',     duration: 70,  points: 90, ideal: 32, color: '#E91E63', unlock: 7 },
+};
+const BEHAVIOR_LIST = Object.keys(BEHAVIORS).filter(b => b !== 'wander');
+
+const ROOMS = [
+  { name: 'Cozy Living Room',  target: 'sit',      bg1: '#FFF8E7', bg2: '#FFE4C4', accent: '#D4A574', treats: 25 },
+  { name: 'Sunny Kitchen',     target: 'stretch',   bg1: '#FFFDE7', bg2: '#FFF9C4', accent: '#FFD54F', treats: 22 },
+  { name: 'Garden Window',     target: 'paw',       bg1: '#E8F5E9', bg2: '#C8E6C9', accent: '#81C784', treats: 22 },
+  { name: 'Cozy Bedroom',      target: 'roll',      bg1: '#EDE7F6', bg2: '#D1C4E9', accent: '#B39DDB', treats: 20 },
+  { name: 'Sunset Rooftop',    target: 'jump',      bg1: '#FFF3E0', bg2: '#FFE0B2', accent: '#FF8A65', treats: 20 },
+  { name: 'Cat Cafe',          target: 'headbutt',  bg1: '#FCE4EC', bg2: '#F8BBD0', accent: '#F48FB1', treats: 20 },
+  { name: 'Enchanted Garden',  target: 'purr',      bg1: '#E0F7FA', bg2: '#B2EBF2', accent: '#4DD0E1', treats: 18 },
+];
+
+const MOODS = {
+  curious:  { label: 'Curious',  icon: '?',  learnMul: 1.0, durMul: 1.0, pointsMul: 1.0, ignoreChance: 0 },
+  playful:  { label: 'Playful',  icon: '!',  learnMul: 1.3, durMul: 0.75, pointsMul: 1.0, ignoreChance: 0 },
+  sleepy:   { label: 'Sleepy',   icon: 'z',  learnMul: 0.7, durMul: 1.4,  pointsMul: 1.0, ignoreChance: 0 },
+  aloof:    { label: 'Aloof',    icon: '~',  learnMul: 1.0, durMul: 1.0, pointsMul: 1.5, ignoreChance: 0.2 },
+};
+const MOOD_LIST = Object.keys(MOODS);
+const RANKS = ['Beginner', 'Apprentice', 'Junior Trainer', 'Trainer', 'Expert Trainer', 'Cat Whisperer'];
+
+// ======================== BANDIT TRAINER ========================
+class BanditTrainer {
+  constructor(availableBehaviors) {
+    this.arms = {};
+    availableBehaviors.forEach(b => {
+      this.arms[b] = { alpha: 4, beta: 6 };
+    });
+    this.history = [];
+  }
+  selectBehavior(moodLearnMul) {
+    const keys = Object.keys(this.arms);
+    const samples = keys.map(k => betaSample(this.arms[k].alpha, this.arms[k].beta));
+    const probs = softmax(samples, 1.0);
+    const r = Math.random();
+    let cum = 0;
+    for (let i = 0; i < keys.length; i++) {
+      cum += probs[i];
+      if (r <= cum) return keys[i];
+    }
+    return keys[keys.length - 1];
+  }
+  reward(behavior, multiplier, learnMul = 1) {
+    if (!this.arms[behavior]) return;
+    this.arms[behavior].alpha += 2.0 * multiplier * learnMul;
+    this.history.push({ behavior, type: 'reward', t: Date.now() });
+  }
+  extinguish(behavior) {
+    if (!this.arms[behavior]) return;
+    this.arms[behavior].beta += 0.15;
+  }
+  getExpectedValue(behavior) {
+    const a = this.arms[behavior];
+    if (!a) return 0;
+    return a.alpha / (a.alpha + a.beta);
+  }
+  getExpectedValues() {
+    const result = {};
+    for (const k in this.arms) result[k] = this.getExpectedValue(k);
+    return result;
+  }
+  shouldName(target) {
+    const a = this.arms[target];
+    if (!a) return false;
+    return a.alpha >= 19 && this.getExpectedValue(target) >= 0.55;
+  }
+}
+
+// ======================== PARTICLES ========================
+class Particle {
+  constructor(x, y, type) {
+    this.x = x; this.y = y; this.type = type;
+    this.life = 1; this.maxLife = 1;
+    this.vx = (Math.random() - 0.5) * 3;
+    this.vy = -Math.random() * 3 - 1;
+    this.size = 4 + Math.random() * 6;
+    this.rotation = Math.random() * Math.PI * 2;
+    this.rotSpeed = (Math.random() - 0.5) * 0.1;
+    if (type === 'heart') { this.maxLife = 1.2; this.life = 1.2; this.vy = -1.5 - Math.random(); this.size = 8 + Math.random() * 4; }
+    if (type === 'star') { this.maxLife = 0.8; this.life = 0.8; this.vx *= 2; this.vy *= 1.5; this.size = 3 + Math.random() * 5; }
+    if (type === 'fish') { this.maxLife = 1.0; this.life = 1.0; this.vy = -2 - Math.random(); this.size = 10 + Math.random() * 4; }
+    if (type === 'sparkle') { this.maxLife = 0.6; this.life = 0.6; this.vx *= 4; this.vy = (Math.random() - 0.5) * 4; this.size = 2 + Math.random() * 3; }
+    if (type === 'note') { this.maxLife = 1.5; this.life = 1.5; this.vy = -1; this.vx = (Math.random() - 0.5) * 1.5; this.size = 12; }
+  }
+  update(dt) {
+    this.life -= dt;
+    this.x += this.vx;
+    this.y += this.vy;
+    this.vy += 0.02;
+    this.rotation += this.rotSpeed;
+  }
+  get alpha() { return clamp(this.life / this.maxLife, 0, 1); }
+  get dead() { return this.life <= 0; }
+  draw(ctx) {
+    const a = this.alpha;
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.rotate(this.rotation);
+    ctx.globalAlpha = a;
+    if (this.type === 'heart') {
+      ctx.fillStyle = '#ff6b8a';
+      const s = this.size;
+      ctx.beginPath();
+      ctx.moveTo(0, s * 0.3);
+      ctx.bezierCurveTo(-s * 0.5, -s * 0.2, -s * 0.5, -s * 0.6, 0, -s * 0.35);
+      ctx.bezierCurveTo(s * 0.5, -s * 0.6, s * 0.5, -s * 0.2, 0, s * 0.3);
+      ctx.fill();
+    } else if (this.type === 'star') {
+      ctx.fillStyle = '#FFD700';
+      drawStar(ctx, 0, 0, 5, this.size, this.size * 0.45);
+    } else if (this.type === 'fish') {
+      drawFish(ctx, 0, 0, this.size, '#FF9800', a);
+    } else if (this.type === 'sparkle') {
+      ctx.fillStyle = `rgba(255,255,200,${a})`;
+      ctx.beginPath();
+      ctx.arc(0, 0, this.size, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (this.type === 'note') {
+      ctx.fillStyle = '#CE93D8';
+      ctx.font = `${this.size}px sans-serif`;
+      ctx.fillText(pick(['♪', '♫', '♬']), -4, 4);
+    }
+    ctx.globalAlpha = 1;
+    ctx.restore();
+  }
+}
+function drawStar(ctx, cx, cy, spikes, outerR, innerR) {
+  ctx.beginPath();
+  for (let i = 0; i < spikes * 2; i++) {
+    const r = i % 2 === 0 ? outerR : innerR;
+    const angle = (i * Math.PI) / spikes - Math.PI / 2;
+    const x = cx + Math.cos(angle) * r, y = cy + Math.sin(angle) * r;
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  }
+  ctx.closePath(); ctx.fill();
+}
+function drawFish(ctx, x, y, size, color, alpha) {
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.ellipse(x, y, size * 0.6, size * 0.3, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(x - size * 0.5, y);
+  ctx.lineTo(x - size * 0.8, y - size * 0.3);
+  ctx.lineTo(x - size * 0.8, y + size * 0.3);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = '#333';
+  ctx.beginPath();
+  ctx.arc(x + size * 0.25, y - size * 0.05, size * 0.06, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+// ======================== CAT RENDERER ========================
+const CAT_COLORS = {
+  body: '#E8913A', dark: '#C06A20', belly: '#FFF3E0', cream: '#FDEBD0',
+  eye: '#66BB6A', eyeDark: '#2E7D32', nose: '#F48FB1', earInner: '#FFAB91',
+  pawPad: '#D4A574', stripe: '#C06A20',
+};
+
+function drawCatBody(ctx, pose) {
+  // Each pose is an object: { bodyX, bodyY, bodyAngle, headX, headY, headAngle,
+  //   tailPts, frontLegs[], backLegs[], eyeState, mouthState }
+  ctx.save();
+
+  // === TAIL (behind body) ===
+  ctx.save();
+  ctx.strokeStyle = CAT_COLORS.body;
+  ctx.lineWidth = 10;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  const tp = pose.tailPts;
+  ctx.moveTo(tp[0], tp[1]);
+  ctx.bezierCurveTo(tp[2], tp[3], tp[4], tp[5], tp[6], tp[7]);
+  ctx.stroke();
+  // Tail tip darker
+  ctx.strokeStyle = CAT_COLORS.dark;
+  ctx.lineWidth = 9;
+  ctx.beginPath();
+  ctx.moveTo(tp[4] * 0.5 + tp[6] * 0.5, tp[5] * 0.5 + tp[7] * 0.5);
+  ctx.lineTo(tp[6], tp[7]);
+  ctx.stroke();
+  ctx.restore();
+
+  // === BACK LEGS ===
+  pose.backLegs.forEach(leg => drawLeg(ctx, leg.x, leg.y, leg.angle, leg.h || 24));
+
+  // === BODY ===
+  ctx.save();
+  ctx.translate(pose.bodyX, pose.bodyY);
+  ctx.rotate(pose.bodyAngle * Math.PI / 180);
+  // Body shape
+  ctx.fillStyle = CAT_COLORS.body;
+  ctx.beginPath();
+  ctx.ellipse(0, 0, 48, 30, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Belly
+  ctx.fillStyle = CAT_COLORS.cream;
+  ctx.beginPath();
+  ctx.ellipse(5, 8, 30, 16, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Stripes
+  ctx.strokeStyle = CAT_COLORS.stripe;
+  ctx.lineWidth = 2.5;
+  ctx.globalAlpha = 0.35;
+  for (let i = -1; i <= 2; i++) {
+    ctx.beginPath();
+    ctx.moveTo(i * 16, -28);
+    ctx.quadraticCurveTo(i * 16 + 4, -14, i * 16 - 2, -4);
+    ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+  ctx.restore();
+
+  // === FRONT LEGS ===
+  pose.frontLegs.forEach(leg => drawLeg(ctx, leg.x, leg.y, leg.angle, leg.h || 24));
+
+  // === HEAD ===
+  ctx.save();
+  ctx.translate(pose.headX, pose.headY);
+  ctx.rotate((pose.headAngle || 0) * Math.PI / 180);
+
+  // Head circle
+  ctx.fillStyle = CAT_COLORS.body;
+  ctx.beginPath();
+  ctx.arc(0, 0, 27, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Cheeks (cream)
+  ctx.fillStyle = CAT_COLORS.cream;
+  ctx.beginPath();
+  ctx.ellipse(0, 8, 22, 14, 0, 0, Math.PI);
+  ctx.fill();
+
+  // Ears
+  drawEar(ctx, -16, -22, -15);
+  drawEar(ctx, 16, -22, 15);
+
+  // Eyes
+  const es = pose.eyeState || 'normal';
+  drawEye(ctx, -10, -3, es, pose.pupilDir || 0);
+  drawEye(ctx, 10, -3, es, pose.pupilDir || 0);
+
+  // Nose
+  ctx.fillStyle = CAT_COLORS.nose;
+  ctx.beginPath();
+  ctx.moveTo(0, 5);
+  ctx.lineTo(-4, 1);
+  ctx.lineTo(4, 1);
+  ctx.closePath();
+  ctx.fill();
+
+  // Mouth
+  ctx.strokeStyle = CAT_COLORS.dark;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(0, 5);
+  ctx.lineTo(0, 9);
+  ctx.moveTo(0, 9);
+  ctx.quadraticCurveTo(-6, 13, -8, 10);
+  ctx.moveTo(0, 9);
+  ctx.quadraticCurveTo(6, 13, 8, 10);
+  ctx.stroke();
+  if (pose.mouthState === 'open') {
+    ctx.fillStyle = '#E57373';
+    ctx.beginPath();
+    ctx.ellipse(0, 11, 5, 3, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Whiskers
+  ctx.strokeStyle = 'rgba(0,0,0,0.25)';
+  ctx.lineWidth = 1;
+  [[-1, 1], [1, 1]].forEach(([sx]) => {
+    for (let i = -1; i <= 1; i++) {
+      ctx.beginPath();
+      ctx.moveTo(sx * 12, 5 + i * 3);
+      ctx.lineTo(sx * 35, 2 + i * 5);
+      ctx.stroke();
+    }
+  });
+
+  ctx.restore(); // head
+  ctx.restore(); // root
+}
+
+function drawEar(ctx, x, y, angle) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(angle * Math.PI / 180);
+  ctx.fillStyle = CAT_COLORS.body;
+  ctx.beginPath();
+  ctx.moveTo(0, -18);
+  ctx.lineTo(-10, 8);
+  ctx.lineTo(10, 8);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = CAT_COLORS.earInner;
+  ctx.beginPath();
+  ctx.moveTo(0, -12);
+  ctx.lineTo(-6, 5);
+  ctx.lineTo(6, 5);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawEye(ctx, x, y, state, dir) {
+  ctx.save();
+  ctx.translate(x, y);
+  if (state === 'closed' || state === 'happy') {
+    // Closed/happy arc
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    if (state === 'happy') {
+      ctx.arc(0, 0, 6, Math.PI * 0.1, Math.PI * 0.9);
+    } else {
+      ctx.moveTo(-6, 0);
+      ctx.lineTo(6, 0);
+    }
+    ctx.stroke();
+  } else {
+    // Eye white
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    const h = state === 'half' ? 5 : 8;
+    ctx.ellipse(0, 0, 7, h, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Iris
+    ctx.fillStyle = CAT_COLORS.eye;
+    const py = state === 'half' ? 1 : 0;
+    ctx.beginPath();
+    ctx.ellipse(dir * 2, py, 5, Math.min(h - 1, 6), 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Pupil (vertical slit)
+    ctx.fillStyle = '#222';
+    ctx.beginPath();
+    ctx.ellipse(dir * 2, py, 2, Math.min(h - 2, 5), 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Highlight
+    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+    ctx.beginPath();
+    ctx.arc(dir * 2 + 2, py - 2, 2, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawLeg(ctx, x, y, angle, h) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(angle * Math.PI / 180);
+  ctx.fillStyle = CAT_COLORS.body;
+  ctx.beginPath();
+  ctx.roundRect(-5, 0, 10, h, 4);
+  ctx.fill();
+  // Paw
+  ctx.fillStyle = CAT_COLORS.cream;
+  ctx.beginPath();
+  ctx.ellipse(0, h, 7, 5, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
+// Pose generators for each behavior
+function getPose(behavior, frame, totalDur) {
+  const t = frame / totalDur; // 0..1 progress
+  const s = Math.sin;
+  switch (behavior) {
+    case 'wander': return {
+      bodyX: 0, bodyY: 0, bodyAngle: 0,
+      headX: 38, headY: -25, headAngle: s(frame * 0.04) * 3,
+      tailPts: [-48, 0, -65, -20 + s(frame * 0.06) * 15, -75, -40 + s(frame * 0.06) * 10, -60, -50 + s(frame * 0.08) * 12],
+      frontLegs: [
+        { x: 22, y: 22, angle: s(frame * 0.12) * 18 },
+        { x: 36, y: 22, angle: s(frame * 0.12 + Math.PI) * 18 },
+      ],
+      backLegs: [
+        { x: -22, y: 20, angle: s(frame * 0.12 + Math.PI) * 14 },
+        { x: -10, y: 20, angle: s(frame * 0.12) * 14 },
+      ],
+      eyeState: 'normal', pupilDir: 0,
+    };
+    case 'sit': {
+      const settle = Math.min(t * 3, 1);
+      return {
+        bodyX: 0, bodyY: 5 * settle, bodyAngle: -12 * settle,
+        headX: 32, headY: -28 - 3 * settle, headAngle: s(frame * 0.03) * 2,
+        tailPts: [-45, 10, -55, 25, -30, 30, -10, 25],
+        frontLegs: [
+          { x: 26, y: 26, angle: 0 },
+          { x: 38, y: 26, angle: 0 },
+        ],
+        backLegs: [
+          { x: -18, y: 18, angle: 30 * settle },
+          { x: -6, y: 18, angle: 30 * settle },
+        ],
+        eyeState: 'normal', pupilDir: 0,
+      };
+    }
+    case 'stretch': {
+      const prog = Math.min(t * 2.5, 1);
+      return {
+        bodyX: -10 * prog, bodyY: 12 * prog, bodyAngle: 8 * prog,
+        headX: 50 * prog + 30 * (1 - prog), headY: -10 - 8 * prog, headAngle: -10 * prog,
+        tailPts: [-48, 5, -70, -25, -80, -45, -65, -55 + s(frame * 0.07) * 8],
+        frontLegs: [
+          { x: 30 + 15 * prog, y: 28, angle: -20 * prog, h: 18 },
+          { x: 40 + 15 * prog, y: 28, angle: -20 * prog, h: 18 },
+        ],
+        backLegs: [
+          { x: -25, y: 16, angle: 15 * prog },
+          { x: -15, y: 16, angle: 15 * prog },
+        ],
+        eyeState: prog > 0.5 ? 'half' : 'normal', pupilDir: 0, mouthState: prog > 0.7 ? 'open' : '',
+      };
+    }
+    case 'paw': {
+      const lift = s(clamp(t * 3, 0, 1) * Math.PI * 0.5);
+      const wave = t > 0.3 ? s((t - 0.3) * 12) * 15 : 0;
+      return {
+        bodyX: 0, bodyY: 4, bodyAngle: -10,
+        headX: 34, headY: -28, headAngle: 5 + s(frame * 0.05) * 3,
+        tailPts: [-45, 8, -55, 20, -35, 28, -15, 22],
+        frontLegs: [
+          { x: 30, y: 15, angle: -45 * lift + wave, h: 26 },
+          { x: 40, y: 26, angle: 0 },
+        ],
+        backLegs: [
+          { x: -18, y: 18, angle: 25 },
+          { x: -6, y: 18, angle: 25 },
+        ],
+        eyeState: 'normal', pupilDir: 0.5,
+      };
+    }
+    case 'roll': {
+      const rollAngle = t * 360;
+      const onBack = (Math.cos(rollAngle * Math.PI / 180) < -0.3);
+      return {
+        bodyX: 0, bodyY: 15, bodyAngle: clamp(s(t * Math.PI * 2) * 30, -30, 30),
+        headX: 30 + s(t * Math.PI * 2) * 10, headY: -15 + Math.abs(s(t * Math.PI * 2)) * 10,
+        headAngle: s(t * Math.PI * 2) * 20,
+        tailPts: [-48, 10, -60 + s(frame * 0.1) * 15, 25, -40, 30, -20, 20],
+        frontLegs: [
+          { x: 22, y: onBack ? -10 : 22, angle: onBack ? -50 + s(frame * 0.2) * 20 : s(frame * 0.15) * 25, h: 20 },
+          { x: 36, y: onBack ? -10 : 22, angle: onBack ? -40 + s(frame * 0.18) * 25 : s(frame * 0.15 + 1) * 25, h: 20 },
+        ],
+        backLegs: [
+          { x: -20, y: onBack ? -5 : 18, angle: onBack ? -45 + s(frame * 0.22) * 15 : 20 },
+          { x: -8, y: onBack ? -5 : 18, angle: onBack ? -35 + s(frame * 0.19) * 18 : 20 },
+        ],
+        eyeState: onBack ? 'happy' : 'normal', pupilDir: 0,
+      };
+    }
+    case 'jump': {
+      const jumpY = -60 * s(t * Math.PI);
+      return {
+        bodyX: 0, bodyY: jumpY, bodyAngle: t < 0.5 ? -15 : 10,
+        headX: 35, headY: -25 + jumpY, headAngle: t < 0.5 ? -5 : 5,
+        tailPts: [-48, jumpY + 5, -68, jumpY - 20, -78, jumpY - 40, -60, jumpY - 48],
+        frontLegs: [
+          { x: 25, y: 20 + jumpY, angle: t < 0.5 ? -30 : 15, h: t < 0.5 ? 18 : 26 },
+          { x: 38, y: 20 + jumpY, angle: t < 0.5 ? -25 : 12, h: t < 0.5 ? 18 : 26 },
+        ],
+        backLegs: [
+          { x: -20, y: 18 + jumpY, angle: t < 0.5 ? 30 : -10 },
+          { x: -8, y: 18 + jumpY, angle: t < 0.5 ? 25 : -5 },
+        ],
+        eyeState: 'normal', pupilDir: 0,
+      };
+    }
+    case 'headbutt': {
+      const push = s(clamp(t * 3, 0, 1) * Math.PI * 0.5);
+      return {
+        bodyX: 5 * push, bodyY: 2, bodyAngle: 5 * push,
+        headX: 38 + 18 * push, headY: -20 + 8 * push, headAngle: 15 * push,
+        tailPts: [-48, 0, -65, -15 + s(frame * 0.08) * 20, -75, -35, -55, -40],
+        frontLegs: [
+          { x: 26, y: 24, angle: 8 * push },
+          { x: 38, y: 24, angle: 5 * push },
+        ],
+        backLegs: [
+          { x: -20, y: 20, angle: -5 * push },
+          { x: -8, y: 20, angle: -5 * push },
+        ],
+        eyeState: push > 0.5 ? 'happy' : 'normal', pupilDir: 1,
+      };
+    }
+    case 'purr': {
+      const vibrate = s(frame * 0.5) * 1.5;
+      return {
+        bodyX: vibrate, bodyY: 5, bodyAngle: -10,
+        headX: 32 + vibrate, headY: -28, headAngle: s(frame * 0.03) * 2,
+        tailPts: [-45, 10, -55, 22 + s(frame * 0.04) * 5, -35, 28, -12, 22],
+        frontLegs: [
+          { x: 26, y: 26, angle: 0 },
+          { x: 38, y: 26, angle: 0 },
+        ],
+        backLegs: [
+          { x: -18, y: 18, angle: 28 },
+          { x: -6, y: 18, angle: 28 },
+        ],
+        eyeState: 'happy', pupilDir: 0,
+      };
+    }
+    default: return getPose('wander', frame, 80);
+  }
+}
+
+// ======================== ROOM BACKGROUNDS ========================
+function drawRoom(ctx, room, frame) {
+  // Gradient background
+  const grad = ctx.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, room.bg1);
+  grad.addColorStop(1, room.bg2);
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+
+  // Floor
+  ctx.fillStyle = 'rgba(0,0,0,0.04)';
+  ctx.fillRect(0, H * 0.72, W, H * 0.28);
+  ctx.strokeStyle = 'rgba(0,0,0,0.06)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(0, H * 0.72);
+  ctx.lineTo(W, H * 0.72);
+  ctx.stroke();
+
+  // Room-specific decorations
+  const t = room.target;
+  ctx.globalAlpha = 0.15;
+  if (t === 'sit' || t === 'stretch') {
+    // Window
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(580, 60, 140, 120);
+    ctx.strokeStyle = room.accent;
+    ctx.lineWidth = 4;
+    ctx.strokeRect(580, 60, 140, 120);
+    ctx.beginPath(); ctx.moveTo(650, 60); ctx.lineTo(650, 180); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(580, 120); ctx.lineTo(720, 120); ctx.stroke();
+  }
+  if (t === 'paw' || t === 'purr') {
+    // Potted plant
+    ctx.fillStyle = room.accent;
+    ctx.fillRect(660, H * 0.72 - 80, 50, 80);
+    ctx.fillStyle = '#4CAF50';
+    ctx.beginPath();
+    ctx.arc(685, H * 0.72 - 100, 45, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  if (t === 'roll') {
+    // Bed edge
+    ctx.fillStyle = room.accent;
+    ctx.beginPath();
+    ctx.roundRect(50, H * 0.55, 200, 100, 15);
+    ctx.fill();
+  }
+  if (t === 'jump') {
+    // City silhouette
+    ctx.fillStyle = '#333';
+    const bldgs = [30, 80, 55, 100, 45, 70, 90, 60, 85, 50, 75, 95, 40, 65];
+    bldgs.forEach((h, i) => {
+      ctx.fillRect(i * 60 + 10, H * 0.72 - h * 0.7, 45, h * 0.7);
+    });
+  }
+  if (t === 'headbutt') {
+    // Cafe tables
+    for (let i = 0; i < 3; i++) {
+      ctx.fillStyle = room.accent;
+      ctx.beginPath();
+      ctx.ellipse(120 + i * 250, H * 0.72 - 30, 40, 8, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillRect(115 + i * 250, H * 0.72 - 30, 10, 30);
+    }
+  }
+  ctx.globalAlpha = 1;
+
+  // Floating dust particles / ambient
+  ctx.fillStyle = 'rgba(255,255,255,0.3)';
+  for (let i = 0; i < 8; i++) {
+    const px = (i * 137.5 + frame * 0.3) % W;
+    const py = (i * 89.3 + Math.sin(frame * 0.01 + i) * 30) % (H * 0.7);
+    ctx.beginPath();
+    ctx.arc(px, py, 1.5 + Math.sin(frame * 0.02 + i) * 0.8, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+// ======================== FLOATING TEXT ========================
+class FloatingText {
+  constructor(x, y, text, color, size = 20) {
+    this.x = x; this.y = y; this.text = text; this.color = color;
+    this.size = size; this.life = 1.2; this.maxLife = 1.2;
+  }
+  update(dt) { this.life -= dt; this.y -= 1.2; }
+  get dead() { return this.life <= 0; }
+  draw(ctx) {
+    const a = clamp(this.life / this.maxLife, 0, 1);
+    ctx.save();
+    ctx.globalAlpha = a;
+    ctx.font = `bold ${this.size}px 'Segoe UI', sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.fillStyle = this.color;
+    ctx.shadowColor = 'rgba(0,0,0,0.3)';
+    ctx.shadowBlur = 4;
+    ctx.fillText(this.text, this.x, this.y);
+    ctx.restore();
+  }
+}
+
+// ======================== GAME ========================
+class Game {
+  constructor() {
+    this.state = 'title'; // title, playing, naming, gameover, paused
+    this.frame = 0;
+    this.score = 0;
+    this.combo = 0;
+    this.maxCombo = 0;
+    this.rank = 0;
+    this.roomIndex = 0;
+    this.treatsRemaining = 0;
+    this.treatsGiven = 0;
+    this.namedBehaviors = {};
+    this.previousTrainers = [];
+
+    // Cat state
+    this.catX = W / 2;
+    this.catY = H * 0.58;
+    this.catFacing = 1; // 1=right, -1=left
+    this.catTargetX = W / 2;
+    this.catSpeed = 2.5;
+    this.catBehavior = 'wander';
+    this.catBehaviorFrame = 0;
+    this.catBehaviorDuration = 80;
+    this.catBobFrame = 0;
+
+    // Mood
+    this.mood = 'curious';
+    this.moodTimer = randInt(1200, 2400); // frames until mood change
+    this.moodTransition = 0;
+
+    // Frustration
+    this.frustration = 0;
+    this.isFrustrated = false;
+    this.isPetting = false;
+    this.petFrame = 0;
+    this.lastClickFrame = -100;
+
+    // ML
+    this.trainer = null;
+    this.targetAppeared = false;
+    this.targetGuaranteeFrame = 480;
+
+    // Visual
+    this.particles = [];
+    this.floatingTexts = [];
+    this.feedbackText = '';
+    this.feedbackTimer = 0;
+    this.hudAnimValues = {};
+    this.shakeMagnitude = 0;
+
+    // Naming
+    this.namingBehavior = null;
+    this.namingInput = '';
+  }
+
+  get room() { return ROOMS[Math.min(this.roomIndex, ROOMS.length - 1)]; }
+  get target() { return this.room.target; }
+
+  start() {
+    audio.init();
+    this.roomIndex = 0;
+    this.score = 0; this.combo = 0; this.maxCombo = 0; this.rank = 0;
+    this.treatsGiven = 0;
+    this.namedBehaviors = {};
+    this.previousTrainers = [];
+    this.startRoom();
+    this.state = 'playing';
+  }
+
+  startRoom() {
+    const room = this.room;
+    this.treatsRemaining = room.treats;
+    this.frustration = 0;
+    this.isFrustrated = false;
+    this.isPetting = false;
+    this.catBehavior = 'wander';
+    this.catBehaviorFrame = 0;
+    this.catBehaviorDuration = 80;
+    this.targetAppeared = false;
+    this.frame = 0;
+    this.combo = 0;
+
+    // Create trainer with available behaviors
+    const available = BEHAVIOR_LIST.filter(b => {
+      const def = BEHAVIORS[b];
+      return !def.unlock || this.roomIndex + 1 >= def.unlock;
+    });
+    this.trainer = new BanditTrainer(available);
+  }
+
+  advanceRoom() {
+    this.roomIndex++;
+    this.rank = Math.min(this.rank + 1, RANKS.length - 1);
+    if (this.roomIndex < ROOMS.length) {
+      this.startRoom();
+      audio.levelUp();
+      this.addFloatingText(W / 2, H / 2 - 40, 'Room Complete!', '#FFD700', 28);
+    } else {
+      // Game complete — loop back with harder settings
+      this.roomIndex = 0;
+      this.startRoom();
+      audio.levelUp();
+      this.addFloatingText(W / 2, H / 2 - 40, 'Master Trainer! New Game+', '#FFD700', 24);
+    }
+  }
+
+  update(dt) {
+    // Always animate background cat for title/pause screens
+    if (this.state !== 'playing') {
+      this.frame++;
+      this.catBobFrame++;
+      if (this.state === 'title') {
+        // Gentle wandering on title
+        this.catBehaviorFrame++;
+        if (this.catBehaviorFrame >= this.catBehaviorDuration) {
+          this.catBehaviorFrame = 0;
+        }
+        const dx = this.catTargetX - this.catX;
+        if (Math.abs(dx) > 3) {
+          this.catX += Math.sign(dx) * 1.5;
+          this.catFacing = dx > 0 ? 1 : -1;
+        } else if (Math.random() < 0.005) {
+          this.catTargetX = randInt(200, W - 200);
+        }
+      }
+      return;
+    }
+    this.frame++;
+    this.catBobFrame++;
+
+    // Mood timer
+    this.moodTimer--;
+    if (this.moodTimer <= 0) {
+      const newMood = pick(MOOD_LIST.filter(m => m !== this.mood));
+      this.mood = newMood;
+      this.moodTimer = randInt(1200, 2400);
+      this.moodTransition = 30;
+    }
+    if (this.moodTransition > 0) this.moodTransition--;
+
+    // Frustration decay
+    if (!this.isFrustrated && !this.isPetting) {
+      this.frustration = Math.max(0, this.frustration - 0.002);
+    }
+    if (this.frustration >= 0.7 && !this.isFrustrated) {
+      this.isFrustrated = true;
+      audio.meow();
+    }
+
+    // Petting
+    if (this.isPetting) {
+      this.petFrame++;
+      this.frustration = Math.max(0, this.frustration - 0.012);
+      if (this.petFrame >= 90) {
+        this.isPetting = false;
+        this.isFrustrated = false;
+        this.frustration = 0;
+        this.petFrame = 0;
+      }
+    }
+
+    // Cat movement
+    const dx = this.catTargetX - this.catX;
+    if (Math.abs(dx) > 3) {
+      const spd = this.mood === 'playful' ? 3.5 : this.mood === 'sleepy' ? 1.5 : 2.5;
+      this.catX += Math.sign(dx) * spd;
+      this.catFacing = dx > 0 ? 1 : -1;
+    } else if (this.catBehavior === 'wander' && Math.random() < 0.008) {
+      this.catTargetX = randInt(120, W - 120);
+    }
+
+    // Behavior timing
+    this.catBehaviorFrame++;
+    if (this.catBehaviorFrame >= this.catBehaviorDuration) {
+      this.offerNextBehavior();
+    }
+
+    // 10-second guarantee: target must appear
+    if (!this.targetAppeared && this.frame >= this.targetGuaranteeFrame && this.frame < this.targetGuaranteeFrame + 120) {
+      if (this.catBehavior !== this.target && Math.random() < 0.05) {
+        this.startBehavior(this.target);
+      }
+    }
+
+    // Update particles
+    this.particles.forEach(p => p.update(dt));
+    this.particles = this.particles.filter(p => !p.dead);
+    this.floatingTexts.forEach(t => t.update(dt));
+    this.floatingTexts = this.floatingTexts.filter(t => !t.dead);
+
+    // Feedback timer
+    if (this.feedbackTimer > 0) this.feedbackTimer -= dt;
+
+    // Screen shake decay
+    if (this.shakeMagnitude > 0) this.shakeMagnitude *= 0.9;
+
+    // Ambient particles for purring
+    if (this.catBehavior === 'purr' && this.frame % 20 === 0) {
+      this.particles.push(new Particle(this.catX + randInt(-20, 20), this.catY - 30, 'note'));
+    }
+    // Frustrated cat meow particles
+    if (this.isFrustrated && !this.isPetting && this.frame % 80 === 0) {
+      audio.meow();
+    }
+  }
+
+  offerNextBehavior() {
+    if (this.isFrustrated || this.isPetting) {
+      this.startBehavior('wander');
+      return;
+    }
+
+    // 20% chance to revive old trainer behavior
+    if (this.previousTrainers.length > 0 && Math.random() < 0.2) {
+      const oldTrainer = pick(this.previousTrainers);
+      const behavior = oldTrainer.selectBehavior(1);
+      if (behavior && BEHAVIORS[behavior]) {
+        this.startBehavior(behavior);
+        return;
+      }
+    }
+
+    // Thompson sampling
+    const moodDef = MOODS[this.mood];
+    const behavior = this.trainer.selectBehavior(moodDef.learnMul);
+    this.startBehavior(behavior);
+
+    // Extinction for unrewarded behaviors
+    if (this.catBehavior !== 'wander' && this.catBehavior !== behavior) {
+      this.trainer.extinguish(this.catBehavior);
+    }
+  }
+
+  startBehavior(behavior) {
+    this.catBehavior = behavior;
+    this.catBehaviorFrame = 0;
+    const def = BEHAVIORS[behavior];
+    const durMul = MOODS[this.mood].durMul;
+    this.catBehaviorDuration = Math.round(def.duration * durMul);
+    if (behavior === this.target) this.targetAppeared = true;
+  }
+
+  handleReward() {
+    if (this.state !== 'playing') return;
+    if (this.isFrustrated || this.isPetting) return;
+    if (this.treatsRemaining <= 0) return;
+
+    // Spam detection
+    const spamThreshold = 10;
+    const isSpam = (this.frame - this.lastClickFrame) < spamThreshold;
+    this.lastClickFrame = this.frame;
+
+    this.treatsRemaining--;
+    this.treatsGiven++;
+
+    const behavior = this.catBehavior;
+    const def = BEHAVIORS[behavior];
+
+    if (behavior === 'wander') {
+      // Clicking on wander — miss
+      this.frustration += 0.15;
+      this.combo = 0;
+      audio.miss();
+      this.addFloatingText(this.catX, this.catY - 60, 'Not a trick!', '#FF5252', 16);
+      this.shakeMagnitude = 3;
+      this.checkTreats();
+      return;
+    }
+
+    if (isSpam) {
+      this.frustration += 0.2;
+      this.combo = 0;
+      audio.miss();
+      this.addFloatingText(this.catX, this.catY - 60, 'Too fast!', '#FF5252', 16);
+      this.shakeMagnitude = 3;
+      this.checkTreats();
+      return;
+    }
+
+    // Aloof mood — chance to ignore
+    if (MOODS[this.mood].ignoreChance > 0 && Math.random() < MOODS[this.mood].ignoreChance) {
+      audio.miss();
+      this.addFloatingText(this.catX, this.catY - 60, 'Cat ignores you...', '#B0BEC5', 15);
+      this.frustration += 0.05;
+      this.checkTreats();
+      return;
+    }
+
+    // Score the click timing
+    const frame = this.catBehaviorFrame;
+    const ideal = def.ideal;
+    const diff = Math.abs(frame - ideal);
+
+    let multiplier = 1.0;
+    let label = 'Good';
+    let color = '#8BC34A';
+
+    if (behavior !== this.target) {
+      // Wrong behavior
+      this.frustration += 0.1;
+      this.combo = 0;
+      audio.miss();
+      this.addFloatingText(this.catX, this.catY - 60, 'Wrong trick!', '#FF9800', 16);
+      this.shakeMagnitude = 2;
+      // Still reward in ML model (weaker)
+      this.trainer.reward(behavior, 0.3, MOODS[this.mood].learnMul);
+      this.checkTreats();
+      return;
+    }
+
+    // Correct behavior!
+    if (diff <= 3) {
+      multiplier = 1.5; label = 'Perfect!'; color = '#FFD700';
+      this.spawnParticles(this.catX, this.catY - 20, 'star', 8);
+    } else if (diff <= 8) {
+      multiplier = 1.2; label = 'Great!'; color = '#8BC34A';
+      this.spawnParticles(this.catX, this.catY - 20, 'sparkle', 5);
+    } else {
+      this.spawnParticles(this.catX, this.catY - 20, 'sparkle', 3);
+    }
+
+    // Combo
+    this.combo++;
+    this.maxCombo = Math.max(this.maxCombo, this.combo);
+    const comboMul = 1.0 + Math.floor(this.combo / 5) * 0.1;
+    const totalMul = Math.min(multiplier * comboMul, 3.0);
+
+    // Points
+    const moodPointsMul = MOODS[this.mood].pointsMul;
+    const points = Math.round(def.points * totalMul * moodPointsMul);
+    this.score += points;
+
+    // ML reward
+    this.trainer.reward(behavior, totalMul, MOODS[this.mood].learnMul);
+
+    // Audio & visual
+    audio.click();
+    setTimeout(() => audio.treat(), 80);
+    this.addFloatingText(this.catX, this.catY - 65, label, color, 22);
+    this.addFloatingText(this.catX, this.catY - 40, `+${points}`, '#fff', 16);
+    this.spawnParticles(this.catX, this.catY - 10, 'fish', 2);
+
+    if (this.combo > 0 && this.combo % 5 === 0) {
+      this.addFloatingText(this.catX, this.catY - 90, `${this.combo}x Combo!`, '#CE93D8', 18);
+    }
+
+    // Frustration relief on correct clicks
+    this.frustration = Math.max(0, this.frustration - 0.05);
+
+    // Check if behavior should be named
+    if (this.trainer.shouldName(this.target) && !this.namedBehaviors[this.target]) {
+      this.showNaming();
+    }
+
+    this.checkTreats();
+  }
+
+  checkTreats() {
+    if (this.treatsRemaining <= 0) {
+      this.state = 'gameover';
+      const el = document.getElementById('gameover-stats');
+      el.innerHTML = `Score: <strong>${this.score}</strong><br>
+        Tricks learned: <strong>${Object.keys(this.namedBehaviors).length}</strong><br>
+        Best combo: <strong>${this.maxCombo}</strong><br>
+        Rank: <strong>${RANKS[this.rank]}</strong>`;
+      document.getElementById('gameover-screen').classList.remove('hidden');
+    }
+  }
+
+  showNaming() {
+    this.state = 'naming';
+    this.namingBehavior = this.target;
+    this.namingInput = BEHAVIORS[this.target].name;
+    document.getElementById('naming-input').value = this.namingInput;
+    document.getElementById('naming-title').textContent = `${BEHAVIORS[this.target].name} Learned!`;
+    document.getElementById('naming-desc').textContent =
+      `Your cat mastered "${BEHAVIORS[this.target].name}"! Give it a custom name:`;
+    document.getElementById('naming-screen').classList.remove('hidden');
+    setTimeout(() => document.getElementById('naming-input').focus(), 100);
+  }
+
+  confirmNaming() {
+    const input = document.getElementById('naming-input').value.trim();
+    const name = input || BEHAVIORS[this.namingBehavior].name;
+    this.namedBehaviors[this.namingBehavior] = name;
+    document.getElementById('naming-screen').classList.add('hidden');
+    this.previousTrainers.push(this.trainer);
+    audio.levelUp();
+    this.spawnParticles(W / 2, H / 2, 'heart', 12);
+    this.spawnParticles(W / 2, H / 2, 'star', 10);
+    this.advanceRoom();
+    this.state = 'playing';
+  }
+
+  handleClick(x, y) {
+    if (this.state !== 'playing') return;
+
+    // Check if clicking on frustrated cat's "pet me" bubble
+    if (this.isFrustrated && !this.isPetting) {
+      const dist = Math.hypot(x - this.catX, y - (this.catY - 50));
+      if (dist < 50) {
+        this.isPetting = true;
+        this.petFrame = 0;
+        audio.purr();
+        this.spawnParticles(this.catX, this.catY - 30, 'heart', 5);
+        return;
+      }
+    }
+
+    // Click on cat area = reward
+    const dist = Math.hypot(x - this.catX, y - this.catY);
+    if (dist < 70) {
+      this.handleReward();
+    } else {
+      // Direct cat to location
+      this.catTargetX = clamp(x, 120, W - 120);
+    }
+  }
+
+  spawnParticles(x, y, type, count) {
+    for (let i = 0; i < count; i++) {
+      this.particles.push(new Particle(x + randInt(-15, 15), y + randInt(-10, 10), type));
+    }
+  }
+
+  addFloatingText(x, y, text, color, size) {
+    this.floatingTexts.push(new FloatingText(x, y, text, color, size));
+  }
+
+  // ======================== DRAWING ========================
+  draw() {
+    ctx.save();
+
+    // Screen shake
+    if (this.shakeMagnitude > 0.5) {
+      ctx.translate(
+        (Math.random() - 0.5) * this.shakeMagnitude,
+        (Math.random() - 0.5) * this.shakeMagnitude
+      );
+    }
+
+    // Room background
+    drawRoom(ctx, this.room, this.frame);
+
+    // Cat shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.08)';
+    ctx.beginPath();
+    ctx.ellipse(this.catX, this.catY + 50, 45, 10, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Draw cat
+    this.drawCat();
+
+    // Petting animation
+    if (this.isPetting) this.drawPetting();
+
+    // Frustrated bubble
+    if (this.isFrustrated && !this.isPetting) this.drawFrustBubble();
+
+    // Particles & floating text
+    this.particles.forEach(p => p.draw(ctx));
+    this.floatingTexts.forEach(t => t.draw(ctx));
+
+    // HUD (only during gameplay)
+    if (this.state === 'playing' || this.state === 'paused') this.drawHUD();
+
+    ctx.restore();
+  }
+
+  drawCat() {
+    const pose = getPose(this.catBehavior, this.catBehaviorFrame, this.catBehaviorDuration);
+    const bobY = Math.sin(this.catBobFrame * 0.04) * 2;
+
+    // Frustration tremor
+    let tremX = 0, tremY = 0;
+    if (this.isFrustrated && !this.isPetting) {
+      tremX = (Math.random() - 0.5) * 3;
+      tremY = (Math.random() - 0.5) * 3;
+    }
+
+    ctx.save();
+    ctx.translate(this.catX + tremX, this.catY + bobY + tremY);
+    if (this.catFacing < 0) ctx.scale(-1, 1);
+    ctx.scale(0.95, 0.95);
+
+    // Mood eye override
+    if (this.mood === 'sleepy' && pose.eyeState === 'normal') pose.eyeState = 'half';
+    if (this.isPetting) pose.eyeState = 'happy';
+
+    drawCatBody(ctx, pose);
+    ctx.restore();
+  }
+
+  drawPetting() {
+    const progress = this.petFrame / 90;
+    const handX = this.catX + Math.sin(this.petFrame * 0.15) * 25;
+    const handY = this.catY - 55 + Math.sin(this.petFrame * 0.1) * 5;
+
+    // Hand
+    ctx.fillStyle = '#FDBCB4';
+    ctx.beginPath();
+    ctx.ellipse(handX, handY, 14, 10, 0.2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Hearts
+    if (this.petFrame % 18 === 0) {
+      this.particles.push(new Particle(this.catX + randInt(-20, 20), this.catY - 40, 'heart'));
+    }
+  }
+
+  drawFrustBubble() {
+    const bx = this.catX, by = this.catY - 75;
+    const pulse = 1 + Math.sin(this.frame * 0.08) * 0.05;
+
+    ctx.save();
+    ctx.translate(bx, by);
+    ctx.scale(pulse, pulse);
+
+    // Bubble
+    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    ctx.strokeStyle = '#FF8A65';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(-42, -18, 84, 32, 14);
+    ctx.fill();
+    ctx.stroke();
+
+    // Pointer
+    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    ctx.beginPath();
+    ctx.moveTo(-5, 14); ctx.lineTo(5, 14); ctx.lineTo(0, 22);
+    ctx.closePath();
+    ctx.fill();
+
+    // Text
+    ctx.fillStyle = '#FF5722';
+    ctx.font = 'bold 13px "Segoe UI", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Pet me! ', 2, 2);
+
+    ctx.restore();
+  }
+
+  drawHUD() {
+    // === Top left: Behavior probability bars ===
+    const evs = this.trainer ? this.trainer.getExpectedValues() : {};
+    const barX = 14, barY = 14, barW = 130, barH = 14, barGap = 3;
+    let by = barY;
+
+    ctx.fillStyle = 'rgba(30, 30, 50, 0.55)';
+    ctx.beginPath();
+    const barCount = Object.keys(evs).length;
+    ctx.roundRect(barX - 6, barY - 6, barW + 52, barCount * (barH + barGap) + 8, 10);
+    ctx.fill();
+
+    for (const beh in evs) {
+      const ev = evs[beh];
+      const def = BEHAVIORS[beh];
+      const named = this.namedBehaviors[beh];
+      const isTarget = beh === this.target;
+
+      // Animate bar
+      const key = `bar_${beh}`;
+      this.hudAnimValues[key] = lerp(this.hudAnimValues[key] || 0, ev, 0.05);
+      const animEV = this.hudAnimValues[key];
+
+      // Label
+      ctx.font = '11px "Segoe UI", sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillStyle = isTarget ? '#FFD54F' : 'rgba(255,255,255,0.7)';
+      ctx.fillText(named || (isTarget ? '???' : def.name), barX, by + 11);
+
+      // Bar bg
+      const bx2 = barX + 55;
+      ctx.fillStyle = 'rgba(255,255,255,0.1)';
+      ctx.beginPath();
+      ctx.roundRect(bx2, by, barW - 20, barH, 3);
+      ctx.fill();
+
+      // Bar fill
+      const fillW = Math.max(0, (barW - 20) * clamp(animEV, 0, 1));
+      const hue = animEV * 120; // red→green
+      ctx.fillStyle = `hsl(${hue}, 70%, 55%)`;
+      ctx.beginPath();
+      ctx.roundRect(bx2, by, fillW, barH, 3);
+      ctx.fill();
+
+      // Shimmer on high values
+      if (animEV > 0.5) {
+        ctx.fillStyle = `rgba(255,255,255,${(animEV - 0.5) * 0.3})`;
+        const shimX = bx2 + ((this.frame * 2) % (barW - 20));
+        ctx.beginPath();
+        ctx.roundRect(shimX, by, 8, barH, 2);
+        ctx.fill();
+      }
+
+      by += barH + barGap;
+    }
+
+    // === Top center: Target indicator ===
+    const targetDef = BEHAVIORS[this.target];
+    const confidence = this.trainer ? this.trainer.getExpectedValue(this.target) : 0;
+    const confKey = 'confidence';
+    this.hudAnimValues[confKey] = lerp(this.hudAnimValues[confKey] || 0, confidence, 0.03);
+    const animConf = this.hudAnimValues[confKey];
+
+    ctx.fillStyle = 'rgba(30, 30, 50, 0.55)';
+    ctx.beginPath();
+    ctx.roundRect(W / 2 - 105, 8, 210, 50, 10);
+    ctx.fill();
+
+    ctx.font = 'bold 13px "Segoe UI", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#FFD54F';
+    ctx.fillText(`Target: ${targetDef.name}`, W / 2, 26);
+
+    // Confidence bar
+    ctx.fillStyle = 'rgba(255,255,255,0.1)';
+    ctx.beginPath();
+    ctx.roundRect(W / 2 - 80, 33, 160, 10, 4);
+    ctx.fill();
+    const confW = 160 * clamp(animConf, 0, 1);
+    const confGrad = ctx.createLinearGradient(W / 2 - 80, 0, W / 2 + 80, 0);
+    confGrad.addColorStop(0, '#FF9800');
+    confGrad.addColorStop(1, '#4CAF50');
+    ctx.fillStyle = confGrad;
+    ctx.beginPath();
+    ctx.roundRect(W / 2 - 80, 33, confW, 10, 4);
+    ctx.fill();
+    ctx.font = '10px "Segoe UI", sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    ctx.fillText(`${Math.round(animConf * 100)}%`, W / 2, 52);
+
+    // === Top right: Treats & Score ===
+    ctx.fillStyle = 'rgba(30, 30, 50, 0.55)';
+    ctx.beginPath();
+    ctx.roundRect(W - 170, 8, 160, 70, 10);
+    ctx.fill();
+
+    // Score
+    ctx.font = 'bold 18px "Segoe UI", sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#fff';
+    ctx.fillText(`${this.score}`, W - 24, 30);
+    ctx.font = '10px "Segoe UI", sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.fillText('SCORE', W - 24, 42);
+
+    // Treats
+    const treatFlash = this.treatsRemaining <= 5 && Math.sin(this.frame * 0.15) > 0;
+    ctx.font = 'bold 15px "Segoe UI", sans-serif';
+    ctx.fillStyle = treatFlash ? '#FF5252' : '#FFB74D';
+    ctx.fillText(`${this.treatsRemaining}`, W - 24, 62);
+    // Fish icon
+    ctx.save();
+    ctx.translate(W - 24 - ctx.measureText(`${this.treatsRemaining}`).width - 18, 55);
+    drawFish(ctx, 0, 0, 12, treatFlash ? '#FF5252' : '#FFB74D', 1);
+    ctx.restore();
+    ctx.font = '10px "Segoe UI", sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.fillText('TREATS', W - 24, 74);
+
+    // === Bottom left: Room & Rank ===
+    ctx.fillStyle = 'rgba(30, 30, 50, 0.45)';
+    ctx.beginPath();
+    ctx.roundRect(12, H - 52, 220, 42, 10);
+    ctx.fill();
+
+    ctx.textAlign = 'left';
+    ctx.font = 'bold 14px "Segoe UI", sans-serif';
+    ctx.fillStyle = '#fff';
+    ctx.fillText(this.room.name, 22, H - 30);
+    ctx.font = '11px "Segoe UI", sans-serif';
+    ctx.fillStyle = this.room.accent;
+    ctx.fillText(RANKS[this.rank], 22, H - 16);
+
+    // === Bottom center: Combo ===
+    if (this.combo >= 3) {
+      const pulse = 1 + Math.sin(this.frame * 0.1) * 0.03;
+      ctx.save();
+      ctx.translate(W / 2, H - 32);
+      ctx.scale(pulse, pulse);
+      ctx.font = 'bold 16px "Segoe UI", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#CE93D8';
+      ctx.fillText(`Combo x${this.combo}`, 0, 0);
+      ctx.restore();
+    }
+
+    // === Bottom right: Mood indicator ===
+    const moodDef = MOODS[this.mood];
+    ctx.fillStyle = 'rgba(30, 30, 50, 0.45)';
+    ctx.beginPath();
+    ctx.roundRect(W - 140, H - 52, 128, 42, 10);
+    ctx.fill();
+
+    ctx.textAlign = 'right';
+    ctx.font = 'bold 13px "Segoe UI", sans-serif';
+    ctx.fillStyle = '#fff';
+    ctx.fillText(`Mood: ${moodDef.label}`, W - 22, H - 30);
+
+    // Mood icon
+    const moodIcons = { curious: '?', playful: '!', sleepy: 'z', aloof: '~' };
+    ctx.font = '18px "Segoe UI", sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.fillText(moodIcons[this.mood], W - 22, H - 14);
+
+    // === Frustration bar (above cat when > 0.1) ===
+    if (this.frustration > 0.1) {
+      const fx = this.catX - 30, fy = this.catY - 80;
+      ctx.fillStyle = 'rgba(0,0,0,0.3)';
+      ctx.beginPath(); ctx.roundRect(fx, fy, 60, 6, 3); ctx.fill();
+      ctx.fillStyle = this.frustration > 0.5 ? '#FF5252' : '#FFA726';
+      ctx.beginPath();
+      ctx.roundRect(fx, fy, 60 * this.frustration, 6, 3);
+      ctx.fill();
+    }
+
+    // === Named tricks (bottom-right, above mood) ===
+    const named = Object.entries(this.namedBehaviors);
+    if (named.length > 0) {
+      ctx.textAlign = 'right';
+      ctx.font = '11px "Segoe UI", sans-serif';
+      let ty = H - 60;
+      named.forEach(([beh, name]) => {
+        ctx.fillStyle = BEHAVIORS[beh].color;
+        ctx.fillText(`${name}`, W - 22, ty);
+        ty -= 16;
+      });
+    }
+  }
+}
+
+// ======================== MAIN LOOP ========================
+const game = new Game();
+let lastTime = 0;
+
+function gameLoop(timestamp) {
+  const dt = Math.min((timestamp - lastTime) / 1000, 0.05);
+  lastTime = timestamp;
+
+  game.update(dt);
+  game.draw();
+
+  requestAnimationFrame(gameLoop);
+}
+
+// ======================== INPUT ========================
+document.addEventListener('keydown', e => {
+  if (e.code === 'Space') {
+    e.preventDefault();
+    if (game.state === 'playing') game.handleReward();
+  }
+  if (e.code === 'Escape') {
+    e.preventDefault();
+    if (game.state === 'playing') {
+      game.state = 'paused';
+      document.getElementById('pause-screen').classList.remove('hidden');
+    } else if (game.state === 'paused') {
+      game.state = 'playing';
+      document.getElementById('pause-screen').classList.add('hidden');
+    } else if (game.state === 'naming') {
+      game.confirmNaming();
+    }
+  }
+  if (e.code === 'Enter' && game.state === 'naming') {
+    game.confirmNaming();
+  }
+});
+
+document.getElementById('naming-input').addEventListener('input', e => {
+  game.namingInput = e.target.value;
+});
+
+canvas.addEventListener('click', e => {
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = W / rect.width, scaleY = H / rect.height;
+  const x = (e.clientX - rect.left) * scaleX;
+  const y = (e.clientY - rect.top) * scaleY;
+  game.handleClick(x, y);
+});
+
+// Touch support
+canvas.addEventListener('touchstart', e => {
+  e.preventDefault();
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = W / rect.width, scaleY = H / rect.height;
+  const touch = e.touches[0];
+  const x = (touch.clientX - rect.left) * scaleX;
+  const y = (touch.clientY - rect.top) * scaleY;
+  game.handleClick(x, y);
+}, { passive: false });
+
+// Buttons
+document.getElementById('start-btn').addEventListener('click', () => {
+  document.getElementById('title-screen').classList.add('hidden');
+  game.start();
+});
+document.getElementById('naming-confirm').addEventListener('click', () => {
+  game.confirmNaming();
+});
+document.getElementById('restart-btn').addEventListener('click', () => {
+  document.getElementById('gameover-screen').classList.add('hidden');
+  game.start();
+});
+document.getElementById('resume-btn').addEventListener('click', () => {
+  document.getElementById('pause-screen').classList.add('hidden');
+  game.state = 'playing';
+});
+
+// Start rendering (title screen visible)
+requestAnimationFrame(gameLoop);
+</script>
+</body>
+</html>
