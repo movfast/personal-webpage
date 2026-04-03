@@ -60,13 +60,13 @@ section {
 
 /* Named section colors for stronger separation */
 .section-wrap--hero    { background: var(--bg); overflow: hidden; }
-.section-wrap--about   { background: #161638; }
-.section-wrap--projects { background: #13132e; }
-.section-wrap--skills  { background: #181842; }
-.section-wrap--blog    { background: #141434; }
-.section-wrap--news    { background: #1a1a44; }
-.section-wrap--twin    { background: #151536; }
-.section-wrap--contact { background: #181840; }
+.section-wrap--about   { background: #1a1a3e; }
+.section-wrap--projects { background: var(--bg); }
+.section-wrap--skills  { background: #1a1a3e; }
+.section-wrap--blog    { background: var(--bg); }
+.section-wrap--news    { background: #1a1a3e; }
+.section-wrap--twin    { background: var(--bg); }
+.section-wrap--contact { background: #1a1a3e; }
 
 .section-title {
     font-size: 1.8rem;
