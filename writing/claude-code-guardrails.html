@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guardrails When Building with Claude Code: What It Does Well and Where It Falls Short — Marian Helcl Øverli</title>
+    <meta name="description" content="An honest look at what Claude Code excels at, where it struggles, and the guardrails every developer should set when using AI coding assistants to build real projects.">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/layout.css">
+    <link rel="stylesheet" href="../css/article.css">
+</head>
+<body class="botanical">
+
+<nav>
+    <div class="nav-inner">
+        <a href="../index.html" class="logo"><img src="../favicon.svg" alt="MH&Oslash;" class="logo-img"></a>
+        <button class="hamburger" aria-label="Menu">&#9776;</button>
+        <ul class="nav-links">
+            <li><a href="../index.html#about">About</a></li>
+            <li><a href="../index.html#projects">Projects</a></li>
+            <li><a href="../index.html#skills">Skills</a></li>
+            <li><a href="../index.html#blog">Writing</a></li>
+            <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+        <a href="../index.html#ai-twin" class="btn btn-primary nav-cta">Chat with My AI Twin</a>
+    </div>
+</nav>
+
+<article class="article">
+    <a href="../index.html#blog" class="article-back">&larr; Back to writing</a>
+
+    <header class="article-header">
+        <div class="article-date">April 2026</div>
+        <h1>Guardrails When Building with Claude Code: What It Does Well and Where It Falls Short</h1>
+        <p class="article-subtitle">
+            Claude Code is one of the most capable AI coding assistants available today.
+            But capable doesn't mean infallible. After using it to build this entire
+            portfolio site and several ML projects, here's an honest breakdown of where
+            it shines, where it stumbles, and the guardrails you should put in place
+            before handing it any real codebase.
+        </p>
+    </header>
+
+    <div class="article-body">
+
+        <h2>Where Claude Code Excels</h2>
+        <p>
+            Claude Code is genuinely impressive at understanding large codebases and making
+            coordinated changes across multiple files. You can point it at a project, describe
+            a feature in natural language, and it will read the relevant files, understand the
+            patterns already in use, and produce code that fits the existing style. It handles
+            boilerplate-heavy tasks &mdash; scaffolding new components, writing CRUD endpoints, adding
+            tests for existing functions, refactoring repeated patterns &mdash; faster than any human
+            could. It's also strong at explaining unfamiliar code, summarizing complex functions,
+            and identifying bugs in code you show it. For tasks where the requirements are clear
+            and the patterns are established, Claude Code can save hours of work per day. Its
+            ability to hold a 200k-token context window means it can reason about relationships
+            between files that would take a human developer significant time to trace manually.
+            Anthropic's own benchmarks show Claude Opus 4.6 achieving 72.5% on SWE-bench Verified,
+            the highest score among frontier models for autonomous coding tasks.
+        </p>
+
+        <h2>Where It Struggles</h2>
+        <p>
+            The failure modes are predictable once you've seen them a few times. Claude Code
+            tends to over-engineer solutions &mdash; adding abstraction layers, helper utilities,
+            and configuration options that nobody asked for. It sometimes "hallucinates"
+            APIs or library methods that don't exist, particularly for less popular packages
+            or very recent releases. It can struggle with complex architectural decisions
+            that require understanding business context it doesn't have: choosing between a
+            monolith and microservices, deciding which database fits your scale, or knowing
+            when a simple script is better than a framework. It also has a tendency to be
+            overly agreeable &mdash; if you suggest an approach that has problems, it will often
+            implement it without pushback rather than flagging the issues. Security is another
+            blind spot: while it generally avoids obvious vulnerabilities, it doesn't
+            consistently think about edge cases like race conditions, input sanitization at
+            trust boundaries, or secrets management. A 2025 study from Endor Labs found that
+            AI coding assistants introduced security vulnerabilities in roughly 25% of
+            generated code snippets when tested against OWASP categories.
+        </p>
+
+        <h2>The Guardrails You Need</h2>
+        <p>
+            The most important guardrail is the simplest: never merge AI-generated code you
+            haven't reviewed. Treat Claude Code like a junior developer who's fast and
+            well-read but lacks judgment &mdash; its output needs a human review pass before it
+            hits production. Use a CLAUDE.md file in your project root to set persistent
+            instructions: coding standards, forbidden patterns, testing requirements, and
+            architectural constraints. This file acts as a system prompt that shapes every
+            interaction. Set up pre-commit hooks and CI pipelines that run linters, type
+            checkers, and security scanners automatically &mdash; these catch the mechanical errors
+            that slip through human review. For security-sensitive code, use tools like
+            Semgrep or Snyk to scan AI-generated output before it ships. And critically,
+            keep your commits small and focused. If you let Claude Code make sweeping changes
+            across dozens of files in one go, reviewing the diff becomes impractical, which
+            defeats the purpose of the review step entirely.
+        </p>
+
+        <h2>Building Good Habits</h2>
+        <p>
+            The developers getting the most out of Claude Code aren't the ones who hand it
+            vague instructions and hope for the best. They break work into small, well-defined
+            tasks. They provide context about why a change is needed, not just what to change.
+            They use the plan mode to align on approach before any code gets written. They
+            read the generated diffs line by line rather than blindly accepting suggestions.
+            And they maintain their own understanding of the codebase &mdash; using Claude Code to
+            accelerate work they could do themselves, not to do work they don't understand.
+            The moment you stop being able to evaluate whether the AI's output is correct, you've
+            lost the guardrail that matters most. GitHub's 2025 developer survey found that
+            developers who reviewed AI-generated code carefully reported 30% fewer production
+            bugs than those who accepted suggestions without modification, reinforcing that
+            the human review step is where the real value protection happens.
+        </p>
+
+        <h2>The Bottom Line</h2>
+        <p>
+            Claude Code is a force multiplier, not a replacement for engineering judgment. It
+            excels at the mechanical parts of programming &mdash; the parts that are tedious but
+            well-defined. It struggles with the parts that require taste, context, and
+            experience. The right approach is to lean on it heavily for what it's good at
+            while maintaining strong guardrails for everything else. Set up your CLAUDE.md,
+            keep your CI pipeline strict, review every diff, and stay sharp on the
+            fundamentals. The developers who thrive with AI tools will be the ones who use
+            them to do more ambitious work, not the ones who use them to stop thinking.
+        </p>
+
+        <h2>Sources</h2>
+        <ul>
+            <li><a href="https://docs.anthropic.com/en/docs/claude-code/overview">Anthropic &mdash; Claude Code Overview</a> &mdash; official documentation on Claude Code's capabilities and configuration</li>
+            <li><a href="https://www.anthropic.com/research/swe-bench-sonnet">Anthropic &mdash; SWE-bench Results</a> &mdash; benchmark performance of Claude models on real-world software engineering tasks</li>
+            <li><a href="https://www.endorlabs.com/learn/ai-code-assistants-and-security">Endor Labs &mdash; AI Code Assistants and Security (2025)</a> &mdash; study on security vulnerabilities in AI-generated code</li>
+            <li><a href="https://github.blog/news-insights/research/survey-ai-wave-developers/">GitHub &mdash; Developer Survey 2025</a> &mdash; data on developer productivity and code quality with AI tools</li>
+            <li><a href="https://docs.anthropic.com/en/docs/claude-code/claude-md">Anthropic &mdash; CLAUDE.md Files</a> &mdash; how to configure project-level instructions for Claude Code</li>
+            <li><a href="https://owasp.org/www-project-top-ten/">OWASP &mdash; Top 10 Web Application Security Risks</a> &mdash; the security categories referenced in AI code vulnerability research</li>
+        </ul>
+    </div>
+
+    <footer class="article-footer">
+        <p>Written by Marian Helcl Øverli &mdash; April 2026</p>
+    </footer>
+</article>
+
+<script src="../js/main.js"></script>
+
+</body>
+</html>

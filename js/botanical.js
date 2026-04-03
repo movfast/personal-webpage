@@ -451,9 +451,9 @@ function stopBotanical() {
 // ============================================================
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Restore saved preference
-    if (localStorage.getItem('mh-botanical') === '1') {
-        document.body.classList.add('botanical');
+    // Botanical is the default — only disable if user explicitly chose dark
+    if (localStorage.getItem('mh-botanical') === '0') {
+        document.body.classList.remove('botanical');
     }
 
     createThemeToggle();
