@@ -45,6 +45,29 @@ section {
     padding: 6rem 2rem 2rem;
 }
 
+/* --- Section Backgrounds --- */
+.section-wrap {
+    width: 100%;
+}
+
+.section-wrap:nth-child(odd) {
+    background: var(--bg);
+}
+
+.section-wrap:nth-child(even) {
+    background: var(--surface);
+}
+
+/* Named section colors for stronger separation */
+.section-wrap--hero    { background: var(--bg); overflow: hidden; }
+.section-wrap--about   { background: #161638; }
+.section-wrap--projects { background: #13132e; }
+.section-wrap--skills  { background: #181842; }
+.section-wrap--blog    { background: #141434; }
+.section-wrap--news    { background: #1a1a44; }
+.section-wrap--twin    { background: #151536; }
+.section-wrap--contact { background: #181840; }
+
 .section-title {
     font-size: 1.8rem;
     margin-bottom: 0.5rem;
