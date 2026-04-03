@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meow Master! — Cat Training Simulator — Marian Helcl Øverli</title>
-    <meta name="description" content="A browser-based cat training game powered by Bayesian Thompson Sampling. Watch real machine learning happen in real-time as you train a cat to perform tricks.">
+    <meta name="description" content="A browser-based cat training game where you teach a procedurally-drawn cat to perform tricks across 7 rooms.">
     <link rel="icon" type="image/svg+xml" href="../favicon.svg">
     <link rel="stylesheet" href="../css/base.css">
     <link rel="stylesheet" href="../css/components.css">
@@ -94,15 +94,14 @@
     <header class="article-header">
         <h1>Meow Master! — Cat Training Simulator</h1>
         <p class="article-subtitle">
-            A browser-based cat training game powered by Bayesian Thompson Sampling.
-            Watch real machine learning happen in real-time as you train a procedurally-drawn cat to perform tricks.
+            A browser-based cat training game where you teach a procedurally-drawn cat
+            to perform tricks. Reward the right behaviors and watch the cat learn over time.
         </p>
         <div class="tech-tags">
             <span class="tag">JavaScript</span>
             <span class="tag">Canvas 2D</span>
             <span class="tag">Web Audio API</span>
-            <span class="tag">Thompson Sampling</span>
-            <span class="tag">Bayesian ML</span>
+            <span class="tag">Web Audio API</span>
         </div>
     </header>
 
@@ -114,8 +113,8 @@
         <h2>How to Play</h2>
         <p>
             You observe a cat performing random behaviors. Press <kbd>Space</kbd> (or click the cat) when you see the
-            target trick. A Bayesian Multi-Armed Bandit model learns which behaviors you reward and offers them more
-            frequently. Once the model is confident enough, you name the trick and advance to the next room.
+            target trick. The cat learns which behaviors you reward and offers them more
+            frequently. Once it's confident enough, you name the trick and advance to the next room.
         </p>
 
         <table>
@@ -130,13 +129,11 @@
             </tbody>
         </table>
 
-        <h2>The ML Behind It</h2>
+        <h2>How the Cat Learns</h2>
         <p>
-            Each behavior is an "arm" in a Multi-Armed Bandit with a Beta(alpha, beta) distribution.
-            Rewarding the target behavior increases alpha (the model learns to offer it more), while
-            unrewarded behaviors slowly increase beta (offered less over time). Thompson Sampling draws
-            from each arm's Beta distribution, then softmax picks the next behavior. The probability bars
-            in the top-left corner visualize this learning in real-time.
+            The cat tracks which behaviors get rewarded and which don't. Rewarded behaviors
+            get offered more often, while ignored ones fade away. The probability bars in
+            the top-left corner visualize this learning in real-time.
         </p>
 
         <h2>Cat Mood System</h2>
