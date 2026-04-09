@@ -358,7 +358,8 @@
         .slope-section { padding-top: 9rem; padding-bottom: 9rem; }
         .hero-stage { padding-top: 6rem; padding-bottom: 0; }
         @media (max-width: 768px) {
-            .slope-container > section { padding-left: 2rem; padding-right: 2rem; }
+            .slope-container > section { padding-left: 2rem; padding-right: 2rem; max-width: 100vw; overflow: hidden; }
+            .slope-container > section#projects { overflow: visible; }
             .slope-section { padding-top: 5rem; padding-bottom: 5rem; }
             .hero-stage { padding-top: 5rem; }
             .moving-title { --p: 0 !important; transform: none !important; }
@@ -486,9 +487,11 @@
 
             <!-- Static caption sits below the moving title's starting position -->
             <div class="upright-block mt-20 ml-4 max-w-md" style="position: relative; z-index: 5;">
-                <p class="text-[#6a6860] text-xl leading-relaxed font-serif italic">
-                    Applied physics and mathematics from NTNU, Trondheim // 5 years acoustic consultant // <a class="not-italic text-[#3b3a36]">AI engineer/Data Scientist</a>. 
-                    <br/> Building LLM tools, RAG systems, and ML pipelines that solve real problems.
+                <p class="font-sans text-sm uppercase tracking-[0.18em] text-[#6a6860] font-medium leading-loose">
+                    Applied physics &amp; mathematics from NTNU, Trondheim <br class="md:hidden"/><span class="text-[#c97a5b]">//</span> 5 years acoustic consultant <br class="md:hidden"/><span class="text-[#c97a5b]">//</span> <span class="text-[#3b3a36] font-semibold">AI engineer / Data Scientist</span>
+                </p>
+                <p class="font-serif italic text-xl text-[#3b3a36] mt-4 leading-relaxed">
+                    Building LLM tools, RAG systems, and ML pipelines that solve real problems.
                 </p>
                 <div class="mt-8 flex flex-wrap gap-4 items-center">
                     <a href="#projects" class="btn-classic">See my work →</a>
@@ -498,7 +501,7 @@
             </div>
         </section>
 
-        <div class="upright mt-1 grid grid-cols-2 md:grid-cols-4 gap-8 max-w-3xl" style="padding-left: 0rem;">
+        <div class="upright mt-12 md:mt-1 grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 max-w-[90vw] md:max-w-3xl" style="padding-left: 0rem;">
             <div>
                 <div class="label">Focus</div>
                 <div class="font-serif italic text-2xl mt-1 text-[#3b3a36]">GenAI &amp; ML</div>
@@ -790,7 +793,7 @@
         <section id="skills" class="slope-section" style="transform: rotate(calc(var(--tilt) * -1)); transform-origin: center center;">
             <div class="label"><span class="ornament"></span> skills</div>
 
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-x-6 gap-y-8 md:gap-10 max-w-5xl" style="margin-top: 100px;">
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-x-6 gap-y-8 md:gap-10 max-w-[90vw] md:max-w-5xl" style="margin-top: 100px;">
                 <div>
                     <h3 class="font-serif italic text-xl md:text-2xl text-[#3b3a36]">Languages</h3>
                     <ul class="mt-3 space-y-1 font-serif text-base md:text-lg text-[#6a6860]">
@@ -848,7 +851,7 @@
 
             <div class="upright label"><span class="ornament"></span> writing</div>
             
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-5xl" style="margin-top: 100px;">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10 max-w-[90vw] md:max-w-5xl" style="margin-top: 100px;">
                 <a href="writing/understanding-rag.html" class="paper-note flutter group block">
                     <div class="pin"></div>
                     <div class="label">LLMs</div>
@@ -885,7 +888,7 @@
             </div>
             <div class="label"><span class="ornament"></span>News from AI</div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-5xl" style="margin-top: 100px;">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10 max-w-[90vw] md:max-w-5xl" style="margin-top: 100px;">
                 <a href="https://aimodels.org" class="paper-note flutter group block">
                     <div class="pin"></div>
                     <div class="label">Models</div>
