@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marian Helcl Øverli — Downhill, Classically</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* The Slope */
+            --tilt: -8deg;
+
+            /* Soft, classic palette */
+            --cream:    #f5efe6;   /* paper */
+            --linen:    #ece3d4;   /* deeper paper */
+            --dusty:    #c8d3d8;   /* dusty sky */
+            --sage:     #a8b9a3;   /* soft sage */
+            --terracotta:#c97a5b;  /* construction-orange, softened */
+            --rose:     #d9a89a;   /* rose blush */
+            --ink:      #3b3a36;   /* warm charcoal */
+            --ink-soft: #6a6860;
+            --gold:     #c9a961;
+        }
+
+        * { box-sizing: border-box; }
+
+        html, body {
+            background:
+                radial-gradient(ellipse at 20% 0%, #e7dccb 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 100%, #d3dde2 0%, transparent 50%),
+                var(--cream);
+            color: var(--ink);
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 18px;
+            overflow-x: clip;
+            margin: 0;
+        }
+
+        /* subtle paper grain */
+        body::before {
+            content: "";
+            position: fixed; inset: 0;
+            background-image:
+                radial-gradient(rgba(59,58,54,0.04) 1px, transparent 1px),
+                radial-gradient(rgba(59,58,54,0.03) 1px, transparent 1px);
+            background-size: 3px 3px, 7px 7px;
+            background-position: 0 0, 1px 1px;
+            pointer-events: none;
+            z-index: 1;
+            mix-blend-mode: multiply;
+        }
+
+        .font-sans { font-family: 'Inter', system-ui, sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+        .font-serif { font-family: 'Cormorant Garamond', Georgia, serif; }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* The slanted main container — gentle 8deg tilt.
+           Width is exactly the viewport so the visual right edge of the
+           rotated rectangle never floats past the viewport. */
+        .slope-container {
+            transform: rotate(var(--tilt));
+            transform-origin: top left;
+            width: 100vw;
+            margin-left: 0;
+            padding-top: 14vh;
+            padding-bottom: 28vh;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Counter-rotate to keep things visually upright when needed */
+        .upright {
+            display: inline-block;
+            transform: rotate(calc(var(--tilt) * -1));
+            transform-origin: top left;
+        }
+        .upright-block {
+            display: block;
+            transform: rotate(calc(var(--tilt) * -1));
+            transform-origin: top left;
+        }
+        /* Counter-rotate around the element's own center — for content
+           that should stay visually centered after un-tilting. */
+        .upright-center {
+            display: inline-block;
+            transform: rotate(calc(var(--tilt) * -1));
+            transform-origin: center center;
+        }
+
+        /* Classic paper card */
+        .paper-card {
+            background: var(--cream);
+            border: 1px solid rgba(59,58,54,0.12);
+            border-radius: 4px;
+            padding: 2.25rem;
+            box-shadow:
+                0 1px 0 rgba(255,255,255,0.7) inset,
+                12px 14px 0 rgba(59,58,54,0.06),
+                0 30px 60px -30px rgba(59,58,54,0.18);
+            transition: transform 0.4s cubic-bezier(.2,.8,.2,1), box-shadow 0.4s ease;
+            position: relative;
+        }
+        .paper-card:hover {
+            transform: scale(1.08);
+            z-index: 5;
+            box-shadow:
+                0 1px 0 rgba(255,255,255,0.7) inset,
+                18px 22px 0 rgba(59,58,54,0.10),
+                0 40px 80px -28px rgba(59,58,54,0.28);
+        }
+
+        /* Classic terracotta button */
+        .btn-classic {
+            background: var(--terracotta);
+            color: var(--cream);
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 0.78rem;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            padding: 0.95rem 1.8rem;
+            border-radius: 999px;
+            border: 1px solid rgba(59,58,54,0.2);
+            box-shadow: 0 4px 0 #9a5a40, 0 12px 24px -8px rgba(201,122,91,0.5);
+            transition: transform 0.15s, box-shadow 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+        .btn-classic:hover { transform: translateY(2px); box-shadow: 0 2px 0 #9a5a40, 0 6px 14px -4px rgba(201,122,91,0.5); }
+        .btn-ghost {
+            background: transparent;
+            color: var(--ink);
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 0.78rem;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            padding: 0.95rem 1.8rem;
+            border-radius: 999px;
+            border: 1px solid var(--ink);
+            transition: background 0.2s, color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+        .btn-ghost:hover { background: var(--ink); color: var(--cream); }
+
+        /* Section labels — small caps */
+        .label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.32em;
+            color: var(--terracotta);
+            font-weight: 500;
+        }
+        .ornament {
+            display: inline-block;
+            width: 36px;
+            height: 1px;
+            background: var(--terracotta);
+            vertical-align: middle;
+            margin: 0 0.6rem;
+        }
+
+        /* The HERO TITLE — moves along an off-centered line on scroll */
+        .hero-stage {
+            position: relative;
+            min-height: 110vh;
+            padding: 6rem 4rem 0 7rem;
+            overflow: hidden;
+        }
+        .moving-title {
+            position: relative;
+            display: inline-block;
+            will-change: transform;
+            /* set by JS via --p (0..1) */
+            --p: 0;
+            /* off-centered line: shift right, drop down, slight rotation */
+            transform:
+                translate(calc(var(--p) * 38vw), calc(var(--p) * 70vh))
+                rotate(calc(var(--p) * 6deg));
+            transition: transform 0.05s linear;
+        }
+        .moving-title h1 {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-weight: 500;
+            font-style: italic;
+            font-size: clamp(3.5rem, 9vw, 9rem);
+            line-height: 0.92;
+            letter-spacing: -0.02em;
+            color: var(--ink);
+            margin: 0;
+        }
+        .moving-title h1 .accent {
+            color: var(--terracotta);
+            font-style: normal;
+            font-weight: 600;
+        }
+        .moving-title h1 .small {
+            display: block;
+            font-family: 'Inter', sans-serif;
+            font-style: normal;
+            font-weight: 500;
+            font-size: 0.18em;
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
+            color: var(--ink-soft);
+            margin-bottom: 1.2rem;
+        }
+
+        /* The "off-centered line" — a faint guideline showing the path */
+        .guide-line {
+            position: absolute;
+            top: 18%;
+            left: 8%;
+            width: 70%;
+            height: 80%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.4;
+        }
+        .guide-line svg { width: 100%; height: 100%; overflow: visible; }
+        .guide-dot {
+            fill: var(--terracotta);
+        }
+
+        /* Bio "boulders" — softened to classic plates */
+        .plate {
+            background: var(--cream);
+            border: 1px solid rgba(59,58,54,0.18);
+            border-radius: 6px;
+            padding: 1.1rem 1.6rem;
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-weight: 500;
+            font-size: 1.55rem;
+            line-height: 1.2;
+            color: var(--ink);
+            box-shadow: 6px 8px 0 rgba(59,58,54,0.08);
+            display: inline-block;
+        }
+        .plate--accent {
+            background: var(--terracotta);
+            color: var(--cream);
+            border-color: rgba(59,58,54,0.25);
+        }
+        .plate--sage { background: var(--sage); color: var(--cream); border-color: rgba(59,58,54,0.2); }
+
+        /* Notice board — pinned papers */
+        .paper-note {
+            background: var(--cream);
+            padding: 1.75rem 1.75rem 2rem;
+            border-radius: 2px;
+            box-shadow:
+                6px 10px 0 rgba(59,58,54,0.08),
+                0 30px 50px -30px rgba(59,58,54,0.25);
+            position: relative;
+            border: 1px solid rgba(59,58,54,0.1);
+        }
+        .pin {
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            width: 14px;
+            height: 14px;
+            background: var(--terracotta);
+            border-radius: 50%;
+            transform: translateX(-50%);
+            box-shadow:
+                0 0 0 3px rgba(201,122,91,0.25),
+                inset 2px 2px 0 rgba(255,255,255,0.4);
+        }
+
+        /* Scroll-in animations */
+        .tumble {
+            opacity: 0;
+            transform: translate(40px, -60px) rotate(15deg);
+            transition: opacity 0.8s ease, transform 1s cubic-bezier(.18,.89,.32,1.28);
+        }
+        .tumble.in { opacity: 1; transform: translate(0,0) rotate(0deg); }
+
+        .flutter {
+            opacity: 0;
+            transform: translateY(-30px) rotate(6deg);
+            transition: opacity 0.7s ease, transform 0.9s cubic-bezier(.18,.89,.32,1.28);
+        }
+        .flutter.in { opacity: 1; transform: translateY(0) rotate(0); }
+        .flutter:nth-child(2) { transition-delay: 0.1s; transform: translateY(-20px) rotate(-4deg); }
+        .flutter:nth-child(3) { transition-delay: 0.2s; transform: translateY(-40px) rotate(3deg); }
+
+        /* HORIZON nav — perfectly horizontal */
+        .horizon-nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            background: rgba(245,239,230,0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(59,58,54,0.15);
+        }
+
+        /* CONVEYOR BELT — full-bleed track with edge fade so cards can
+           slide all the way to the left and dissolve into the void.       */
+        .conveyor {
+            /* Break out of the section's symmetric 7rem/7rem padding so the
+               track exactly spans the section's outer edges. */
+            margin-left: -7rem;
+            width: calc(100% + 14rem);
+            -webkit-mask-image: linear-gradient(
+                to right,
+                transparent 0,
+                #000 7rem,
+                #000 calc(100% - 7rem),
+                transparent 100%
+            );
+                    mask-image: linear-gradient(
+                to right,
+                transparent 0,
+                #000 7rem,
+                #000 calc(100% - 7rem),
+                transparent 100%
+            );
+        }
+        /* Auto-scrolling tracks. Both rows use the same animation;
+           the reverse modifier flips direction so the two rows drift
+           past each other in opposite directions. */
+        .conveyor-auto-track {
+            display: flex;
+            gap: 2.5rem;
+            width: max-content;
+            padding: 2rem 0;
+            animation: marquee 60s linear infinite;
+        }
+        .conveyor-auto-track.reverse { animation-direction: reverse; }
+        @keyframes marquee {
+            from { transform: translateX(0); }
+            to   { transform: translateX(-50%); }
+        }
+        /* HOVER A CARD: pause every track in the projects section. */
+        #projects:has(.paper-card:hover) .conveyor-auto-track {
+            animation-play-state: paused;
+        }
+
+        @media (max-width: 768px) {
+            .conveyor { margin-left: -2rem; width: calc(100% + 4rem); }
+            .conveyor-track { padding: 1.5rem 2rem; }
+        }
+
+        /* Section padding rhythm — all sections share the SAME left padding
+           so that, combined with the JS rotation-compensation, every section
+           starts at the same visual vertical axis. */
+        .slope-container > section { padding-left: 7rem; padding-right: 7rem; }
+        .slope-section { padding-top: 9rem; padding-bottom: 9rem; }
+        .hero-stage { padding-top: 6rem; padding-bottom: 0; }
+        @media (max-width: 768px) {
+            .slope-container > section { padding-left: 2rem; padding-right: 2rem; }
+            .slope-section { padding-top: 5rem; padding-bottom: 5rem; }
+            .hero-stage { padding-top: 5rem; }
+            .moving-title { --p: 0 !important; transform: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HORIZON NAV -->
+    <nav class="horizon-nav">
+        <div class="flex items-center justify-between px-6 md:px-12 py-5">
+            <div class="flex items-center gap-3">
+                <span class="font-mono text-xs tracking-[0.3em] text-[#c97a5b]">M·H·Ø</span>
+                <span class="font-serif italic text-xl text-[#3b3a36]">Marian H. Øverli</span>
+            </div>
+            <div class="hidden md:flex items-center gap-10 font-sans text-xs uppercase tracking-[0.2em] font-medium text-[#3b3a36]">
+                <a href="#about" class="hover:text-[#c97a5b] transition">About</a>
+                <a href="#projects" class="hover:text-[#c97a5b] transition">Work</a>
+                <a href="#writing" class="hover:text-[#c97a5b] transition">Writing</a>
+                <a href="#news" class="hover:text-[#c97a5b] transition">News</a>
+                <a href="#connect" class="btn-classic !py-2 !px-5 !text-[10px]">Let's Talk →</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- THE SLOPE -->
+    <div class="slope-container">
+
+        <!-- HERO STAGE: title travels along an off-centered line on scroll -->
+        <section class="hero-stage">
+
+            <!-- The faint guideline showing the path -->
+            <div class="guide-line">
+                <svg viewBox="0 0 1000 800" preserveAspectRatio="none">
+                    <defs>
+                        <pattern id="dots" x="0" y="0" width="22" height="22" patternUnits="userSpaceOnUse">
+                            <circle cx="1.5" cy="1.5" r="1.5" fill="#c97a5b" opacity="0.5"/>
+                        </pattern>
+                    </defs>
+                    <!-- Off-centered diagonal line w/ slight curve -->
+                    <path d="M 60 80 Q 420 220 760 720"
+                          stroke="#c97a5b" stroke-width="1" fill="none"
+                          stroke-dasharray="2 8" opacity="0.7"/>
+                    <circle cx="60" cy="80" r="5" class="guide-dot"/>
+                    <circle cx="760" cy="720" r="5" class="guide-dot"/>
+                    <text x="78" y="74" font-family="JetBrains Mono" font-size="14" fill="#c97a5b" letter-spacing="2">START</text>
+                    <text x="660" y="745" font-family="JetBrains Mono" font-size="14" fill="#c97a5b" letter-spacing="2">DOWNHILL →</text>
+                </svg>
+            </div>
+        <br/>
+            <!-- the moving title — JS sets --p (0..1) on scroll -->
+            <div class="moving-title" id="movingTitle">
+              <!-- <span class="upright label"><span class="ornament"></span>hello, i am marian<span class="ornament"></span></span>-->
+                <h1>
+                    <!--<span class="small">A Portfolio In Three Acts</span>-->
+                    Marian <!--<br/>-->
+                    Helcl
+                    <span class="accent">Øverli.</span>
+                </h1>
+
+            </div>
+
+            <!-- Static caption sits below the moving title's starting position -->
+            <div class="upright-block mt-10 ml-2 max-w-md" style="position: relative; z-index: 5;">
+                <p class="text-[#6a6860] text-xl leading-relaxed font-serif italic">
+                    Applied physics and mathematics from NTNU, Trondheim // 5 years acoustic consultant // <a class="not-italic text-[#3b3a36]">AI engineer/Data Scientist</a>. 
+                    <br/> Building LLM tools, RAG systems, and ML pipelines that solve real problems.
+                </p>
+                <div class="mt-8 flex flex-wrap gap-4 items-center">
+                    <a href="#projects" class="btn-classic">See my work →</a>
+                    <a href="#connect" class="btn-ghost">Or just say hi</a>
+                </div>
+                <div class="mt-12 label">scroll, and watch it slide ↓</div>
+            </div>
+        </section>
+
+        <!-- ABOUT — Rolling Bio Plates -->
+        <section id="about" class="slope-section">
+            <div class="upright label mb-4"><span class="ornament"></span>act i — about</div>
+            <h2 class="upright font-serif italic text-5xl md:text-6xl text-[#3b3a36] mb-12 leading-none">A rolling bio.</h2>
+
+            <div class="flex flex-wrap gap-4 max-w-5xl items-end relative">
+                <div class="plate tumble">Five years</div>
+                <div class="plate plate--accent tumble">turning sound</div>
+                <div class="plate tumble">into insight.</div>
+                <div class="plate tumble">Now I do</div>
+                <div class="plate plate--sage tumble">the same</div>
+                <div class="plate tumble">with AI.</div>
+
+            </div>
+
+            <div class="upright mt-24 grid grid-cols-2 md:grid-cols-4 gap-8 max-w-3xl">
+                <div>
+                    <div class="label">Focus</div>
+                    <div class="font-serif italic text-2xl mt-1 text-[#3b3a36]">GenAI &amp; ML</div>
+                </div>
+                <div>
+                    <div class="label">Interest</div>
+                    <div class="font-serif italic text-2xl mt-1 text-[#3b3a36]">NLP &amp; LLMs</div>
+                </div>
+                <div>
+                    <div class="label">Currently</div>
+                    <div class="font-serif italic text-2xl mt-1 text-[#3b3a36]">Building</div>
+                </div>
+                <div>
+                    <div class="label">Open to</div>
+                    <div class="font-serif italic text-2xl mt-1 text-[#3b3a36]">Opportunities</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PROJECTS — The Conveyor Belt -->
+        <section id="projects" class="slope-section !max-w-none">
+            <!-- Centered title — extends to the same width as the belt below
+                 so it is centered over the belt itself, not the section padding. -->
+            <div class="text-center mb-12" style="margin-top: -20px; margin-left: -7rem; width: calc(100% + 14rem);">
+                <div class="upright-center text-center">
+                    <div class="label"><span class="ornament"></span>act ii — selected work<span class="ornament"></span></div>
+                    <h2 class="font-serif italic text-5xl md:text-6xl text-[#3b3a36] mt-3">The conveyor belt.</h2>
+                    <p class="font-serif italic text-xl text-[#6a6860] mt-2">Six crates rolling down the hill — drag to slide them off the edge.</p>
+                </div>
+            </div>
+
+            <div class="conveyor">
+              <div class="conveyor-auto-track">
+
+                <!-- Crate 1 -->
+                <a href="https://movcrafter.com" class="min-w-[380px] max-w-[380px] paper-card group block">
+                    <div class="h-48 bg-[#ece3d4] rounded-sm mb-5 overflow-hidden border border-[rgba(59,58,54,0.15)]">
+                        <img src="assets/images/movcrafter-screenshot.png" alt="MovCrafter" class="w-full h-full object-cover group-hover:translate-y-2 transition-transform duration-500"/>
+                    </div>
+                    <div class="label">3D · 2026</div>
+                    <h3 class="font-serif italic text-3xl mt-1 text-[#3b3a36]">MovCrafter</h3>
+                    <p class="font-serif text-lg text-[#6a6860] mt-2 leading-snug">A browser interior designer. Rooms, furniture, 2D &amp; 3D, GLB/PNG export.</p>
+                    <div class="flex flex-wrap gap-1.5 mt-3"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Three.js</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">JavaScript</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">3D</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Canvas 2D</span></div>
+                </a>
+
+                <!-- Crate 2 -->
+                <a href="https://movfast.github.io/learn-storytelling/" class="min-w-[380px] max-w-[380px] paper-card group block">
+                    <div class="h-48 bg-[#ece3d4] rounded-sm mb-5 overflow-hidden border border-[rgba(59,58,54,0.15)]">
+                        <img src="assets/images/project-learn-storytelling.png" alt="Learn Storytelling" class="w-full h-full object-cover group-hover:translate-y-2 transition-transform duration-500"/>
+                    </div>
+                    <div class="label">Web App · 2026</div>
+                    <h3 class="font-serif italic text-3xl mt-1 text-[#3b3a36]">Learn Storytelling</h3>
+                    <p class="font-serif text-lg text-[#6a6860] mt-2 leading-snug">A six-level course in storytelling for LinkedIn &amp; Instagram, backed by neuroscience.</p>
+                    <div class="flex flex-wrap gap-1.5 mt-3"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Next.js</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">React</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">TypeScript</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Tailwind CSS</span></div>
+                </a>
+
+                <!-- Crate 3 -->
+                <a href="https://movfast.github.io/language-learner-german/" class="min-w-[380px] max-w-[380px] paper-card group block">
+                    <div class="h-48 bg-[#ece3d4] rounded-sm mb-5 overflow-hidden border border-[rgba(59,58,54,0.15)]">
+                        <img src="assets/images/project-german-learner.png" alt="German Learner" class="w-full h-full object-cover group-hover:translate-y-2 transition-transform duration-500"/>
+                    </div>
+                    <div class="label">Education · 2026</div>
+                    <h3 class="font-serif italic text-3xl mt-1 text-[#3b3a36]">German Learner</h3>
+                    <p class="font-serif text-lg text-[#6a6860] mt-2 leading-snug">Flashcards, grammar, quizzes &amp; hover-to-translate stories across CEFR A1–C2.</p>
+                    <div class="flex flex-wrap gap-1.5 mt-3"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Next.js</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">React</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">TypeScript</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Tailwind CSS</span></div>
+                </a>
+
+                <!-- Crate 4 -->
+                <a href="projects/acoustic-anomaly-demo.html" class="min-w-[380px] max-w-[380px] paper-card group block">
+                    <div class="h-48 bg-[#ece3d4] rounded-sm mb-5 overflow-hidden border border-[rgba(59,58,54,0.15)]">
+                        <img src="assets/images/project-acoustic-anomaly.png" alt="Acoustic Anomaly" class="w-full h-full object-cover group-hover:translate-y-2 transition-transform duration-500"/>
+                    </div>
+                    <div class="label">Deep Learning · 2025</div>
+                    <h3 class="font-serif italic text-3xl mt-1 text-[#3b3a36]">Acoustic Anomaly</h3>
+                    <p class="font-serif text-lg text-[#6a6860] mt-2 leading-snug">Detect anomalies in audio with spectrograms and a CNN. Industrial fault detection.</p>
+                    <div class="flex flex-wrap gap-1.5 mt-3"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Python</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">PyTorch</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Librosa</span></div>
+                </a>
+
+                <!-- Crate 5 -->
+                <a href="projects/meow-master.html" class="min-w-[380px] max-w-[380px] paper-card group block">
+                    <div class="h-48 bg-[#ece3d4] rounded-sm mb-5 overflow-hidden border border-[rgba(59,58,54,0.15)]">
+                        <img src="assets/images/project-meow-master.png" alt="Meow Master" class="w-full h-full object-cover group-hover:translate-y-2 transition-transform duration-500"/>
+                    </div>
+                    <div class="label">Browser Game · 2025</div>
+                    <h3 class="font-serif italic text-3xl mt-1 text-[#3b3a36]">Meow Master</h3>
+                    <p class="font-serif text-lg text-[#6a6860] mt-2 leading-snug">Train a procedurally-drawn cat through tricks across seven rooms with reward mechanics.</p>
+                    <div class="flex flex-wrap gap-1.5 mt-3"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">JavaScript</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Canvas 2D</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Web Audio API</span></div>
+                </a>
+
+                <!-- Crate 6 -->
+                <a href="https://movfast.github.io/behaviour-analysis-wolfs/" class="min-w-[380px] max-w-[380px] paper-card group block">
+                    <div class="h-48 bg-[#ece3d4] rounded-sm mb-5 overflow-hidden border border-[rgba(59,58,54,0.15)]">
+                        <img src="assets/images/project-wolf-behaviour.png" alt="Wolf Behavior" class="w-full h-full object-cover group-hover:translate-y-2 transition-transform duration-500"/>
+                    </div>
+                    <div class="label">Random Forest · 2025</div>
+                    <h3 class="font-serif italic text-3xl mt-1 text-[#3b3a36]">Wolf Behavior</h3>
+                    <p class="font-serif text-lg text-[#6a6860] mt-2 leading-snug">Classify resting, foraging &amp; traveling states from raw GPS tracking data.</p>
+                    <div class="flex flex-wrap gap-1.5 mt-3"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">React</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Recharts</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Random Forest</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Vite</span></div>
+                </a>
+
+                <a href="projects.html" class="min-w-[260px] max-w-[260px] paper-card !bg-[#c97a5b] flex items-center justify-center text-center group">
+                    <span class="font-serif italic text-2xl text-[#f5efe6] leading-tight">See all<br/>18 projects →</span>
+                </a>
+
+                <!-- Set 2 — exact duplicate so the marquee loop is seamless -->
+                <a href="https://movcrafter.com" class="min-w-[380px] max-w-[380px] paper-card group block" aria-hidden="true">
+                    <div class="h-48 bg-[#ece3d4] rounded-sm mb-5 overflow-hidden border border-[rgba(59,58,54,0.15)]">
+                        <img src="assets/images/movcrafter-screenshot.png" alt="" class="w-full h-full object-cover"/>
+                    </div>
+                    <div class="label">3D · 2026</div>
+                    <h3 class="font-serif italic text-3xl mt-1 text-[#3b3a36]">MovCrafter</h3>
+                    <p class="font-serif text-lg text-[#6a6860] mt-2 leading-snug">A browser interior designer. Rooms, furniture, 2D &amp; 3D, GLB/PNG export.</p>
+                    <div class="flex flex-wrap gap-1.5 mt-3"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Three.js</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">JavaScript</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">3D</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Canvas 2D</span></div>
+                </a>
+                <a href="https://movfast.github.io/learn-storytelling/" class="min-w-[380px] max-w-[380px] paper-card group block" aria-hidden="true">
+                    <div class="h-48 bg-[#ece3d4] rounded-sm mb-5 overflow-hidden border border-[rgba(59,58,54,0.15)]">
+                        <img src="assets/images/project-learn-storytelling.png" alt="" class="w-full h-full object-cover"/>
+                    </div>
+                    <div class="label">Web App · 2026</div>
+                    <h3 class="font-serif italic text-3xl mt-1 text-[#3b3a36]">Learn Storytelling</h3>
+                    <p class="font-serif text-lg text-[#6a6860] mt-2 leading-snug">A six-level course in storytelling for LinkedIn &amp; Instagram, backed by neuroscience.</p>
+                    <div class="flex flex-wrap gap-1.5 mt-3"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Next.js</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">React</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">TypeScript</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Tailwind CSS</span></div>
+                </a>
+                <a href="https://movfast.github.io/language-learner-german/" class="min-w-[380px] max-w-[380px] paper-card group block" aria-hidden="true">
+                    <div class="h-48 bg-[#ece3d4] rounded-sm mb-5 overflow-hidden border border-[rgba(59,58,54,0.15)]">
+                        <img src="assets/images/project-german-learner.png" alt="" class="w-full h-full object-cover"/>
+                    </div>
+                    <div class="label">Education · 2026</div>
+                    <h3 class="font-serif italic text-3xl mt-1 text-[#3b3a36]">German Learner</h3>
+                    <p class="font-serif text-lg text-[#6a6860] mt-2 leading-snug">Flashcards, grammar, quizzes &amp; hover-to-translate stories across CEFR A1–C2.</p>
+                    <div class="flex flex-wrap gap-1.5 mt-3"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Next.js</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">React</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">TypeScript</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Tailwind CSS</span></div>
+                </a>
+                <a href="projects/acoustic-anomaly-demo.html" class="min-w-[380px] max-w-[380px] paper-card group block" aria-hidden="true">
+                    <div class="h-48 bg-[#ece3d4] rounded-sm mb-5 overflow-hidden border border-[rgba(59,58,54,0.15)]">
+                        <img src="assets/images/project-acoustic-anomaly.png" alt="" class="w-full h-full object-cover"/>
+                    </div>
+                    <div class="label">Deep Learning · 2025</div>
+                    <h3 class="font-serif italic text-3xl mt-1 text-[#3b3a36]">Acoustic Anomaly</h3>
+                    <p class="font-serif text-lg text-[#6a6860] mt-2 leading-snug">Detect anomalies in audio with spectrograms and a CNN. Industrial fault detection.</p>
+                    <div class="flex flex-wrap gap-1.5 mt-3"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Python</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">PyTorch</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Librosa</span></div>
+                </a>
+                <a href="projects/meow-master.html" class="min-w-[380px] max-w-[380px] paper-card group block" aria-hidden="true">
+                    <div class="h-48 bg-[#ece3d4] rounded-sm mb-5 overflow-hidden border border-[rgba(59,58,54,0.15)]">
+                        <img src="assets/images/project-meow-master.png" alt="" class="w-full h-full object-cover"/>
+                    </div>
+                    <div class="label">Browser Game · 2025</div>
+                    <h3 class="font-serif italic text-3xl mt-1 text-[#3b3a36]">Meow Master</h3>
+                    <p class="font-serif text-lg text-[#6a6860] mt-2 leading-snug">Train a procedurally-drawn cat through tricks across seven rooms with reward mechanics.</p>
+                    <div class="flex flex-wrap gap-1.5 mt-3"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">JavaScript</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Canvas 2D</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Web Audio API</span></div>
+                </a>
+                <a href="https://movfast.github.io/behaviour-analysis-wolfs/" class="min-w-[380px] max-w-[380px] paper-card group block" aria-hidden="true">
+                    <div class="h-48 bg-[#ece3d4] rounded-sm mb-5 overflow-hidden border border-[rgba(59,58,54,0.15)]">
+                        <img src="assets/images/project-wolf-behaviour.png" alt="" class="w-full h-full object-cover"/>
+                    </div>
+                    <div class="label">Random Forest · 2025</div>
+                    <h3 class="font-serif italic text-3xl mt-1 text-[#3b3a36]">Wolf Behavior</h3>
+                    <p class="font-serif text-lg text-[#6a6860] mt-2 leading-snug">Classify resting, foraging &amp; traveling states from raw GPS tracking data.</p>
+                    <div class="flex flex-wrap gap-1.5 mt-3"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">React</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Recharts</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Random Forest</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Vite</span></div>
+                </a>
+                <a href="projects.html" class="min-w-[260px] max-w-[260px] paper-card !bg-[#c97a5b] flex items-center justify-center text-center group" aria-hidden="true">
+                    <span class="font-serif italic text-2xl text-[#f5efe6] leading-tight">See all<br/>18 projects →</span>
+                </a>
+
+              </div>
+            </div>
+
+            <!-- SECOND ROW — auto-scrolls in the opposite direction -->
+            <div class="conveyor mt-6">
+              <div class="conveyor-auto-track reverse">
+                <!-- Set 1 -->
+                <a href="projects/rag-chatbot-demo.html" class="min-w-[340px] max-w-[340px] paper-card group block">
+                    <div class="h-40 bg-[#ece3d4] rounded-sm mb-4 overflow-hidden border border-[rgba(59,58,54,0.15)]">
+                        <img src="assets/images/project-rag-chatbot.png" alt="RAG Chatbot" class="w-full h-full object-cover group-hover:translate-y-2 transition-transform duration-500"/>
+                    </div>
+                    <div class="label">RAG · 2025</div>
+                    <h3 class="font-serif italic text-2xl mt-1 text-[#3b3a36]">RAG Chatbot</h3>
+                    <p class="font-serif text-base text-[#6a6860] mt-1 leading-snug">Retrieval-augmented assistant over your own documents.</p>
+                    <div class="flex flex-wrap gap-1.5 mt-2"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Python</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">LangChain</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">FAISS</span></div>
+                </a>
+                <a href="projects/image-classifier-demo.html" class="min-w-[340px] max-w-[340px] paper-card group block">
+                    <div class="h-40 bg-[#ece3d4] rounded-sm mb-4 overflow-hidden border border-[rgba(59,58,54,0.15)]">
+                        <img src="assets/images/project-image-classifier.png" alt="Image Classifier" class="w-full h-full object-cover group-hover:translate-y-2 transition-transform duration-500"/>
+                    </div>
+                    <div class="label">CNN · 2025</div>
+                    <h3 class="font-serif italic text-2xl mt-1 text-[#3b3a36]">Image Classifier</h3>
+                    <p class="font-serif text-base text-[#6a6860] mt-1 leading-snug">Train and deploy a CNN classifier in a single notebook.</p>
+                    <div class="flex flex-wrap gap-1.5 mt-2"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">PyTorch</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Flask</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">CNN</span></div>
+                </a>
+                <a href="projects/sentiment-analyzer-demo.html" class="min-w-[340px] max-w-[340px] paper-card group block">
+                    <div class="h-40 bg-[#ece3d4] rounded-sm mb-4 overflow-hidden border border-[rgba(59,58,54,0.15)]">
+                        <img src="assets/images/project-sentiment-analyzer.png" alt="Sentiment Analyzer" class="w-full h-full object-cover group-hover:translate-y-2 transition-transform duration-500"/>
+                    </div>
+                    <div class="label">NLP · 2025</div>
+                    <h3 class="font-serif italic text-2xl mt-1 text-[#3b3a36]">Sentiment Analyzer</h3>
+                    <p class="font-serif text-base text-[#6a6860] mt-1 leading-snug">Detect tone in product reviews with a fine-tuned transformer.</p>
+                    <div class="flex flex-wrap gap-1.5 mt-2"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Transformers</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">HuggingFace</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">NLP</span></div>
+                </a>
+                <a href="projects/paper-summarizer-demo.html" class="min-w-[340px] max-w-[340px] paper-card group block">
+                    <div class="h-40 bg-[#ece3d4] rounded-sm mb-4 overflow-hidden border border-[rgba(59,58,54,0.15)]">
+                        <img src="assets/images/project-paper-summarizer.png" alt="Paper Summarizer" class="w-full h-full object-cover group-hover:translate-y-2 transition-transform duration-500"/>
+                    </div>
+                    <div class="label">LLM · 2025</div>
+                    <h3 class="font-serif italic text-2xl mt-1 text-[#3b3a36]">Paper Summarizer</h3>
+                    <p class="font-serif text-base text-[#6a6860] mt-1 leading-snug">Turn arXiv preprints into one-paragraph TL;DRs.</p>
+                    <div class="flex flex-wrap gap-1.5 mt-2"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Python</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">LangChain</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">LLM</span></div>
+                </a>
+                <a href="projects/scene-narrator-demo.html" class="min-w-[340px] max-w-[340px] paper-card group block">
+                    <div class="h-40 bg-[#ece3d4] rounded-sm mb-4 overflow-hidden border border-[rgba(59,58,54,0.15)]">
+                        <img src="assets/images/project-scene-narrator.png" alt="Scene Narrator" class="w-full h-full object-cover group-hover:translate-y-2 transition-transform duration-500"/>
+                    </div>
+                    <div class="label">Vision-LLM · 2025</div>
+                    <h3 class="font-serif italic text-2xl mt-1 text-[#3b3a36]">Scene Narrator</h3>
+                    <p class="font-serif text-base text-[#6a6860] mt-1 leading-snug">Describe a video scene-by-scene with multimodal models.</p>
+                    <div class="flex flex-wrap gap-1.5 mt-2"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Python</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">CLIP</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">OpenCV</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">LLM</span></div>
+                </a>
+                <a href="projects/speech-translator-demo.html" class="min-w-[340px] max-w-[340px] paper-card group block">
+                    <div class="h-40 bg-[#ece3d4] rounded-sm mb-4 overflow-hidden border border-[rgba(59,58,54,0.15)]">
+                        <img src="assets/images/project-speech-translator.png" alt="Speech Translator" class="w-full h-full object-cover group-hover:translate-y-2 transition-transform duration-500"/>
+                    </div>
+                    <div class="label">Speech · 2025</div>
+                    <h3 class="font-serif italic text-2xl mt-1 text-[#3b3a36]">Speech Translator</h3>
+                    <p class="font-serif text-base text-[#6a6860] mt-1 leading-snug">Live translate spoken audio between languages with Whisper.</p>
+                    <div class="flex flex-wrap gap-1.5 mt-2"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Python</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Whisper</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">TTS</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">LLM</span></div>
+                </a>
+
+                <!-- Set 2 — exact duplicate so the loop is seamless -->
+                <a href="projects/rag-chatbot-demo.html" class="min-w-[340px] max-w-[340px] paper-card group block" aria-hidden="true">
+                    <div class="h-40 bg-[#ece3d4] rounded-sm mb-4 overflow-hidden border border-[rgba(59,58,54,0.15)]">
+                        <img src="assets/images/project-rag-chatbot.png" alt="" class="w-full h-full object-cover"/>
+                    </div>
+                    <div class="label">RAG · 2025</div>
+                    <h3 class="font-serif italic text-2xl mt-1 text-[#3b3a36]">RAG Chatbot</h3>
+                    <p class="font-serif text-base text-[#6a6860] mt-1 leading-snug">Retrieval-augmented assistant over your own documents.</p>
+                    <div class="flex flex-wrap gap-1.5 mt-2"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Python</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">LangChain</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">FAISS</span></div>
+                </a>
+                <a href="projects/image-classifier-demo.html" class="min-w-[340px] max-w-[340px] paper-card group block" aria-hidden="true">
+                    <div class="h-40 bg-[#ece3d4] rounded-sm mb-4 overflow-hidden border border-[rgba(59,58,54,0.15)]">
+                        <img src="assets/images/project-image-classifier.png" alt="" class="w-full h-full object-cover"/>
+                    </div>
+                    <div class="label">CNN · 2025</div>
+                    <h3 class="font-serif italic text-2xl mt-1 text-[#3b3a36]">Image Classifier</h3>
+                    <p class="font-serif text-base text-[#6a6860] mt-1 leading-snug">Train and deploy a CNN classifier in a single notebook.</p>
+                    <div class="flex flex-wrap gap-1.5 mt-2"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">PyTorch</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Flask</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">CNN</span></div>
+                </a>
+                <a href="projects/sentiment-analyzer-demo.html" class="min-w-[340px] max-w-[340px] paper-card group block" aria-hidden="true">
+                    <div class="h-40 bg-[#ece3d4] rounded-sm mb-4 overflow-hidden border border-[rgba(59,58,54,0.15)]">
+                        <img src="assets/images/project-sentiment-analyzer.png" alt="" class="w-full h-full object-cover"/>
+                    </div>
+                    <div class="label">NLP · 2025</div>
+                    <h3 class="font-serif italic text-2xl mt-1 text-[#3b3a36]">Sentiment Analyzer</h3>
+                    <p class="font-serif text-base text-[#6a6860] mt-1 leading-snug">Detect tone in product reviews with a fine-tuned transformer.</p>
+                    <div class="flex flex-wrap gap-1.5 mt-2"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Transformers</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">HuggingFace</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">NLP</span></div>
+                </a>
+                <a href="projects/paper-summarizer-demo.html" class="min-w-[340px] max-w-[340px] paper-card group block" aria-hidden="true">
+                    <div class="h-40 bg-[#ece3d4] rounded-sm mb-4 overflow-hidden border border-[rgba(59,58,54,0.15)]">
+                        <img src="assets/images/project-paper-summarizer.png" alt="" class="w-full h-full object-cover"/>
+                    </div>
+                    <div class="label">LLM · 2025</div>
+                    <h3 class="font-serif italic text-2xl mt-1 text-[#3b3a36]">Paper Summarizer</h3>
+                    <p class="font-serif text-base text-[#6a6860] mt-1 leading-snug">Turn arXiv preprints into one-paragraph TL;DRs.</p>
+                    <div class="flex flex-wrap gap-1.5 mt-2"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Python</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">LangChain</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">LLM</span></div>
+                </a>
+                <a href="projects/scene-narrator-demo.html" class="min-w-[340px] max-w-[340px] paper-card group block" aria-hidden="true">
+                    <div class="h-40 bg-[#ece3d4] rounded-sm mb-4 overflow-hidden border border-[rgba(59,58,54,0.15)]">
+                        <img src="assets/images/project-scene-narrator.png" alt="" class="w-full h-full object-cover"/>
+                    </div>
+                    <div class="label">Vision-LLM · 2025</div>
+                    <h3 class="font-serif italic text-2xl mt-1 text-[#3b3a36]">Scene Narrator</h3>
+                    <p class="font-serif text-base text-[#6a6860] mt-1 leading-snug">Describe a video scene-by-scene with multimodal models.</p>
+                    <div class="flex flex-wrap gap-1.5 mt-2"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Python</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">CLIP</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">OpenCV</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">LLM</span></div>
+                </a>
+                <a href="projects/speech-translator-demo.html" class="min-w-[340px] max-w-[340px] paper-card group block" aria-hidden="true">
+                    <div class="h-40 bg-[#ece3d4] rounded-sm mb-4 overflow-hidden border border-[rgba(59,58,54,0.15)]">
+                        <img src="assets/images/project-speech-translator.png" alt="" class="w-full h-full object-cover"/>
+                    </div>
+                    <div class="label">Speech · 2025</div>
+                    <h3 class="font-serif italic text-2xl mt-1 text-[#3b3a36]">Speech Translator</h3>
+                    <p class="font-serif text-base text-[#6a6860] mt-1 leading-snug">Live translate spoken audio between languages with Whisper.</p>
+                    <div class="flex flex-wrap gap-1.5 mt-2"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Python</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Whisper</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">TTS</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">LLM</span></div>
+                </a>
+              </div>
+            </div>
+        </section>
+
+        <!-- WRITING — The Notice Board -->
+        <section id="writing" class="slope-section">
+            <div class="upright label"><span class="ornament"></span>act iii — writing</div>
+            <h2 class="upright font-serif italic text-5xl md:text-6xl text-[#3b3a36] mt-3">The notice board.</h2>
+            <p class="upright font-serif italic text-xl text-[#6a6860] mt-2 max-w-md mb-14">Pinned notes, fluttering as they slide down the slope.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-5xl">
+                <a href="writing/understanding-rag.html" class="paper-note flutter group block">
+                    <div class="pin"></div>
+                    <div class="label">LLMs</div>
+                    <h3 class="font-serif italic text-2xl mt-2 text-[#3b3a36] group-hover:text-[#c97a5b] transition">Understanding RAG</h3>
+                    <p class="font-serif text-lg text-[#6a6860] mt-2 leading-snug">How retrieval-augmented generation actually works under the hood.</p>
+                </a>
+                <a href="writing/ai-security-risks-2026.html" class="paper-note flutter group block">
+                    <div class="pin"></div>
+                    <div class="label">Security</div>
+                    <h3 class="font-serif italic text-2xl mt-2 text-[#3b3a36] group-hover:text-[#c97a5b] transition">AI Security Risks 2026</h3>
+                    <p class="font-serif text-lg text-[#6a6860] mt-2 leading-snug">The threats every AI builder should know about going into 2026.</p>
+                </a>
+                <a href="writing/prompting-claude-effectively.html" class="paper-note flutter group block">
+                    <div class="pin"></div>
+                    <div class="label">Prompting</div>
+                    <h3 class="font-serif italic text-2xl mt-2 text-[#3b3a36] group-hover:text-[#c97a5b] transition">Prompting Claude Effectively</h3>
+                    <p class="font-serif text-lg text-[#6a6860] mt-2 leading-snug">Patterns and tactics for getting the most out of Claude.</p>
+                </a>
+            </div>
+
+            <div class="upright mt-14">
+                <a href="writing.html" class="btn-classic">More writing →</a>
+            </div>
+        </section>
+
+        <!-- NEWS — A second notice board, title on the right -->
+        <section id="news" class="slope-section">
+            <!-- Right-aligned header -->
+            <div class="flex justify-end">
+                <div class="upright text-right">
+                    <div class="label"><span class="ornament"></span>act iv — what's new</div>
+                    <h2 class="font-serif italic text-5xl md:text-6xl text-[#3b3a36] mt-3">From the wires.</h2>
+                    <p class="font-serif italic text-xl text-[#6a6860] mt-2 max-w-md ml-auto mb-14">Fresh AI clippings, pinned to the board the moment they land.</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-5xl ml-auto">
+                <a href="https://www.anthropic.com/news" class="paper-note flutter group block">
+                    <div class="pin"></div>
+                    <div class="label">Models</div>
+                    <h3 class="font-serif italic text-2xl mt-2 text-[#3b3a36] group-hover:text-[#c97a5b] transition">Frontier Model Updates</h3>
+                    <p class="font-serif text-lg text-[#6a6860] mt-2 leading-snug">Anthropic, OpenAI &amp; Google ship new flagships almost monthly. The pace isn't slowing.</p>
+                </a>
+                <a href="https://huggingface.co/blog" class="paper-note flutter group block">
+                    <div class="pin"></div>
+                    <div class="label">Open Source</div>
+                    <h3 class="font-serif italic text-2xl mt-2 text-[#3b3a36] group-hover:text-[#c97a5b] transition">Open Weights Catch Up</h3>
+                    <p class="font-serif text-lg text-[#6a6860] mt-2 leading-snug">Llama, Mistral &amp; DeepSeek narrow the gap with closed labs on reasoning benchmarks.</p>
+                </a>
+                <a href="https://arxiv.org/list/cs.AI/recent" class="paper-note flutter group block">
+                    <div class="pin"></div>
+                    <div class="label">Research</div>
+                    <h3 class="font-serif italic text-2xl mt-2 text-[#3b3a36] group-hover:text-[#c97a5b] transition">Agents, Memory, Tools</h3>
+                    <p class="font-serif text-lg text-[#6a6860] mt-2 leading-snug">Long-horizon agents with persistent memory dominate the latest arXiv preprints.</p>
+                </a>
+            </div>
+
+            <div class="upright mt-14 w-full flex justify-end">
+                <a href="index.html#news" class="btn-classic">All AI news →</a>
+            </div>
+        </section>
+
+        <!-- CONNECT — Landing Pad -->
+        <section id="connect" class="slope-section">
+            <div class="upright">
+                <div class="label"><span class="ornament"></span>landing pad</div>
+                <h2 class="font-serif italic text-5xl md:text-7xl text-[#3b3a36] mt-3 leading-tight">
+                    You made it<br/>
+                    <span class="text-[#c97a5b]">down the hill.</span>
+                </h2>
+                <p class="font-serif italic text-xl text-[#6a6860] mt-6 max-w-md">Got an idea? A project? A roast? Let's talk.</p>
+                <div class="mt-10 flex flex-wrap gap-4">
+                    <a href="mailto:marian.helcl@gmail.com" class="btn-classic">Say hello ✉</a>
+                    <a href="https://github.com/movfast" class="btn-ghost">GitHub</a>
+                    <a href="https://www.linkedin.com/" class="btn-ghost">LinkedIn</a>
+                    <a href="index.html" class="btn-ghost">← Main site</a>
+                </div>
+                <div class="mt-16 label">© 2026 Marian Helcl Øverli<span class="ornament"></span>built on a gentle slope</div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- FIXED CHAT BUBBLE -->
+    <div class="fixed bottom-8 right-8 z-[60]">
+        <a href="mailto:marian.helcl@gmail.com" class="bg-[#3b3a36] text-[#f5efe6] px-4 py-3 rounded-sm shadow-2xl flex items-center gap-3 font-serif italic text-base hover:bg-[#c97a5b] transition border border-[rgba(245,239,230,0.2)]">
+            <div class="w-2 h-2 bg-[#a8b9a3] rounded-full animate-pulse"></div>
+            <span>"Don't fall off — let's chat."</span>
+        </a>
+    </div>
+
+    <script>
+        // ============================================================
+        //  THE OFF-CENTERED LINE
+        //  As you scroll down through the hero, the title travels along
+        //  a diagonal path: rightward + downward + slight rotation.
+        //  We expose progress (0..1) as the CSS variable --p on the
+        //  .moving-title element. The transform is defined in CSS.
+        // ============================================================
+        // ============================================================
+        //  ALIGN SECTIONS TO THE SAME VERTICAL AXIS
+        //  Because the slope-container is rotated by --tilt around its
+        //  top-left corner, any child at unrotated coordinates (0, y)
+        //  visually drifts right by y * tan(|tilt|). To make every
+        //  section start at the same visual left edge (and prevent
+        //  bottom sections from leaving the viewport on the right),
+        //  we shift each section LEFT by exactly that amount.
+        // ============================================================
+        const TILT_DEG = parseFloat(getComputedStyle(document.documentElement)
+                                      .getPropertyValue('--tilt')) || -8;
+        const TILT_RAD = TILT_DEG * Math.PI / 180;
+
+        function alignSections() {
+            const sections = document.querySelectorAll('.slope-container > section');
+            // First reset so offsetTop measures the natural layout
+            sections.forEach(s => { s.style.marginLeft = ''; });
+            // Then apply compensation. Lower section => larger negative shift.
+            sections.forEach(s => {
+                const top = s.offsetTop;
+                // visual_x_drift = top * sin(|tilt|), in pre-rotation coords we
+                // pull left by top * tan(|tilt|) to land back on x = 0.
+                const shift = top * Math.tan(Math.abs(TILT_RAD));
+                s.style.marginLeft = `${-shift}px`;
+            });
+        }
+
+        const movingTitle = document.getElementById('movingTitle');
+        const heroStage   = document.querySelector('.hero-stage');
+
+        function updateTitleTravel() {
+            if (!movingTitle || !heroStage) return;
+            // Distance over which the animation plays = hero stage height
+            const start = 0;
+            const end   = heroStage.offsetHeight * 0.85;
+            const y     = window.scrollY;
+            let p = (y - start) / (end - start);
+            p = Math.max(0, Math.min(1, p));
+            // ease-out for a smoother arrival
+            const eased = 1 - Math.pow(1 - p, 2);
+            movingTitle.style.setProperty('--p', eased.toFixed(4));
+        }
+
+        window.addEventListener('scroll', updateTitleTravel, { passive: true });
+        window.addEventListener('resize', () => { alignSections(); updateTitleTravel(); });
+        window.addEventListener('load', () => { alignSections(); updateTitleTravel(); });
+        alignSections();
+        updateTitleTravel();
+
+        // ============================================================
+        //  Tumble + flutter scroll-in animations
+        // ============================================================
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry, i) => {
+                if (entry.isIntersecting) {
+                    setTimeout(() => entry.target.classList.add('in'), i * 80);
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.2 });
+
+        document.querySelectorAll('.tumble, .flutter').forEach(el => observer.observe(el));
+
+        // ============================================================
+        //  CONVEYOR SCROLL CONTROL
+        //  Horizontal scrolling (trackpad/shift+wheel) nudges the
+        //  conveyor belt by adjusting each track's animation delay,
+        //  giving the user direct control over the scroll direction.
+        // ============================================================
+        (function () {
+            const conveyors = document.querySelectorAll('.conveyor');
+
+            conveyors.forEach(conveyor => {
+                const tracks = conveyor.querySelectorAll('.conveyor-auto-track');
+
+                tracks.forEach(track => {
+                    // Accumulated manual offset in px
+                    let manualOffset = 0;
+                    // Store the computed animation duration in ms
+                    const style = getComputedStyle(track);
+                    const durationStr = style.animationDuration || '60s';
+                    const duration = parseFloat(durationStr) * 1000; // ms
+                    // Total scroll distance = half the track width (the marquee goes from 0 to -50%)
+                    const isReverse = track.classList.contains('reverse');
+
+                    conveyor.addEventListener('wheel', (e) => {
+                        // Use deltaX for horizontal scroll; fall back to deltaY if no horizontal component
+                        const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+                        if (delta === 0) return;
+
+                        e.preventDefault();
+
+                        // Convert pixel delta to time offset in the animation
+                        const scrollWidth = track.scrollWidth / 2; // marquee loops over half
+                        const pxToMs = duration / scrollWidth;
+                        const timeShift = delta * pxToMs * (isReverse ? -1 : 1);
+
+                        // Adjust the animation delay to shift position
+                        const current = parseFloat(track.style.animationDelay || '0') * 1000;
+                        const newDelay = current - timeShift;
+                        track.style.animationDelay = `${newDelay / 1000}s`;
+                    }, { passive: false });
+                });
+            });
+        })();
+    </script>
+
+</body>
+</html>
