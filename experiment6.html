@@ -358,11 +358,17 @@
         .slope-section { padding-top: 9rem; padding-bottom: 9rem; }
         .hero-stage { padding-top: 6rem; padding-bottom: 0; }
         @media (max-width: 768px) {
+            .slope-container { transform: none; }
             .slope-container > section { padding-left: 2rem; padding-right: 2rem; max-width: 100vw; overflow: hidden; }
             .slope-container > section#projects { overflow: visible; }
             .slope-section { padding-top: 5rem; padding-bottom: 5rem; }
-            .hero-stage { padding-top: 5rem; }
+            .hero-stage { padding: 5rem 1.5rem 0 1.5rem; min-height: auto; }
             .moving-title { --p: 0 !important; transform: none !important; }
+            .upright, .upright-block, .upright-center { transform: none; display: block; }
+            #skills { transform: none; }
+            .conveyor { margin-top: 2rem !important; }
+            .slope-container > section .grid[style*="margin-top: 100px"] { margin-top: 2rem !important; }
+            .upright-block.ml-4 { margin-left: 0; }
         }
 
         /* Hamburger icon */
@@ -501,22 +507,22 @@
             </div>
         </section>
 
-        <div class="upright mt-12 md:mt-1 grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 max-w-[90vw] md:max-w-3xl" style="padding-left: 0rem;">
+        <div class="upright mt-12 md:mt-1 grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 max-w-[90vw] md:max-w-3xl pl-6 md:pl-0">
             <div>
                 <div class="label">Focus</div>
-                <div class="font-serif italic text-2xl mt-1 text-[#3b3a36]">GenAI &amp; ML</div>
+                <div class="font-serif italic text-xl md:text-2xl mt-1 text-[#3b3a36]">GenAI &amp; ML</div>
             </div>
             <div>
                 <div class="label">Interest</div>
-                <div class="font-serif italic text-2xl mt-1 text-[#3b3a36]">NLP &amp; LLMs</div>
+                <div class="font-serif italic text-xl md:text-2xl mt-1 text-[#3b3a36]">NLP &amp; LLMs</div>
             </div>
             <div>
                 <div class="label">Currently</div>
-                <div class="font-serif italic text-2xl mt-1 text-[#3b3a36]">Building</div>
+                <div class="font-serif italic text-xl md:text-2xl mt-1 text-[#3b3a36]">Building</div>
             </div>
             <div>
                 <div class="label">Open to</div>
-                <div class="font-serif italic text-2xl mt-1 text-[#3b3a36]">Opportunities</div>
+                <div class="font-serif italic text-xl md:text-2xl mt-1 text-[#3b3a36]">Opportunities</div>
             </div>
         </div>
 
@@ -533,10 +539,11 @@
                         </div>
                     </div>-->
                     
-                    <h2 class="font-serif italic text-5xl md:text-6xl text-[#3b3a36]"> </h2>
+                    <h2 class="font-serif italic text-5xl md:text-6xl text-[#3b3a36] hidden md:block"> </h2>
                     
                     <div class="conveyor" style="margin-top: 250px;">
-                        <div class="label" style="margin-left: 10rem; margin-bottom: 1rem; margin-top: 100px"><span class="ornament"></span>Projects - Scroll and click on the cards to interact and learn more.</div>
+                        <div class="label ml-4 md:ml-[10rem] mb-4 md:mb-4 mt-4 md:mt-[100px]"><span class="ornament"></span>Projects - Scroll and click on the cards to interact and learn more.</div>
+                        <div style="margin-bottom: 2rem; text-align: center;"><a href="projects.html" class="btn-ghost !py-2 !px-5 !text-[10px]">— view all —</a></div>
                         <div class="conveyor-auto-track">
 
                 <!-- Crate 1 -->
@@ -909,7 +916,7 @@
                 </a>
             </div>
 
-            <div class="upright mt-14 w-full flex justify-end">
+            <div class="upright mt-14 w-full flex justify-start md:justify-end">
                 <a href="index.html#news" class="btn-classic">All AI news →</a>
             </div>
         </section>
@@ -918,11 +925,11 @@
         <section id="connect" class="slope-section">
             <div class="upright">
                 <div class="label"><span class="ornament"></span>landing pad</div>
-                <h2 class="font-serif italic text-5xl md:text-7xl text-[#3b3a36] mt-3 leading-tight">
+                <h2 class="font-serif italic text-4xl md:text-7xl text-[#3b3a36] mt-3 leading-tight">
                     Connect<br/>
                     <span class="text-[#c97a5b]">with me.</span>
                 </h2>
-                <p class="font-serif italic text-xl text-[#6a6860] mt-6 max-w-md">Please contact me for AI discussions or opportunities, or just to connect with me.</p>
+                <p class="font-serif italic text-lg md:text-xl text-[#6a6860] mt-6 max-w-sm md:max-w-md">Please contact me for AI discussions or opportunities, or just to connect with me.</p>
                 <div class="mt-10 flex flex-wrap gap-4">
                     <a href="mailto:marian.helcl@gmail.com" class="btn-classic">Say hello ✉</a>
                     <a href="https://github.com/movfast" class="btn-ghost">GitHub</a>
@@ -936,10 +943,11 @@
     </div>
 
     <!-- FIXED CHAT BUBBLE -->
-    <div class="fixed bottom-8 right-8 z-[60]">
-        <a href="mailto:marian.helcl@gmail.com" class="bg-[#3b3a36] text-[#f5efe6] px-4 py-3 rounded-sm shadow-2xl flex items-center gap-3 font-serif italic text-base hover:bg-[#c97a5b] transition border border-[rgba(245,239,230,0.2)]">
+    <div class="fixed bottom-4 right-4 md:bottom-8 md:right-8 z-[60]">
+        <a href="mailto:marian.helcl@gmail.com" class="bg-[#3b3a36] text-[#f5efe6] px-3 py-2 md:px-4 md:py-3 rounded-sm shadow-2xl flex items-center gap-2 md:gap-3 font-serif italic text-sm md:text-base hover:bg-[#c97a5b] transition border border-[rgba(245,239,230,0.2)]">
             <div class="w-2 h-2 bg-[#a8b9a3] rounded-full animate-pulse"></div>
-            <span>"Don't fall off — let's chat."</span>
+            <span class="hidden sm:inline">"Don't fall off — let's chat."</span>
+            <span class="sm:hidden">Chat</span>
         </a>
     </div>
 
@@ -968,6 +976,8 @@
             const sections = document.querySelectorAll('.slope-container > section');
             // First reset so offsetTop measures the natural layout
             sections.forEach(s => { s.style.marginLeft = ''; });
+            // Skip alignment on mobile — slope is disabled via CSS
+            if (window.innerWidth <= 768) return;
             // Then apply compensation. Lower section => larger negative shift.
             sections.forEach(s => {
                 const top = s.offsetTop;
