@@ -325,6 +325,110 @@
             .timeline-entry { margin-left: 0; }
             .plate { font-size: 1rem; padding: 0.8rem 1.1rem; }
         }
+
+        /* Side navigation */
+        .side-nav {
+            position: fixed;
+            right: clamp(1rem, 3vw, 2.5rem);
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            gap: 0.15rem;
+        }
+        .side-nav-link {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.7rem;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--ink-soft);
+            text-decoration: none;
+            padding: 0.4rem 0.75rem;
+            border-right: 2px solid transparent;
+            text-align: right;
+            transition: color 0.3s, border-color 0.3s;
+            opacity: 0.5;
+        }
+        .side-nav-link:hover {
+            color: var(--terracotta);
+            opacity: 1;
+        }
+        .side-nav-link.active {
+            color: var(--terracotta);
+            border-right-color: var(--terracotta);
+            opacity: 1;
+            font-weight: 600;
+        }
+        @media (max-width: 1200px) {
+            .side-nav { display: none; }
+        }
+
+        /* Audio player */
+        .audio-player {
+            position: absolute;
+            top: 2rem;
+            right: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            background: var(--linen);
+            border: 1px solid rgba(59,58,54,0.15);
+            border-radius: 999px;
+            padding: 0.4rem 1rem 0.4rem 0.4rem;
+            box-shadow: 4px 6px 0 rgba(59,58,54,0.06);
+            z-index: 10;
+        }
+        .audio-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 1px solid rgba(59,58,54,0.2);
+            background: var(--terracotta);
+            color: var(--cream);
+            font-size: 0.7rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.15s, box-shadow 0.15s;
+            box-shadow: 0 2px 0 #9a5a40;
+            flex-shrink: 0;
+        }
+        .audio-btn:hover { transform: translateY(1px); box-shadow: 0 1px 0 #9a5a40; }
+        .audio-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            min-width: 100px;
+        }
+        .audio-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--ink-soft);
+            font-weight: 500;
+        }
+        .audio-progress-bar {
+            width: 100%;
+            height: 3px;
+            background: rgba(59,58,54,0.12);
+            border-radius: 2px;
+            cursor: pointer;
+            position: relative;
+        }
+        .audio-progress-fill {
+            height: 100%;
+            background: var(--terracotta);
+            border-radius: 2px;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+        @media (max-width: 480px) {
+            .audio-player { position: relative; top: 0; margin-bottom: 1rem; }
+        }
     </style>
 </head>
 <body>
@@ -368,7 +472,19 @@
     <div class="page-wrap" style="padding-top: 7rem;">
 
         <!-- ═══════════════════ HERO ═══════════════════ -->
-        <section class="section" style="border-top:none; padding-top:2rem;">
+        <section id="hero" class="section" style="border-top:none; padding-top:2rem; position:relative;">
+            <!-- Audio player -->
+            <div class="audio-player" id="audioPlayer">
+                <button id="audioPlayBtn" aria-label="Play music" class="audio-btn" type="button">&#9654;</button>
+                <div class="audio-info">
+                    <span class="audio-title">The Neural Seam</span>
+                    <div class="audio-progress-bar" id="audioProgressBar">
+                        <div class="audio-progress-fill" id="audioProgressFill"></div>
+                    </div>
+                </div>
+            </div>
+            <audio id="bgAudio" src="The_Neural_Seam.mp3" preload="metadata"></audio>
+
             <div class="tumble">
                 <div class="label"><span class="ornament"></span>About me</div>
                 <h1 class="font-serif italic text-[#3b3a36] mt-4 leading-tight" style="font-size: clamp(2rem, 6vw, 5.5rem);">
@@ -390,7 +506,7 @@
                 </div>
             </div>
             <div class="tumble mt-8">
-                <p class="font-serif italic text-xl text-[#6a6860] max-w-lg leading-relaxed">An applied physicist who loves experimenting, small dogs, and a good toast — and who turned acoustics into automation.</p>
+                <p class="font-serif italic text-xl text-[#6a6860] max-w-lg leading-relaxed">An applied physicist who loves experimenting, small dogs, and a good toast.</p>
             </div>
 
             <!-- Fun facts -->
@@ -539,7 +655,7 @@
         <section id="skills" class="section">
             <div class="tumble">
                 <div class="label"><span class="ornament"></span>Skills &amp; Tools</div>
-                <h2 class="section-heading">What I bring<br/><span class="text-[#c97a5b]">to the table.</span></h2>
+                <h2 class="section-heading">Languages, frameworks,<br/><span class="text-[#c97a5b]">and craft.</span></h2>
             </div>
             <div class="tumble mt-6 mb-4">
                 <p class="font-serif italic text-xl text-[#6a6860] max-w-lg">A toolkit shaped by physics, refined by consulting, and expanding into AI.</p>
@@ -828,11 +944,11 @@
                     Let's build<br/>
                     <span class="text-[#c97a5b]">something together.</span>
                 </h2>
-                <p class="font-serif italic text-xl text-[#6a6860] mt-6 max-w-md">Please contact me for AI discussions or opportunities, or just to connect with me.</p>
+                <p class="font-serif italic text-xl text-[#6a6860] mt-6 max-w-md">Please contact me for AI discussions, opportunities, or just to connect with me.</p>
                 <div class="mt-10 flex flex-wrap gap-4">
                     <a href="mailto:marian.helcl@gmail.com" class="btn-classic">Say hello ✉</a>
                     <a href="https://github.com/movfast" class="btn-ghost">GitHub</a>
-                    <a href="https://www.linkedin.com/" class="btn-ghost">LinkedIn</a>
+                    <a href="https://www.linkedin.com/in/marianhelcloverli/" class="btn-ghost">LinkedIn</a>
                     <a href="experiment6.html" class="btn-ghost">← Back to site</a>
                 </div>
                 <div class="mt-16 label">© 2026 Marian Helcl Øverli<span class="ornament"></span>the full story</div>
@@ -840,6 +956,19 @@
         </section>
 
     </div>
+
+    <!-- SIDE NAV -->
+    <nav id="sideNav" class="side-nav" aria-label="Page sections">
+        <a href="#hero" class="side-nav-link active" data-section="hero">About me</a>
+        <a href="#education" class="side-nav-link" data-section="education">The Foundation</a>
+        <a href="#journey" class="side-nav-link" data-section="journey">The Journey</a>
+        <a href="#skills" class="side-nav-link" data-section="skills">Toolkit</a>
+        <a href="#thinking" class="side-nav-link" data-section="thinking">Thinking</a>
+        <a href="#why-hire" class="side-nav-link" data-section="why-hire">Why Hire Me</a>
+        <a href="#focus" class="side-nav-link" data-section="focus">AI & Future</a>
+        <a href="#creative" class="side-nav-link" data-section="creative">How I Work</a>
+        <a href="#connect" class="side-nav-link" data-section="connect">Connect</a>
+    </nav>
 
     <!-- PLATE STYLE (reused from experiment6) -->
     <style>
@@ -896,6 +1025,68 @@
                 document.getElementById('menuBtn').classList.remove('menu-open');
             });
         });
+
+        // Audio player
+        (() => {
+            const audio = document.getElementById('bgAudio');
+            const btn = document.getElementById('audioPlayBtn');
+            const fill = document.getElementById('audioProgressFill');
+            const bar = document.getElementById('audioProgressBar');
+            let playing = false;
+
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (playing) {
+                    audio.pause();
+                    btn.textContent = '\u25B6';
+                    playing = false;
+                } else {
+                    audio.play().then(() => {
+                        btn.textContent = '\u275A\u275A';
+                        playing = true;
+                    }).catch(() => {});
+                }
+            });
+
+            audio.addEventListener('timeupdate', () => {
+                if (audio.duration) {
+                    fill.style.width = (audio.currentTime / audio.duration * 100) + '%';
+                }
+            });
+
+            audio.addEventListener('ended', () => {
+                playing = false;
+                btn.textContent = '\u25B6';
+                fill.style.width = '0%';
+            });
+
+            bar.addEventListener('click', (e) => {
+                const rect = bar.getBoundingClientRect();
+                const pct = (e.clientX - rect.left) / rect.width;
+                audio.currentTime = pct * audio.duration;
+            });
+        })();
+
+        // Side nav – highlight active section on scroll
+        (() => {
+            const sectionIds = ['hero','education','journey','skills','thinking','why-hire','focus','creative','connect'];
+            const links = document.querySelectorAll('.side-nav-link');
+
+            const sectionObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        links.forEach(l => l.classList.remove('active'));
+                        const active = document.querySelector(`.side-nav-link[data-section="${entry.target.id}"]`);
+                        if (active) active.classList.add('active');
+                    }
+                });
+            }, { rootMargin: '-30% 0px -60% 0px' });
+
+            sectionIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) sectionObserver.observe(el);
+            });
+        })();
     </script>
 
 </body>
