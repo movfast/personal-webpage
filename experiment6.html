@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Marian Helcl Øverli — Downhill, Classically</title>
+    <title>Marian Helcl Øverli — Physics, AI engineering</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
@@ -67,7 +67,7 @@
             width: 100vw;
             margin-left: 0;
             padding-top: 14vh;
-            padding-bottom: 28vh;
+            padding-bottom: 8vh;
             position: relative;
             z-index: 2;
         }
@@ -171,7 +171,7 @@
         /* The HERO TITLE — moves along an off-centered line on scroll */
         .hero-stage {
             position: relative;
-            min-height: 110vh;
+            min-height: 75vh;
             padding: 6rem 4rem 0 7rem;
             overflow: hidden;
         }
@@ -375,7 +375,7 @@
                 <span class="font-serif italic text-xl text-[#3b3a36]">Marian H. Øverli</span>
             </div>
             <div class="hidden md:flex items-center gap-10 font-sans text-xs uppercase tracking-[0.2em] font-medium text-[#3b3a36]">
-                <a href="#about" class="hover:text-[#c97a5b] transition">About</a>
+                <a href="about.html" class="hover:text-[#c97a5b] transition">About</a>
                 <a href="#projects" class="hover:text-[#c97a5b] transition">Work</a>
                 <a href="#writing" class="hover:text-[#c97a5b] transition">Writing</a>
                 <a href="#news" class="hover:text-[#c97a5b] transition">News</a>
@@ -402,10 +402,11 @@
                     <path d="M 60 80 Q 420 220 760 720"
                           stroke="#c97a5b" stroke-width="1" fill="none"
                           stroke-dasharray="2 8" opacity="0.7"/>
-                    <circle cx="60" cy="80" r="5" class="guide-dot"/>
-                    <circle cx="760" cy="720" r="5" class="guide-dot"/>
-                    <text x="78" y="74" font-family="JetBrains Mono" font-size="14" fill="#c97a5b" letter-spacing="2">START</text>
+                   <!-- <circle cx="60" cy="80" r="5" class="guide-dot"/>
+                    <circle cx="760" cy="720" r="5" class="guide-dot"/>-->
+           <!--         <text x="78" y="74" font-family="JetBrains Mono" font-size="14" fill="#c97a5b" letter-spacing="2">START</text>
                     <text x="660" y="745" font-family="JetBrains Mono" font-size="14" fill="#c97a5b" letter-spacing="2">DOWNHILL →</text>
+                    -->
                 </svg>
             </div>
         <br/>
@@ -422,7 +423,7 @@
             </div>
 
             <!-- Static caption sits below the moving title's starting position -->
-            <div class="upright-block mt-10 ml-2 max-w-md" style="position: relative; z-index: 5;">
+            <div class="upright-block mt-20 ml-4 max-w-md" style="position: relative; z-index: 5;">
                 <p class="text-[#6a6860] text-xl leading-relaxed font-serif italic">
                     Applied physics and mathematics from NTNU, Trondheim // 5 years acoustic consultant // <a class="not-italic text-[#3b3a36]">AI engineer/Data Scientist</a>. 
                     <br/> Building LLM tools, RAG systems, and ML pipelines that solve real problems.
@@ -431,59 +432,47 @@
                     <a href="#projects" class="btn-classic">See my work →</a>
                     <a href="#connect" class="btn-ghost">Or just say hi</a>
                 </div>
-                <div class="mt-12 label">scroll, and watch it slide ↓</div>
+             <!--   <div class="mt-12 label">scroll, and watch it slide ↓</div>-->
             </div>
         </section>
 
-        <!-- ABOUT — Rolling Bio Plates -->
-        <section id="about" class="slope-section">
-            <div class="upright label mb-4"><span class="ornament"></span>act i — about</div>
-            <h2 class="upright font-serif italic text-5xl md:text-6xl text-[#3b3a36] mb-12 leading-none">A rolling bio.</h2>
-
-            <div class="flex flex-wrap gap-4 max-w-5xl items-end relative">
-                <div class="plate tumble">Five years</div>
-                <div class="plate plate--accent tumble">turning sound</div>
-                <div class="plate tumble">into insight.</div>
-                <div class="plate tumble">Now I do</div>
-                <div class="plate plate--sage tumble">the same</div>
-                <div class="plate tumble">with AI.</div>
-
+        <div class="upright mt-1 grid grid-cols-2 md:grid-cols-4 gap-8 max-w-3xl" style="padding-left: 0rem;">
+            <div>
+                <div class="label">Focus</div>
+                <div class="font-serif italic text-2xl mt-1 text-[#3b3a36]">GenAI &amp; ML</div>
             </div>
-
-            <div class="upright mt-24 grid grid-cols-2 md:grid-cols-4 gap-8 max-w-3xl">
-                <div>
-                    <div class="label">Focus</div>
-                    <div class="font-serif italic text-2xl mt-1 text-[#3b3a36]">GenAI &amp; ML</div>
-                </div>
-                <div>
-                    <div class="label">Interest</div>
-                    <div class="font-serif italic text-2xl mt-1 text-[#3b3a36]">NLP &amp; LLMs</div>
-                </div>
-                <div>
-                    <div class="label">Currently</div>
-                    <div class="font-serif italic text-2xl mt-1 text-[#3b3a36]">Building</div>
-                </div>
-                <div>
-                    <div class="label">Open to</div>
-                    <div class="font-serif italic text-2xl mt-1 text-[#3b3a36]">Opportunities</div>
-                </div>
+            <div>
+                <div class="label">Interest</div>
+                <div class="font-serif italic text-2xl mt-1 text-[#3b3a36]">NLP &amp; LLMs</div>
             </div>
-        </section>
+            <div>
+                <div class="label">Currently</div>
+                <div class="font-serif italic text-2xl mt-1 text-[#3b3a36]">Building</div>
+            </div>
+            <div>
+                <div class="label">Open to</div>
+                <div class="font-serif italic text-2xl mt-1 text-[#3b3a36]">Opportunities</div>
+            </div>
+        </div>
 
         <!-- PROJECTS — The Conveyor Belt -->
         <section id="projects" class="slope-section !max-w-none">
             <!-- Centered title — extends to the same width as the belt below
                  so it is centered over the belt itself, not the section padding. -->
-            <div class="text-center mb-12" style="margin-top: -20px; margin-left: -7rem; width: calc(100% + 14rem);">
-                <div class="upright-center text-center">
-                    <div class="label"><span class="ornament"></span>act ii — selected work<span class="ornament"></span></div>
-                    <h2 class="font-serif italic text-5xl md:text-6xl text-[#3b3a36] mt-3">The conveyor belt.</h2>
-                    <p class="font-serif italic text-xl text-[#6a6860] mt-2">Six crates rolling down the hill — drag to slide them off the edge.</p>
-                </div>
-            </div>
-
-            <div class="conveyor">
-              <div class="conveyor-auto-track">
+                 <!--<div class="text-center mb-12" style="margin-top: 80px; margin-left: -7rem; width: calc(100% + 14rem);">
+                     <div class="upright-center text-center">
+                         
+                         <!-- <div class="label"><span class="ornament"></span>act ii — selected work<span class="ornament"></span></div>-->
+                         <!--<h2 class="font-serif italic text-5xl md:text-6xl text-[#3b3a36] mt-3">A selection of my Projects.</h2>
+                         <p class="font-serif italic text-xl text-[#6a6860] mt-2">Scroll and click on the cards to interact and learn more.</p>
+                        </div>
+                    </div>-->
+                    
+                    <h2 class="font-serif italic text-5xl md:text-6xl text-[#3b3a36]"> </h2>
+                    
+                    <div class="conveyor" style="margin-top: 250px;">
+                        <div class="label" style="margin-left: 10rem; margin-bottom: 1rem; margin-top: 100px"><span class="ornament"></span>Projects - Scroll and click on the cards to interact and learn more.</div>
+                        <div class="conveyor-auto-track">
 
                 <!-- Crate 1 -->
                 <a href="https://movcrafter.com" class="min-w-[380px] max-w-[380px] paper-card group block">
@@ -523,7 +512,7 @@
                     <div class="h-48 bg-[#ece3d4] rounded-sm mb-5 overflow-hidden border border-[rgba(59,58,54,0.15)]">
                         <img src="assets/images/project-acoustic-anomaly.png" alt="Acoustic Anomaly" class="w-full h-full object-cover group-hover:translate-y-2 transition-transform duration-500"/>
                     </div>
-                    <div class="label">Deep Learning · 2025</div>
+                    <div class="label">Deep Learning · 2026</div>
                     <h3 class="font-serif italic text-3xl mt-1 text-[#3b3a36]">Acoustic Anomaly</h3>
                     <p class="font-serif text-lg text-[#6a6860] mt-2 leading-snug">Detect anomalies in audio with spectrograms and a CNN. Industrial fault detection.</p>
                     <div class="flex flex-wrap gap-1.5 mt-3"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Python</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">PyTorch</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Librosa</span></div>
@@ -534,7 +523,7 @@
                     <div class="h-48 bg-[#ece3d4] rounded-sm mb-5 overflow-hidden border border-[rgba(59,58,54,0.15)]">
                         <img src="assets/images/project-meow-master.png" alt="Meow Master" class="w-full h-full object-cover group-hover:translate-y-2 transition-transform duration-500"/>
                     </div>
-                    <div class="label">Browser Game · 2025</div>
+                    <div class="label">Browser Game · 2026</div>
                     <h3 class="font-serif italic text-3xl mt-1 text-[#3b3a36]">Meow Master</h3>
                     <p class="font-serif text-lg text-[#6a6860] mt-2 leading-snug">Train a procedurally-drawn cat through tricks across seven rooms with reward mechanics.</p>
                     <div class="flex flex-wrap gap-1.5 mt-3"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">JavaScript</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Canvas 2D</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Web Audio API</span></div>
@@ -545,7 +534,7 @@
                     <div class="h-48 bg-[#ece3d4] rounded-sm mb-5 overflow-hidden border border-[rgba(59,58,54,0.15)]">
                         <img src="assets/images/project-wolf-behaviour.png" alt="Wolf Behavior" class="w-full h-full object-cover group-hover:translate-y-2 transition-transform duration-500"/>
                     </div>
-                    <div class="label">Random Forest · 2025</div>
+                    <div class="label">Random Forest · 2026</div>
                     <h3 class="font-serif italic text-3xl mt-1 text-[#3b3a36]">Wolf Behavior</h3>
                     <p class="font-serif text-lg text-[#6a6860] mt-2 leading-snug">Classify resting, foraging &amp; traveling states from raw GPS tracking data.</p>
                     <div class="flex flex-wrap gap-1.5 mt-3"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">React</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Recharts</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Random Forest</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Vite</span></div>
@@ -587,7 +576,7 @@
                     <div class="h-48 bg-[#ece3d4] rounded-sm mb-5 overflow-hidden border border-[rgba(59,58,54,0.15)]">
                         <img src="assets/images/project-acoustic-anomaly.png" alt="" class="w-full h-full object-cover"/>
                     </div>
-                    <div class="label">Deep Learning · 2025</div>
+                    <div class="label">Deep Learning · 2026</div>
                     <h3 class="font-serif italic text-3xl mt-1 text-[#3b3a36]">Acoustic Anomaly</h3>
                     <p class="font-serif text-lg text-[#6a6860] mt-2 leading-snug">Detect anomalies in audio with spectrograms and a CNN. Industrial fault detection.</p>
                     <div class="flex flex-wrap gap-1.5 mt-3"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Python</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">PyTorch</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Librosa</span></div>
@@ -596,7 +585,7 @@
                     <div class="h-48 bg-[#ece3d4] rounded-sm mb-5 overflow-hidden border border-[rgba(59,58,54,0.15)]">
                         <img src="assets/images/project-meow-master.png" alt="" class="w-full h-full object-cover"/>
                     </div>
-                    <div class="label">Browser Game · 2025</div>
+                    <div class="label">Browser Game · 2026</div>
                     <h3 class="font-serif italic text-3xl mt-1 text-[#3b3a36]">Meow Master</h3>
                     <p class="font-serif text-lg text-[#6a6860] mt-2 leading-snug">Train a procedurally-drawn cat through tricks across seven rooms with reward mechanics.</p>
                     <div class="flex flex-wrap gap-1.5 mt-3"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">JavaScript</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Canvas 2D</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Web Audio API</span></div>
@@ -605,7 +594,7 @@
                     <div class="h-48 bg-[#ece3d4] rounded-sm mb-5 overflow-hidden border border-[rgba(59,58,54,0.15)]">
                         <img src="assets/images/project-wolf-behaviour.png" alt="" class="w-full h-full object-cover"/>
                     </div>
-                    <div class="label">Random Forest · 2025</div>
+                    <div class="label">Random Forest · 2026</div>
                     <h3 class="font-serif italic text-3xl mt-1 text-[#3b3a36]">Wolf Behavior</h3>
                     <p class="font-serif text-lg text-[#6a6860] mt-2 leading-snug">Classify resting, foraging &amp; traveling states from raw GPS tracking data.</p>
                     <div class="flex flex-wrap gap-1.5 mt-3"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">React</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Recharts</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Random Forest</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Vite</span></div>
@@ -625,7 +614,7 @@
                     <div class="h-40 bg-[#ece3d4] rounded-sm mb-4 overflow-hidden border border-[rgba(59,58,54,0.15)]">
                         <img src="assets/images/project-rag-chatbot.png" alt="RAG Chatbot" class="w-full h-full object-cover group-hover:translate-y-2 transition-transform duration-500"/>
                     </div>
-                    <div class="label">RAG · 2025</div>
+                    <div class="label">RAG · 2026</div>
                     <h3 class="font-serif italic text-2xl mt-1 text-[#3b3a36]">RAG Chatbot</h3>
                     <p class="font-serif text-base text-[#6a6860] mt-1 leading-snug">Retrieval-augmented assistant over your own documents.</p>
                     <div class="flex flex-wrap gap-1.5 mt-2"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Python</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">LangChain</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">FAISS</span></div>
@@ -634,7 +623,7 @@
                     <div class="h-40 bg-[#ece3d4] rounded-sm mb-4 overflow-hidden border border-[rgba(59,58,54,0.15)]">
                         <img src="assets/images/project-image-classifier.png" alt="Image Classifier" class="w-full h-full object-cover group-hover:translate-y-2 transition-transform duration-500"/>
                     </div>
-                    <div class="label">CNN · 2025</div>
+                    <div class="label">CNN · 2026</div>
                     <h3 class="font-serif italic text-2xl mt-1 text-[#3b3a36]">Image Classifier</h3>
                     <p class="font-serif text-base text-[#6a6860] mt-1 leading-snug">Train and deploy a CNN classifier in a single notebook.</p>
                     <div class="flex flex-wrap gap-1.5 mt-2"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">PyTorch</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Flask</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">CNN</span></div>
@@ -643,7 +632,7 @@
                     <div class="h-40 bg-[#ece3d4] rounded-sm mb-4 overflow-hidden border border-[rgba(59,58,54,0.15)]">
                         <img src="assets/images/project-sentiment-analyzer.png" alt="Sentiment Analyzer" class="w-full h-full object-cover group-hover:translate-y-2 transition-transform duration-500"/>
                     </div>
-                    <div class="label">NLP · 2025</div>
+                    <div class="label">NLP · 2026</div>
                     <h3 class="font-serif italic text-2xl mt-1 text-[#3b3a36]">Sentiment Analyzer</h3>
                     <p class="font-serif text-base text-[#6a6860] mt-1 leading-snug">Detect tone in product reviews with a fine-tuned transformer.</p>
                     <div class="flex flex-wrap gap-1.5 mt-2"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Transformers</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">HuggingFace</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">NLP</span></div>
@@ -652,7 +641,7 @@
                     <div class="h-40 bg-[#ece3d4] rounded-sm mb-4 overflow-hidden border border-[rgba(59,58,54,0.15)]">
                         <img src="assets/images/project-paper-summarizer.png" alt="Paper Summarizer" class="w-full h-full object-cover group-hover:translate-y-2 transition-transform duration-500"/>
                     </div>
-                    <div class="label">LLM · 2025</div>
+                    <div class="label">LLM · 2026</div>
                     <h3 class="font-serif italic text-2xl mt-1 text-[#3b3a36]">Paper Summarizer</h3>
                     <p class="font-serif text-base text-[#6a6860] mt-1 leading-snug">Turn arXiv preprints into one-paragraph TL;DRs.</p>
                     <div class="flex flex-wrap gap-1.5 mt-2"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Python</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">LangChain</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">LLM</span></div>
@@ -661,7 +650,7 @@
                     <div class="h-40 bg-[#ece3d4] rounded-sm mb-4 overflow-hidden border border-[rgba(59,58,54,0.15)]">
                         <img src="assets/images/project-scene-narrator.png" alt="Scene Narrator" class="w-full h-full object-cover group-hover:translate-y-2 transition-transform duration-500"/>
                     </div>
-                    <div class="label">Vision-LLM · 2025</div>
+                    <div class="label">Vision-LLM · 2026</div>
                     <h3 class="font-serif italic text-2xl mt-1 text-[#3b3a36]">Scene Narrator</h3>
                     <p class="font-serif text-base text-[#6a6860] mt-1 leading-snug">Describe a video scene-by-scene with multimodal models.</p>
                     <div class="flex flex-wrap gap-1.5 mt-2"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Python</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">CLIP</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">OpenCV</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">LLM</span></div>
@@ -670,7 +659,7 @@
                     <div class="h-40 bg-[#ece3d4] rounded-sm mb-4 overflow-hidden border border-[rgba(59,58,54,0.15)]">
                         <img src="assets/images/project-speech-translator.png" alt="Speech Translator" class="w-full h-full object-cover group-hover:translate-y-2 transition-transform duration-500"/>
                     </div>
-                    <div class="label">Speech · 2025</div>
+                    <div class="label">Speech · 2026</div>
                     <h3 class="font-serif italic text-2xl mt-1 text-[#3b3a36]">Speech Translator</h3>
                     <p class="font-serif text-base text-[#6a6860] mt-1 leading-snug">Live translate spoken audio between languages with Whisper.</p>
                     <div class="flex flex-wrap gap-1.5 mt-2"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Python</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Whisper</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">TTS</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">LLM</span></div>
@@ -681,7 +670,7 @@
                     <div class="h-40 bg-[#ece3d4] rounded-sm mb-4 overflow-hidden border border-[rgba(59,58,54,0.15)]">
                         <img src="assets/images/project-rag-chatbot.png" alt="" class="w-full h-full object-cover"/>
                     </div>
-                    <div class="label">RAG · 2025</div>
+                    <div class="label">RAG · 2026</div>
                     <h3 class="font-serif italic text-2xl mt-1 text-[#3b3a36]">RAG Chatbot</h3>
                     <p class="font-serif text-base text-[#6a6860] mt-1 leading-snug">Retrieval-augmented assistant over your own documents.</p>
                     <div class="flex flex-wrap gap-1.5 mt-2"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Python</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">LangChain</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">FAISS</span></div>
@@ -690,7 +679,7 @@
                     <div class="h-40 bg-[#ece3d4] rounded-sm mb-4 overflow-hidden border border-[rgba(59,58,54,0.15)]">
                         <img src="assets/images/project-image-classifier.png" alt="" class="w-full h-full object-cover"/>
                     </div>
-                    <div class="label">CNN · 2025</div>
+                    <div class="label">CNN · 2026</div>
                     <h3 class="font-serif italic text-2xl mt-1 text-[#3b3a36]">Image Classifier</h3>
                     <p class="font-serif text-base text-[#6a6860] mt-1 leading-snug">Train and deploy a CNN classifier in a single notebook.</p>
                     <div class="flex flex-wrap gap-1.5 mt-2"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">PyTorch</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Flask</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">CNN</span></div>
@@ -699,7 +688,7 @@
                     <div class="h-40 bg-[#ece3d4] rounded-sm mb-4 overflow-hidden border border-[rgba(59,58,54,0.15)]">
                         <img src="assets/images/project-sentiment-analyzer.png" alt="" class="w-full h-full object-cover"/>
                     </div>
-                    <div class="label">NLP · 2025</div>
+                    <div class="label">NLP · 2026</div>
                     <h3 class="font-serif italic text-2xl mt-1 text-[#3b3a36]">Sentiment Analyzer</h3>
                     <p class="font-serif text-base text-[#6a6860] mt-1 leading-snug">Detect tone in product reviews with a fine-tuned transformer.</p>
                     <div class="flex flex-wrap gap-1.5 mt-2"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Transformers</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">HuggingFace</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">NLP</span></div>
@@ -708,7 +697,7 @@
                     <div class="h-40 bg-[#ece3d4] rounded-sm mb-4 overflow-hidden border border-[rgba(59,58,54,0.15)]">
                         <img src="assets/images/project-paper-summarizer.png" alt="" class="w-full h-full object-cover"/>
                     </div>
-                    <div class="label">LLM · 2025</div>
+                    <div class="label">LLM · 2026</div>
                     <h3 class="font-serif italic text-2xl mt-1 text-[#3b3a36]">Paper Summarizer</h3>
                     <p class="font-serif text-base text-[#6a6860] mt-1 leading-snug">Turn arXiv preprints into one-paragraph TL;DRs.</p>
                     <div class="flex flex-wrap gap-1.5 mt-2"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Python</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">LangChain</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">LLM</span></div>
@@ -717,7 +706,7 @@
                     <div class="h-40 bg-[#ece3d4] rounded-sm mb-4 overflow-hidden border border-[rgba(59,58,54,0.15)]">
                         <img src="assets/images/project-scene-narrator.png" alt="" class="w-full h-full object-cover"/>
                     </div>
-                    <div class="label">Vision-LLM · 2025</div>
+                    <div class="label">Vision-LLM · 2026</div>
                     <h3 class="font-serif italic text-2xl mt-1 text-[#3b3a36]">Scene Narrator</h3>
                     <p class="font-serif text-base text-[#6a6860] mt-1 leading-snug">Describe a video scene-by-scene with multimodal models.</p>
                     <div class="flex flex-wrap gap-1.5 mt-2"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Python</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">CLIP</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">OpenCV</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">LLM</span></div>
@@ -726,7 +715,7 @@
                     <div class="h-40 bg-[#ece3d4] rounded-sm mb-4 overflow-hidden border border-[rgba(59,58,54,0.15)]">
                         <img src="assets/images/project-speech-translator.png" alt="" class="w-full h-full object-cover"/>
                     </div>
-                    <div class="label">Speech · 2025</div>
+                    <div class="label">Speech · 2026</div>
                     <h3 class="font-serif italic text-2xl mt-1 text-[#3b3a36]">Speech Translator</h3>
                     <p class="font-serif text-base text-[#6a6860] mt-1 leading-snug">Live translate spoken audio between languages with Whisper.</p>
                     <div class="flex flex-wrap gap-1.5 mt-2"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Python</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Whisper</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">TTS</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">LLM</span></div>
@@ -735,13 +724,69 @@
             </div>
         </section>
 
+        <!-- SKILLS — counter-rotated to sit horizontal -->
+        <section id="skills" class="slope-section" style="transform: rotate(calc(var(--tilt) * -1)); transform-origin: center center;">
+            <div class="label"><span class="ornament"></span> skills</div>
+
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-10 max-w-5xl" style="margin-top: 100px;">
+                <div>
+                    <h3 class="font-serif italic text-2xl text-[#3b3a36]">Languages</h3>
+                    <ul class="mt-3 space-y-1 font-serif text-lg text-[#6a6860]">
+                        <li>Python</li>
+                        <li>JavaScript</li>
+                        <li>C#</li>
+                        <li>SQL</li>
+                        <li>CSS</li>
+                        <li>Bash</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-serif italic text-2xl text-[#3b3a36]">ML Frameworks</h3>
+                    <ul class="mt-3 space-y-1 font-serif text-lg text-[#6a6860]">
+                        <li>PyTorch</li>
+                        <li>TensorFlow</li>
+                        <li>HuggingFace</li>
+                        <li>scikit-learn</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-serif italic text-2xl text-[#3b3a36]">AI Engineering</h3>
+                    <ul class="mt-3 space-y-1 font-serif text-lg text-[#6a6860]">
+                        <li>LLMs</li>
+                        <li>RAG</li>
+                        <li>Agents</li>
+                        <li>API Integration</li>
+                        <li>Claude Code</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-serif italic text-2xl text-[#3b3a36]">Tools &amp; Platforms</h3>
+                    <ul class="mt-3 space-y-1 font-serif text-lg text-[#6a6860]">
+                        <li>Git &amp; GitHub</li>
+                        <li>Linux</li>
+                        <li>Jupyter</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-serif italic text-2xl text-[#3b3a36]">Data</h3>
+                    <ul class="mt-3 space-y-1 font-serif text-lg text-[#6a6860]">
+                        <li>Pandas &amp; NumPy</li>
+                        <li>Matplotlib</li>
+                        <li>PostgreSQL</li>
+                        <li>Vector Databases</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
         <!-- WRITING — The Notice Board -->
         <section id="writing" class="slope-section">
-            <div class="upright label"><span class="ornament"></span>act iii — writing</div>
-            <h2 class="upright font-serif italic text-5xl md:text-6xl text-[#3b3a36] mt-3">The notice board.</h2>
-            <p class="upright font-serif italic text-xl text-[#6a6860] mt-2 max-w-md mb-14">Pinned notes, fluttering as they slide down the slope.</p>
+            <!-- <h2 class="upright font-serif italic text-5xl md:text-6xl text-[#3b3a36] mt-3">The notice board.</h2>-->
+            <!-- <p class="upright font-serif italic text-xl text-[#6a6860] mt-2 max-w-md mb-14">Pinned notes, fluttering as they slide down the slope.</p>-->
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-5xl">
+            <div class="upright label"><span class="ornament"></span> writing</div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-5xl" style="margin-top: 100px;">
                 <a href="writing/understanding-rag.html" class="paper-note flutter group block">
                     <div class="pin"></div>
                     <div class="label">LLMs</div>
@@ -772,14 +817,14 @@
             <!-- Right-aligned header -->
             <div class="flex justify-end">
                 <div class="upright text-right">
-                    <div class="label"><span class="ornament"></span>act iv — what's new</div>
-                    <h2 class="font-serif italic text-5xl md:text-6xl text-[#3b3a36] mt-3">From the wires.</h2>
-                    <p class="font-serif italic text-xl text-[#6a6860] mt-2 max-w-md ml-auto mb-14">Fresh AI clippings, pinned to the board the moment they land.</p>
+                    <!--<h2 class="font-serif italic text-5xl md:text-6xl text-[#3b3a36] mt-3">From the wires.</h2>
+                    <p class="font-serif italic text-xl text-[#6a6860] mt-2 max-w-md ml-auto mb-14">Fresh AI clippings, pinned to the board the moment they land.</p>-->
                 </div>
             </div>
+            <div class="label"><span class="ornament"></span>News from AI</div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-5xl ml-auto">
-                <a href="https://www.anthropic.com/news" class="paper-note flutter group block">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-5xl" style="margin-top: 100px;">
+                <a href="https://aimodels.org" class="paper-note flutter group block">
                     <div class="pin"></div>
                     <div class="label">Models</div>
                     <h3 class="font-serif italic text-2xl mt-2 text-[#3b3a36] group-hover:text-[#c97a5b] transition">Frontier Model Updates</h3>
@@ -809,10 +854,10 @@
             <div class="upright">
                 <div class="label"><span class="ornament"></span>landing pad</div>
                 <h2 class="font-serif italic text-5xl md:text-7xl text-[#3b3a36] mt-3 leading-tight">
-                    You made it<br/>
-                    <span class="text-[#c97a5b]">down the hill.</span>
+                    Connect<br/>
+                    <span class="text-[#c97a5b]">with me.</span>
                 </h2>
-                <p class="font-serif italic text-xl text-[#6a6860] mt-6 max-w-md">Got an idea? A project? A roast? Let's talk.</p>
+                <p class="font-serif italic text-xl text-[#6a6860] mt-6 max-w-md">Please contact me for AI discussions or opportunities, or just to connect with me.</p>
                 <div class="mt-10 flex flex-wrap gap-4">
                     <a href="mailto:marian.helcl@gmail.com" class="btn-classic">Say hello ✉</a>
                     <a href="https://github.com/movfast" class="btn-ghost">GitHub</a>
@@ -927,8 +972,9 @@
                     const isReverse = track.classList.contains('reverse');
 
                     conveyor.addEventListener('wheel', (e) => {
-                        // Use deltaX for horizontal scroll; fall back to deltaY if no horizontal component
-                        const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+                        // Only intercept horizontal scrolling; let vertical scroll pass through to the page
+                        if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+                        const delta = e.deltaX;
                         if (delta === 0) return;
 
                         e.preventDefault();

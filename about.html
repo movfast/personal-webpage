@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About — Marian Helcl Øverli</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --cream:     #f5efe6;
+            --linen:     #ece3d4;
+            --dusty:     #c8d3d8;
+            --sage:      #a8b9a3;
+            --terracotta:#c97a5b;
+            --rose:      #d9a89a;
+            --ink:       #3b3a36;
+            --ink-soft:  #6a6860;
+            --gold:      #c9a961;
+        }
+
+        * { box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
+
+        html, body {
+            background:
+                radial-gradient(ellipse at 20% 0%, #e7dccb 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 100%, #d3dde2 0%, transparent 50%),
+                var(--cream);
+            color: var(--ink);
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 18px;
+            overflow-x: clip;
+            margin: 0;
+        }
+
+        body::before {
+            content: "";
+            position: fixed; inset: 0;
+            background-image:
+                radial-gradient(rgba(59,58,54,0.04) 1px, transparent 1px),
+                radial-gradient(rgba(59,58,54,0.03) 1px, transparent 1px);
+            background-size: 3px 3px, 7px 7px;
+            background-position: 0 0, 1px 1px;
+            pointer-events: none;
+            z-index: 1;
+            mix-blend-mode: multiply;
+        }
+
+        .font-sans  { font-family: 'Inter', system-ui, sans-serif; }
+        .font-mono  { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+        .font-serif { font-family: 'Cormorant Garamond', Georgia, serif; }
+
+        /* Layout */
+        .page-wrap {
+            position: relative;
+            z-index: 2;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        .section {
+            padding: 5rem 0;
+            border-top: 1px solid rgba(59,58,54,0.1);
+        }
+        .section:first-of-type { border-top: none; }
+
+        /* Nav */
+        .horizon-nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            background: rgba(245,239,230,0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(59,58,54,0.15);
+        }
+
+        /* Components */
+        .label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.32em;
+            color: var(--terracotta);
+            font-weight: 500;
+        }
+        .ornament {
+            display: inline-block;
+            width: 36px;
+            height: 1px;
+            background: var(--terracotta);
+            vertical-align: middle;
+            margin: 0 0.6rem;
+        }
+
+        .paper-card {
+            background: var(--cream);
+            border: 1px solid rgba(59,58,54,0.12);
+            border-radius: 4px;
+            padding: 2rem;
+            box-shadow:
+                0 1px 0 rgba(255,255,255,0.7) inset,
+                8px 10px 0 rgba(59,58,54,0.06),
+                0 24px 48px -24px rgba(59,58,54,0.18);
+            transition: transform 0.4s cubic-bezier(.2,.8,.2,1), box-shadow 0.4s ease;
+            position: relative;
+        }
+        .paper-card:hover {
+            transform: translateY(-4px);
+            box-shadow:
+                0 1px 0 rgba(255,255,255,0.7) inset,
+                10px 14px 0 rgba(59,58,54,0.08),
+                0 32px 64px -24px rgba(59,58,54,0.24);
+        }
+
+        .paper-note {
+            background: var(--cream);
+            padding: 1.75rem;
+            border-radius: 2px;
+            box-shadow:
+                6px 10px 0 rgba(59,58,54,0.08),
+                0 30px 50px -30px rgba(59,58,54,0.25);
+            position: relative;
+            border: 1px solid rgba(59,58,54,0.1);
+        }
+        .pin {
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            width: 14px;
+            height: 14px;
+            background: var(--terracotta);
+            border-radius: 50%;
+            transform: translateX(-50%);
+            box-shadow:
+                0 0 0 3px rgba(201,122,91,0.25),
+                inset 2px 2px 0 rgba(255,255,255,0.4);
+        }
+
+        .btn-classic {
+            background: var(--terracotta);
+            color: var(--cream);
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 0.78rem;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            padding: 0.95rem 1.8rem;
+            border-radius: 999px;
+            border: 1px solid rgba(59,58,54,0.2);
+            box-shadow: 0 4px 0 #9a5a40, 0 12px 24px -8px rgba(201,122,91,0.5);
+            transition: transform 0.15s, box-shadow 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            text-decoration: none;
+        }
+        .btn-classic:hover { transform: translateY(2px); box-shadow: 0 2px 0 #9a5a40, 0 6px 14px -4px rgba(201,122,91,0.5); }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--ink);
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 0.78rem;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            padding: 0.95rem 1.8rem;
+            border-radius: 999px;
+            border: 1px solid var(--ink);
+            transition: background 0.2s, color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            text-decoration: none;
+        }
+        .btn-ghost:hover { background: var(--ink); color: var(--cream); }
+
+        /* Scroll animations */
+        .tumble {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.7s ease, transform 0.8s cubic-bezier(.18,.89,.32,1.28);
+        }
+        .tumble.in { opacity: 1; transform: translateY(0); }
+
+        /* Timeline */
+        .timeline-entry {
+            border-left: 2px solid var(--terracotta);
+            padding-left: 2rem;
+            margin-left: 0.5rem;
+            position: relative;
+        }
+        .timeline-entry::before {
+            content: "";
+            position: absolute;
+            left: -7px;
+            top: 0.5rem;
+            width: 12px;
+            height: 12px;
+            background: var(--terracotta);
+            border-radius: 50%;
+            border: 2px solid var(--cream);
+        }
+
+        /* Proficiency dots */
+        .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 0.5rem; flex-shrink: 0; }
+        .dot-core       { background: var(--terracotta); }
+        .dot-proficient  { background: var(--sage); }
+        .dot-exploring   { background: var(--gold); }
+
+        /* Status badges */
+        .badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-weight: 500;
+        }
+        .badge-active     { background: rgba(168,185,163,0.25); color: #6a8a60; }
+        .badge-growing    { background: rgba(201,169,97,0.2); color: #9a7d3a; }
+        .badge-foundation { background: rgba(59,58,54,0.1); color: var(--ink-soft); }
+
+        /* Expandable cards */
+        .expand-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+        }
+        .expand-btn {
+            background: none;
+            border: none;
+            color: var(--terracotta);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            cursor: pointer;
+            padding: 0.5rem 0;
+            transition: opacity 0.2s;
+        }
+        .expand-btn:hover { opacity: 0.7; }
+
+        /* Mobile nav */
+        .mobile-menu {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(245,239,230,0.97);
+            backdrop-filter: blur(12px);
+            z-index: 99;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+        }
+        .mobile-menu.open { display: flex; }
+
+        @media (max-width: 768px) {
+            .section { padding: 3.5rem 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HORIZON NAV -->
+    <nav class="horizon-nav">
+        <div class="flex items-center justify-between px-6 md:px-12 py-5">
+            <a href="experiment6.html" class="flex items-center gap-3 no-underline">
+                <span class="font-mono text-xs tracking-[0.3em] text-[#c97a5b]">M·H·Ø</span>
+                <span class="font-serif italic text-xl text-[#3b3a36]">Marian H. Øverli</span>
+            </a>
+            <div class="hidden md:flex items-center gap-10 font-sans text-xs uppercase tracking-[0.2em] font-medium text-[#3b3a36]">
+                <a href="#" class="text-[#c97a5b]" style="pointer-events:none">About</a>
+                <a href="experiment6.html#projects" class="hover:text-[#c97a5b] transition">Work</a>
+                <a href="experiment6.html#writing" class="hover:text-[#c97a5b] transition">Writing</a>
+                <a href="experiment6.html#news" class="hover:text-[#c97a5b] transition">News</a>
+                <a href="experiment6.html" class="hover:text-[#c97a5b] transition">← Back</a>
+                <a href="experiment6.html#connect" class="btn-classic !py-2 !px-5 !text-[10px]">Let's Talk →</a>
+            </div>
+            <!-- Mobile hamburger -->
+            <button id="menuBtn" class="md:hidden font-mono text-sm text-[#3b3a36] tracking-wider" onclick="document.getElementById('mobileMenu').classList.toggle('open'); this.textContent = this.textContent.trim() === 'MENU' ? 'CLOSE' : 'MENU'">MENU</button>
+        </div>
+    </nav>
+
+    <!-- MOBILE MENU -->
+    <div id="mobileMenu" class="mobile-menu">
+        <a href="#" class="font-sans text-sm uppercase tracking-[0.2em] text-[#c97a5b]" style="pointer-events:none">About</a>
+        <a href="experiment6.html#projects" class="font-sans text-sm uppercase tracking-[0.2em] text-[#3b3a36] hover:text-[#c97a5b] transition">Work</a>
+        <a href="experiment6.html#writing" class="font-sans text-sm uppercase tracking-[0.2em] text-[#3b3a36] hover:text-[#c97a5b] transition">Writing</a>
+        <a href="experiment6.html#news" class="font-sans text-sm uppercase tracking-[0.2em] text-[#3b3a36] hover:text-[#c97a5b] transition">News</a>
+        <a href="experiment6.html#connect" class="btn-classic mt-4">Let's Talk →</a>
+    </div>
+
+    <div class="page-wrap" style="padding-top: 7rem;">
+
+        <!-- ═══════════════════ HERO ═══════════════════ -->
+        <section class="section" style="border-top:none; padding-top:2rem;">
+            <div class="tumble">
+                <div class="label"><span class="ornament"></span>About me</div>
+                <h1 class="font-serif italic text-[#3b3a36] mt-4 leading-tight" style="font-size: clamp(2.8rem, 7vw, 5.5rem);">
+                    Marian Helcl<br/>
+                    <span class="text-[#c97a5b]" style="font-style:normal; font-weight:600;">Øverli.</span>
+                </h1>
+            </div>
+            <div class="tumble mt-6">
+                <p class="font-sans text-sm uppercase tracking-[0.2em] text-[#6a6860] font-medium">Applied Physicist · AI Developer · Creative Problem Solver</p>
+            </div>
+            <div class="tumble mt-8 flex flex-wrap gap-4">
+                <div class="plate">
+                    <span class="font-sans text-xs uppercase tracking-[0.2em] text-[#6a6860] font-medium block mb-1">Education</span>
+                    M.Sc. Applied Physics &amp; Mathematics — NTNU
+                </div>
+                <div class="plate">
+                    <span class="font-sans text-xs uppercase tracking-[0.2em] text-[#6a6860] font-medium block mb-1">Location</span>
+                    Oslo, Norway
+                </div>
+            </div>
+            <div class="tumble mt-8">
+                <p class="font-serif italic text-xl text-[#6a6860] max-w-lg leading-relaxed">An applied physicist who loves experimenting, small dogs, and a good toast — and who turned acoustics into automation.</p>
+            </div>
+
+            <!-- Fun facts -->
+            <div class="mt-10 grid gap-4 sm:grid-cols-3">
+                <div class="paper-note tumble">
+                    <div class="pin"></div>
+                    <p class="font-serif text-base text-[#3b3a36] leading-relaxed mt-2">I love all dogs, but there's something special about small dogs. They can be noisy, but also very cute.</p>
+                </div>
+                <div class="paper-note tumble">
+                    <div class="pin"></div>
+                    <p class="font-serif text-base text-[#3b3a36] leading-relaxed mt-2">I like to experiment and ask "what happens if I do this?" — curiosity is my default mode.</p>
+                </div>
+                <div class="paper-note tumble">
+                    <div class="pin"></div>
+                    <p class="font-serif text-base text-[#3b3a36] leading-relaxed mt-2">I love food, but I'm not picky — sometimes a toast can be the best thing in the world.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════════ THE FOUNDATION ═══════════════════ -->
+        <section id="education" class="section">
+            <div class="tumble">
+                <div class="label"><span class="ornament"></span>The Foundation</div>
+                <h2 class="font-serif italic text-4xl md:text-5xl text-[#3b3a36] mt-3 leading-tight">Where physics meets<br/><span class="text-[#c97a5b]">problem solving.</span></h2>
+            </div>
+            <div class="tumble mt-6">
+                <p class="font-serif italic text-xl text-[#6a6860] max-w-lg">I studied physics and mathematics at NTNU, but the real education was learning to think in systems.</p>
+            </div>
+            <div class="tumble mt-4">
+                <p class="font-serif text-lg text-[#3b3a36] max-w-2xl leading-relaxed">At NTNU, I studied Applied Physics and Mathematics — a combination that teaches you not just how to solve equations, but how to model reality. Physics gave me the ability to break complex systems into understandable parts. Mathematics gave me the language to describe them precisely. Together, they shaped how I approach every problem: understand the fundamentals first, then build up.</p>
+            </div>
+            <div class="mt-10 grid gap-5 sm:grid-cols-3">
+                <div class="paper-card tumble">
+                    <h3 class="font-sans font-semibold text-sm uppercase tracking-[0.15em] text-[#3b3a36] mb-3">Analytical Thinking</h3>
+                    <p class="font-serif text-base text-[#6a6860] leading-relaxed">Physics trained me to decompose problems into first principles — identify what you know, what you need to find, and the simplest path between them.</p>
+                </div>
+                <div class="paper-card tumble">
+                    <h3 class="font-sans font-semibold text-sm uppercase tracking-[0.15em] text-[#3b3a36] mb-3">Mathematical Modeling</h3>
+                    <p class="font-serif text-base text-[#6a6860] leading-relaxed">From differential equations to statistical analysis — learning to create models that approximate reality well enough to be useful, and knowing their limits.</p>
+                </div>
+                <div class="paper-card tumble">
+                    <h3 class="font-sans font-semibold text-sm uppercase tracking-[0.15em] text-[#3b3a36] mb-3">Systems Perspective</h3>
+                    <p class="font-serif text-base text-[#6a6860] leading-relaxed">Applied physics is about real systems with feedback loops, constraints, and emergent behavior. This perspective applies just as well to software and organizations.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════════ THE JOURNEY ═══════════════════ -->
+        <section id="journey" class="section">
+            <div class="tumble">
+                <div class="label"><span class="ornament"></span>The Journey</div>
+                <h2 class="font-serif italic text-4xl md:text-5xl text-[#3b3a36] mt-3 leading-tight">From sound waves<br/><span class="text-[#c97a5b]">to software.</span></h2>
+            </div>
+            <div class="tumble mt-6 mb-12">
+                <p class="font-serif italic text-xl text-[#6a6860] max-w-lg">Every career has a turning point. Mine was realizing that the best acoustic solutions were built with code.</p>
+            </div>
+
+            <!-- Brekke & Strand -->
+            <div class="timeline-entry tumble mb-10">
+                <div class="flex flex-wrap items-baseline gap-3 mb-1">
+                    <h3 class="font-serif italic text-2xl text-[#3b3a36]">Acoustic Consultant &amp; Project Leader</h3>
+                </div>
+                <div class="font-sans text-xs uppercase tracking-[0.15em] text-[#6a6860] font-medium mb-4">Brekke &amp; Strand Akustikk AS · 5+ years · Norway</div>
+                <p class="font-serif text-base text-[#3b3a36] leading-relaxed mb-4">I joined Brekke &amp; Strand to work in acoustics, but I ended up transforming how the team worked. My main tasks were project leadership, planning, and acoustic consulting for building, industrial, and transportation projects — construction noise calculations in CadnaA, sound measurements, and regulatory compliance with Norwegian workplace legislation. But I saw an opportunity: the manual workflows were slowing us down. So I built automated data analysis pipelines, maintained SQL databases, and developed the company's intranet solution with Blazor Server on the frontend and ASP.NET Minimal API on the backend. </p>
+                <ul class="font-serif text-sm text-[#6a6860] space-y-1 mb-4 ml-4 list-disc">
+                    <li>Led projects from early phase through completion in industrial and transportation acoustics</li>
+                    <li>Conducted sound measurements and compared results against workplace legislation</li>
+                    <li>Built construction noise calculations and rail traffic analysis in CadnaA</li>
+                    <li>Developed automated workflows for data collection, analysis, and reporting</li>
+                    <li>Created and maintained SQL databases for efficient data management</li>
+                    <li>Built the company intranet: Blazor Server frontend, ASP.NET Minimal API backend</li>
+
+                    <li>Created dashboards and visualization tools for real-time project insights</li>
+                    <li>Wrote Standard Operating Procedures (SOPs) for automated tools</li>
+                    <li>Mentored new employees and shared knowledge across the team</li>
+                </ul>
+                <div class="flex flex-wrap gap-2">
+                    <span class="font-mono text-[10px] uppercase tracking-[0.15em] px-2 py-1 bg-[#ece3d4] rounded text-[#3b3a36]">C#</span>
+                    <span class="font-mono text-[10px] uppercase tracking-[0.15em] px-2 py-1 bg-[#ece3d4] rounded text-[#3b3a36]">SQL</span>
+                    <span class="font-mono text-[10px] uppercase tracking-[0.15em] px-2 py-1 bg-[#ece3d4] rounded text-[#3b3a36]">Blazor</span>
+                    <span class="font-mono text-[10px] uppercase tracking-[0.15em] px-2 py-1 bg-[#ece3d4] rounded text-[#3b3a36]">ASP.NET</span>
+                    <span class="font-mono text-[10px] uppercase tracking-[0.15em] px-2 py-1 bg-[#ece3d4] rounded text-[#3b3a36]">CadnaA</span>
+                    <span class="font-mono text-[10px] uppercase tracking-[0.15em] px-2 py-1 bg-[#ece3d4] rounded text-[#3b3a36]">Python</span>
+                    <span class="font-mono text-[10px] uppercase tracking-[0.15em] px-2 py-1 bg-[#ece3d4] rounded text-[#3b3a36]">Data Analysis</span>
+                    <span class="font-mono text-[10px] uppercase tracking-[0.15em] px-2 py-1 bg-[#ece3d4] rounded text-[#3b3a36]">Project Leadership</span>
+                </div>
+            </div>
+
+            <!-- SINTEF -->
+            <div class="timeline-entry tumble mb-10">
+                <h3 class="font-serif italic text-2xl text-[#3b3a36] mb-1">Summer Research Associate</h3>
+                <div class="font-sans text-xs uppercase tracking-[0.15em] text-[#6a6860] font-medium mb-4">SINTEF Community · Summer · Norway</div>
+                <p class="font-serif text-base text-[#3b3a36] leading-relaxed mb-4">At SINTEF, one of Europe's largest independent research organizations, I worked in acoustic laboratories conducting measurements and research. This was where theory met practice — applying the physics I'd studied at NTNU to real-world acoustic problems in a professional research setting.</p>
+                <ul class="font-serif text-sm text-[#6a6860] space-y-1 mb-4 ml-4 list-disc">
+                    <li>Worked in acoustic laboratories conducting professional measurements</li>
+                    <li>Applied physics theory to practical acoustic research</li>
+                    <li>Collaborated with experienced researchers in a multidisciplinary environment</li>
+                </ul>
+                <div class="flex flex-wrap gap-2">
+                    <span class="font-mono text-[10px] uppercase tracking-[0.15em] px-2 py-1 bg-[#ece3d4] rounded text-[#3b3a36]">Acoustics</span>
+                    <span class="font-mono text-[10px] uppercase tracking-[0.15em] px-2 py-1 bg-[#ece3d4] rounded text-[#3b3a36]">Laboratory Work</span>
+                    <span class="font-mono text-[10px] uppercase tracking-[0.15em] px-2 py-1 bg-[#ece3d4] rounded text-[#3b3a36]">Data Collection</span>
+                    <span class="font-mono text-[10px] uppercase tracking-[0.15em] px-2 py-1 bg-[#ece3d4] rounded text-[#3b3a36]">Research</span>
+                </div>
+            </div>
+
+            <!-- AquaGen -->
+            <div class="timeline-entry tumble mb-10">
+                <h3 class="font-serif italic text-2xl text-[#3b3a36] mb-1">Engineering Summer Intern</h3>
+                <div class="font-sans text-xs uppercase tracking-[0.15em] text-[#6a6860] font-medium mb-4">AquaGen AS · Summer · Norway</div>
+                <p class="font-serif text-base text-[#3b3a36] leading-relaxed mb-4">At AquaGen, a leading fish farming genetics company, I focused on automation and workflow optimization. It was a fascinating intersection of engineering and biology — building tools to make complex processes more efficient in an industry I hadn't expected to work in. This experience planted the seed for my love of automation.</p>
+                <ul class="font-serif text-sm text-[#6a6860] space-y-1 mb-4 ml-4 list-disc">
+                    <li>Developed automation solutions for fish farming workflows</li>
+                    <li>Optimized processes at the intersection of engineering and biology</li>
+                    <li>Explored solutions for more efficient operations</li>
+                </ul>
+                <div class="flex flex-wrap gap-2">
+                    <span class="font-mono text-[10px] uppercase tracking-[0.15em] px-2 py-1 bg-[#ece3d4] rounded text-[#3b3a36]">Automation</span>
+                    <span class="font-mono text-[10px] uppercase tracking-[0.15em] px-2 py-1 bg-[#ece3d4] rounded text-[#3b3a36]">Workflow Design</span>
+                    <span class="font-mono text-[10px] uppercase tracking-[0.15em] px-2 py-1 bg-[#ece3d4] rounded text-[#3b3a36]">Python</span>
+                    <span class="font-mono text-[10px] uppercase tracking-[0.15em] px-2 py-1 bg-[#ece3d4] rounded text-[#3b3a36]">Engineering</span>
+                </div>
+            </div>
+
+            <!-- Teaching -->
+            <div class="timeline-entry tumble">
+                <h3 class="font-serif italic text-2xl text-[#3b3a36] mb-1">Course Leader &amp; Teacher</h3>
+                <div class="font-sans text-xs uppercase tracking-[0.15em] text-[#6a6860] font-medium mb-4">Various · Multiple years</div>
+                <p class="font-serif text-base text-[#3b3a36] leading-relaxed mb-4">Teaching has been a thread running through my career. As a course leader, I developed and delivered content in physics, mathematics, and chemistry to children. Teaching forces you to truly understand a concept — if you can't explain it simply, you don't understand it well enough. This experience shaped how I communicate complex technical ideas in every role since.</p>
+                <ul class="font-serif text-sm text-[#6a6860] space-y-1 mb-4 ml-4 list-disc">
+                    <li>Led courses in physics, mathematics, and chemistry for children</li>
+                    <li>Developed clear pedagogical approaches for complex scientific concepts</li>
+                    <li>Built strong communication skills that transfer to technical consulting</li>
+                </ul>
+                <div class="flex flex-wrap gap-2">
+                    <span class="font-mono text-[10px] uppercase tracking-[0.15em] px-2 py-1 bg-[#ece3d4] rounded text-[#3b3a36]">Teaching</span>
+                    <span class="font-mono text-[10px] uppercase tracking-[0.15em] px-2 py-1 bg-[#ece3d4] rounded text-[#3b3a36]">Communication</span>
+                    <span class="font-mono text-[10px] uppercase tracking-[0.15em] px-2 py-1 bg-[#ece3d4] rounded text-[#3b3a36]">Physics</span>
+                    <span class="font-mono text-[10px] uppercase tracking-[0.15em] px-2 py-1 bg-[#ece3d4] rounded text-[#3b3a36]">Mathematics</span>
+                    <span class="font-mono text-[10px] uppercase tracking-[0.15em] px-2 py-1 bg-[#ece3d4] rounded text-[#3b3a36]">Chemistry</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════════ SKILLS & TOOLS ═══════════════════ -->
+        <section id="skills" class="section">
+            <div class="tumble">
+                <div class="label"><span class="ornament"></span>Skills &amp; Tools</div>
+                <h2 class="font-serif italic text-4xl md:text-5xl text-[#3b3a36] mt-3 leading-tight">What I bring<br/><span class="text-[#c97a5b]">to the table.</span></h2>
+            </div>
+            <div class="tumble mt-6 mb-4">
+                <p class="font-serif italic text-xl text-[#6a6860] max-w-lg">A toolkit shaped by physics, refined by consulting, and expanding into AI.</p>
+            </div>
+
+            <!-- Legend -->
+            <div class="tumble flex items-center gap-6 mb-10 font-sans text-xs text-[#6a6860]">
+                <span class="flex items-center"><span class="dot dot-core"></span>Core</span>
+                <span class="flex items-center"><span class="dot dot-proficient"></span>Proficient</span>
+                <span class="flex items-center"><span class="dot dot-exploring"></span>Exploring</span>
+            </div>
+
+            <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                <!-- Programming -->
+                <div class="paper-note tumble">
+                    <div class="pin"></div>
+                    <h3 class="font-sans font-semibold text-sm uppercase tracking-[0.15em] text-[#3b3a36] mt-2 mb-4">Programming</h3>
+                    <ul class="space-y-2">
+                        <li class="flex items-center font-serif text-base text-[#3b3a36]"><span class="dot dot-core"></span>Python</li>
+                        <li class="flex items-center font-serif text-base text-[#3b3a36]"><span class="dot dot-core"></span>C#</li>
+                        <li class="flex items-center font-serif text-base text-[#3b3a36]"><span class="dot dot-core"></span>SQL</li>
+                        <li class="flex items-center font-serif text-base text-[#3b3a36]"><span class="dot dot-proficient"></span>HTML / CSS</li>
+                        <li class="flex items-center font-serif text-base text-[#3b3a36]"><span class="dot dot-exploring"></span>TypeScript</li>
+                    </ul>
+                </div>
+
+                <!-- Frameworks & Tools -->
+                <div class="paper-note tumble">
+                    <div class="pin"></div>
+                    <h3 class="font-sans font-semibold text-sm uppercase tracking-[0.15em] text-[#3b3a36] mt-2 mb-4">Frameworks &amp; Tools</h3>
+                    <ul class="space-y-2">
+                        <li class="flex items-center font-serif text-base text-[#3b3a36]"><span class="dot dot-proficient"></span>Blazor Server</li>
+                        <li class="flex items-center font-serif text-base text-[#3b3a36]"><span class="dot dot-proficient"></span>ASP.NET</li>
+                        <li class="flex items-center font-serif text-base text-[#3b3a36]"><span class="dot dot-proficient"></span>Minimal API</li>
+                        <li class="flex items-center font-serif text-base text-[#3b3a36]"><span class="dot dot-core"></span>CadnaA</li>
+                    </ul>
+                </div>
+
+                <!-- Data & Analysis -->
+                <div class="paper-note tumble">
+                    <div class="pin"></div>
+                    <h3 class="font-sans font-semibold text-sm uppercase tracking-[0.15em] text-[#3b3a36] mt-2 mb-4">Data &amp; Analysis</h3>
+                    <ul class="space-y-2">
+                        <li class="flex items-center font-serif text-base text-[#3b3a36]"><span class="dot dot-core"></span>Data Analysis</li>
+                        <li class="flex items-center font-serif text-base text-[#3b3a36]"><span class="dot dot-core"></span>Data Modeling</li>
+                        <li class="flex items-center font-serif text-base text-[#3b3a36]"><span class="dot dot-core"></span>SQL Databases</li>
+                        <li class="flex items-center font-serif text-base text-[#3b3a36]"><span class="dot dot-proficient"></span>Data Visualization</li>
+                        <li class="flex items-center font-serif text-base text-[#3b3a36]"><span class="dot dot-core"></span>Workflow Automation</li>
+                    </ul>
+                </div>
+
+                <!-- AI & Machine Learning -->
+                <div class="paper-note tumble">
+                    <div class="pin"></div>
+                    <h3 class="font-sans font-semibold text-sm uppercase tracking-[0.15em] text-[#3b3a36] mt-2 mb-4">AI &amp; Machine Learning</h3>
+                    <ul class="space-y-2">
+                        <li class="flex items-center font-serif text-base text-[#3b3a36]"><span class="dot dot-proficient"></span>Neural Networks</li>
+                        <li class="flex items-center font-serif text-base text-[#3b3a36]"><span class="dot dot-proficient"></span>Deep Learning</li>
+                        <li class="flex items-center font-serif text-base text-[#3b3a36]"><span class="dot dot-exploring"></span>AI Agents</li>
+                        <li class="flex items-center font-serif text-base text-[#3b3a36]"><span class="dot dot-exploring"></span>AI Tool Development</li>
+                    </ul>
+                </div>
+
+                <!-- Domain Expertise -->
+                <div class="paper-note tumble">
+                    <div class="pin"></div>
+                    <h3 class="font-sans font-semibold text-sm uppercase tracking-[0.15em] text-[#3b3a36] mt-2 mb-4">Domain Expertise</h3>
+                    <ul class="space-y-2">
+                        <li class="flex items-center font-serif text-base text-[#3b3a36]"><span class="dot dot-core"></span>Acoustics</li>
+                        <li class="flex items-center font-serif text-base text-[#3b3a36]"><span class="dot dot-core"></span>Sound Measurement</li>
+                        <li class="flex items-center font-serif text-base text-[#3b3a36]"><span class="dot dot-core"></span>Applied Physics</li>
+                        <li class="flex items-center font-serif text-base text-[#3b3a36]"><span class="dot dot-core"></span>Mathematics</li>
+                        <li class="flex items-center font-serif text-base text-[#3b3a36]"><span class="dot dot-proficient"></span>Regulatory Compliance</li>
+                    </ul>
+                </div>
+
+                <!-- Leadership & Communication -->
+                <div class="paper-note tumble">
+                    <div class="pin"></div>
+                    <h3 class="font-sans font-semibold text-sm uppercase tracking-[0.15em] text-[#3b3a36] mt-2 mb-4">Leadership &amp; Communication</h3>
+                    <ul class="space-y-2">
+                        <li class="flex items-center font-serif text-base text-[#3b3a36]"><span class="dot dot-core"></span>Project Leadership</li>
+                        <li class="flex items-center font-serif text-base text-[#3b3a36]"><span class="dot dot-core"></span>Client Collaboration</li>
+                        <li class="flex items-center font-serif text-base text-[#3b3a36]"><span class="dot dot-proficient"></span>Technical Writing</li>
+                        <li class="flex items-center font-serif text-base text-[#3b3a36]"><span class="dot dot-core"></span>Teaching &amp; Mentoring</li>
+                        <li class="flex items-center font-serif text-base text-[#3b3a36]"><span class="dot dot-core"></span>Team Collaboration</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════════ HOW I THINK ═══════════════════ -->
+        <section id="thinking" class="section">
+            <div class="tumble">
+                <div class="label"><span class="ornament"></span>How I Think</div>
+                <h2 class="font-serif italic text-4xl md:text-5xl text-[#3b3a36] mt-3 leading-tight">Approaches to<br/><span class="text-[#c97a5b]">complex problems.</span></h2>
+            </div>
+            <div class="tumble mt-6 mb-10">
+                <p class="font-serif italic text-xl text-[#6a6860] max-w-lg">The right framework turns a tangled problem into a solvable one.</p>
+            </div>
+
+            <div class="space-y-6">
+                <!-- Design Thinking -->
+                <div class="paper-card tumble">
+                    <h3 class="font-serif italic text-2xl text-[#3b3a36]">Design Thinking</h3>
+                    <p class="font-sans text-sm text-[#6a6860] mt-1 mb-3">Start with empathy, end with solutions</p>
+                    <div class="expand-content" id="expand-design">
+                        <p class="font-serif text-base text-[#3b3a36] leading-relaxed mt-4">Design Thinking puts the human at the center. Before jumping to solutions, I invest time understanding who I'm solving for and what they actually need — not what I assume they need. This means conducting interviews, observing workflows, and testing prototypes before committing to a final design. It's iterative: empathize, define, ideate, prototype, test. Each loop brings you closer to something that truly works.</p>
+                        <div class="mt-4 p-4 bg-[#ece3d4] rounded" style="border-left: 3px solid var(--terracotta);">
+                            <div class="label mb-2">Real example</div>
+                            <p class="font-serif text-sm text-[#3b3a36] leading-relaxed">When I was building automated workflows at Brekke &amp; Strand, I didn't start with the code. I started by observing how colleagues actually handled data — where they got stuck, what they repeated, what frustrated them. The automation I built wasn't just technically efficient; it fit naturally into how people already worked, which is why the team adopted it quickly.</p>
+                        </div>
+                    </div>
+                    <button class="expand-btn mt-3" onclick="toggleExpand('expand-design', this)">Read more +</button>
+                </div>
+
+                <!-- First Principles -->
+                <div class="paper-card tumble">
+                    <h3 class="font-serif italic text-2xl text-[#3b3a36]">First Principles Thinking</h3>
+                    <p class="font-sans text-sm text-[#6a6860] mt-1 mb-3">Break it down to what you know is true</p>
+                    <div class="expand-content" id="expand-first">
+                        <p class="font-serif text-base text-[#3b3a36] leading-relaxed mt-4">First Principles Thinking means stripping a problem down to its fundamental truths and building up from there, rather than reasoning by analogy or convention. Instead of asking 'how has this been done before?' you ask 'what do we know for certain, and what can we build from that?' My physics background made this second nature — every equation starts from axioms.</p>
+                        <div class="mt-4 p-4 bg-[#ece3d4] rounded" style="border-left: 3px solid var(--terracotta);">
+                            <div class="label mb-2">Real example</div>
+                            <p class="font-serif text-sm text-[#3b3a36] leading-relaxed">In acoustic consulting, regulations tell you what noise levels are acceptable, but they don't tell you the best path to get there. By going back to the physics — how sound propagates, reflects, and attenuates — I could design solutions that were more effective and often simpler than the conventional approaches. The same thinking applies to software: understanding the underlying system lets you build better abstractions.</p>
+                        </div>
+                    </div>
+                    <button class="expand-btn mt-3" onclick="toggleExpand('expand-first', this)">Read more +</button>
+                </div>
+
+                <!-- Systems Thinking -->
+                <div class="paper-card tumble">
+                    <h3 class="font-serif italic text-2xl text-[#3b3a36]">Systems Thinking</h3>
+                    <p class="font-sans text-sm text-[#6a6860] mt-1 mb-3">See the connections, not just the parts</p>
+                    <div class="expand-content" id="expand-systems">
+                        <p class="font-serif text-base text-[#3b3a36] leading-relaxed mt-4">Systems Thinking is about understanding how components interact and influence each other within a larger whole. Instead of optimizing one piece in isolation, you consider feedback loops, dependencies, and emergent behavior. A change in one part ripples through the system — and if you don't see the system, you won't see the ripple until it hits you.</p>
+                        <div class="mt-4 p-4 bg-[#ece3d4] rounded" style="border-left: 3px solid var(--terracotta);">
+                            <div class="label mb-2">Real example</div>
+                            <p class="font-serif text-sm text-[#3b3a36] leading-relaxed">When I led projects at Brekke &amp; Strand, I couldn't just focus on the acoustic measurements in isolation. The data collection, analysis pipeline, client reporting, and regulatory compliance were all interconnected. By mapping these dependencies, I could identify bottlenecks — like manual data entry that delayed the entire reporting chain — and target automation where it would have the biggest systemic impact.</p>
+                        </div>
+                    </div>
+                    <button class="expand-btn mt-3" onclick="toggleExpand('expand-systems', this)">Read more +</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════════ WHY WORK WITH ME ═══════════════════ -->
+        <section id="why-hire" class="section">
+            <div class="tumble">
+                <div class="label"><span class="ornament"></span>Why Work With Me</div>
+                <h2 class="font-serif italic text-4xl md:text-5xl text-[#3b3a36] mt-3 leading-tight">What I bring<br/><span class="text-[#c97a5b]">to your team.</span></h2>
+            </div>
+            <div class="tumble mt-6 mb-10">
+                <p class="font-serif italic text-xl text-[#6a6860] max-w-lg">You need someone who can bridge the gap between deep technical work and clear communication.</p>
+            </div>
+
+            <div class="grid gap-6 sm:grid-cols-2">
+                <div class="paper-note tumble">
+                    <div class="pin"></div>
+                    <h3 class="font-sans font-semibold text-sm uppercase tracking-[0.15em] text-[#3b3a36] mt-2 mb-3">Strong Technical Expertise</h3>
+                    <p class="font-serif text-base text-[#3b3a36] leading-relaxed mb-4">You need someone who doesn't just use tools — they understand the science behind them. My foundation in Applied Physics and Mathematics means I approach data analysis, modeling, and programming with deep understanding, not just pattern matching. When something breaks, I don't just Google the error; I reason about why it happened.</p>
+                    <p class="label" style="font-size: 0.6rem;">M.Sc. in Applied Physics and Mathematics from NTNU. Hands-on experience in data collection, analysis, modeling, and programming with Python and C#.</p>
+                </div>
+
+                <div class="paper-note tumble">
+                    <div class="pin"></div>
+                    <h3 class="font-sans font-semibold text-sm uppercase tracking-[0.15em] text-[#3b3a36] mt-2 mb-3">Real-World Consulting Experience</h3>
+                    <p class="font-serif text-base text-[#3b3a36] leading-relaxed mb-4">Theory is powerful, but it needs to be tested in the real world. Over five years as an Acoustic Consultant, I managed projects end-to-end — from planning and client conversations to data analysis and final delivery. I learned that the best technical solution means nothing if you can't communicate it clearly and deliver it on time.</p>
+                    <p class="label" style="font-size: 0.6rem;">5+ years at Brekke &amp; Strand Akustikk AS, leading projects in industrial and transportation acoustics.</p>
+                </div>
+
+                <div class="paper-note tumble">
+                    <div class="pin"></div>
+                    <h3 class="font-sans font-semibold text-sm uppercase tracking-[0.15em] text-[#3b3a36] mt-2 mb-3">AI &amp; Machine Learning Focus</h3>
+                    <p class="font-serif text-base text-[#3b3a36] leading-relaxed mb-4">The field is moving fast, and I'm moving with it. My current work centers on developing AI tools and AI agents, backed by certifications in Neural Networks and Deep Learning. I'm not just following the AI trend — I'm building with it, understanding the principles behind it, and thinking critically about its implications.</p>
+                    <p class="label" style="font-size: 0.6rem;">Certifications in Neural Networks and Deep Learning. Active development of AI tools and agent-based systems.</p>
+                </div>
+
+                <div class="paper-note tumble">
+                    <div class="pin"></div>
+                    <h3 class="font-sans font-semibold text-sm uppercase tracking-[0.15em] text-[#3b3a36] mt-2 mb-3">Teaching &amp; Communication Skills</h3>
+                    <p class="font-serif text-base text-[#3b3a36] leading-relaxed mb-4">The ability to explain complex ideas simply is underrated. Years of teaching physics, math, and chemistry to children — plus experience as a course leader — taught me that communication is a skill you practice, not a talent you're born with. I bring this to every team meeting, client presentation, and code review.</p>
+                    <p class="label" style="font-size: 0.6rem;">Described as 'pedagogical in training new employees' and 'eager to share knowledge' by former employer.</p>
+                </div>
+
+                <div class="paper-note tumble sm:col-span-2">
+                    <div class="pin"></div>
+                    <h3 class="font-sans font-semibold text-sm uppercase tracking-[0.15em] text-[#3b3a36] mt-2 mb-3">Adaptability &amp; Growth Mindset</h3>
+                    <p class="font-serif text-base text-[#3b3a36] leading-relaxed mb-4">From acoustics to automation, from C# to AI agents — my career is defined by adaptation. I don't just tolerate change; I seek it out. Every new domain is an opportunity to apply familiar thinking to unfamiliar problems, and that cross-pollination is where the best ideas come from.</p>
+                    <p class="label" style="font-size: 0.6rem;">Diverse career spanning physics, acoustics, software development, automation, and AI. Consistent pattern of learning new domains and delivering results quickly.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════════ WHERE I'M HEADED ═══════════════════ -->
+        <section id="focus" class="section">
+            <div class="tumble">
+                <div class="label"><span class="ornament"></span>Where I'm Headed</div>
+                <h2 class="font-serif italic text-4xl md:text-5xl text-[#3b3a36] mt-3 leading-tight">AI, agents, and<br/><span class="text-[#c97a5b]">the future.</span></h2>
+            </div>
+            <div class="tumble mt-6 mb-10">
+                <p class="font-serif italic text-xl text-[#6a6860] max-w-lg">The tools we build today will shape how we solve problems tomorrow.</p>
+            </div>
+
+            <div class="space-y-5">
+                <div class="paper-card tumble flex flex-col sm:flex-row sm:items-start gap-4">
+                    <div class="flex-1">
+                        <h3 class="font-serif italic text-xl text-[#3b3a36]">AI Agents &amp; Tool Development</h3>
+                        <p class="font-serif text-base text-[#6a6860] leading-relaxed mt-2">Building intelligent agents that can reason, plan, and take action. I'm exploring how autonomous AI systems can assist with complex workflows — from data analysis to decision support. This is where my automation experience meets cutting-edge AI.</p>
+                    </div>
+                    <span class="badge badge-active shrink-0">Active</span>
+                </div>
+
+                <div class="paper-card tumble flex flex-col sm:flex-row sm:items-start gap-4">
+                    <div class="flex-1">
+                        <h3 class="font-serif italic text-xl text-[#3b3a36]">Neural Networks &amp; Deep Learning</h3>
+                        <p class="font-serif text-base text-[#6a6860] leading-relaxed mt-2">Deepening my understanding of neural architectures and their practical applications. With certifications already in hand, I'm focused on applying these techniques to real-world problems rather than just understanding them in theory.</p>
+                    </div>
+                    <span class="badge badge-active shrink-0">Active</span>
+                </div>
+
+                <div class="paper-card tumble flex flex-col sm:flex-row sm:items-start gap-4">
+                    <div class="flex-1">
+                        <h3 class="font-serif italic text-xl text-[#3b3a36]">AI Ethics &amp; Responsible Development</h3>
+                        <p class="font-serif text-base text-[#6a6860] leading-relaxed mt-2">As AI becomes more powerful, the questions around ethics, personal data, and responsible development become more urgent. I believe that building AI responsibly isn't a constraint — it's a design requirement that leads to better systems.</p>
+                    </div>
+                    <span class="badge badge-growing shrink-0">Growing</span>
+                </div>
+
+                <div class="paper-card tumble flex flex-col sm:flex-row sm:items-start gap-4">
+                    <div class="flex-1">
+                        <h3 class="font-serif italic text-xl text-[#3b3a36]">Cybersecurity Awareness</h3>
+                        <p class="font-serif text-base text-[#6a6860] leading-relaxed mt-2">Understanding security isn't optional when you're building tools that handle data. I'm growing my knowledge of cybersecurity principles to ensure that the systems I build are secure by design, not as an afterthought.</p>
+                    </div>
+                    <span class="badge badge-growing shrink-0">Growing</span>
+                </div>
+
+                <div class="paper-card tumble flex flex-col sm:flex-row sm:items-start gap-4">
+                    <div class="flex-1">
+                        <h3 class="font-serif italic text-xl text-[#3b3a36]">Data Analysis &amp; Programming</h3>
+                        <p class="font-serif text-base text-[#6a6860] leading-relaxed mt-2">Python and C# remain my core programming languages, and data analysis is the thread connecting all my work. Whether it's acoustic measurements, workflow metrics, or AI training data — the ability to extract meaning from data is the skill that never gets old.</p>
+                    </div>
+                    <span class="badge badge-foundation shrink-0">Foundation</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════════ THE CREATIVE SIDE ═══════════════════ -->
+        <section id="creative" class="section">
+            <div class="tumble">
+                <div class="label"><span class="ornament"></span>The Creative Side</div>
+                <h2 class="font-serif italic text-4xl md:text-5xl text-[#3b3a36] mt-3 leading-tight">Where curiosity<br/><span class="text-[#c97a5b]">meets craft.</span></h2>
+            </div>
+            <div class="tumble mt-6">
+                <p class="font-serif italic text-xl text-[#6a6860] max-w-lg">Creativity isn't separate from technical work — it's the engine that drives it.</p>
+            </div>
+            <div class="tumble mt-4">
+                <p class="font-serif text-lg text-[#3b3a36] max-w-2xl leading-relaxed">My creativity doesn't live in one domain — it shows up wherever I work. When I was building automation at Brekke &amp; Strand, the creativity wasn't in the code itself but in seeing the opportunity: recognizing that a manual, error-prone process could become an elegant automated workflow. When I teach, creativity is about finding the analogy that makes a difficult concept seem easy.</p>
+            </div>
+
+            <div class="mt-10 grid gap-5 sm:grid-cols-2">
+                <div class="paper-card tumble">
+                    <h3 class="font-sans font-semibold text-sm uppercase tracking-[0.15em] text-[#3b3a36] mb-3">Cross-Domain Thinking</h3>
+                    <p class="font-serif text-base text-[#6a6860] leading-relaxed">The best ideas come from connecting fields that don't usually talk to each other. My path from physics to acoustics to software to AI has given me a toolkit that draws from each domain to solve problems in the next.</p>
+                </div>
+                <div class="paper-card tumble">
+                    <h3 class="font-sans font-semibold text-sm uppercase tracking-[0.15em] text-[#3b3a36] mb-3">Knowledge Sharing</h3>
+                    <p class="font-serif text-base text-[#6a6860] leading-relaxed">Creativity multiplies when you share it. I'm described as eager to share knowledge and pedagogical in training new team members. Making complex ideas accessible isn't just about communication — it's a creative act in itself.</p>
+                </div>
+                <div class="paper-card tumble">
+                    <h3 class="font-sans font-semibold text-sm uppercase tracking-[0.15em] text-[#3b3a36] mb-3">Process Innovation</h3>
+                    <p class="font-serif text-base text-[#6a6860] leading-relaxed">Seeing an inefficient workflow and imagining a better one is a form of creativity. From automated data pipelines to intranet solutions, I've consistently found ways to make teams more effective through creative engineering.</p>
+                </div>
+                <div class="paper-card tumble">
+                    <h3 class="font-sans font-semibold text-sm uppercase tracking-[0.15em] text-[#3b3a36] mb-3">Curiosity-Driven Growth</h3>
+                    <p class="font-serif text-base text-[#6a6860] leading-relaxed">I'm drawn to new challenges because curiosity is the fuel for creativity. Whether it's exploring AI agents, deepening my cybersecurity knowledge, or thinking about the ethics of the technology we build — each new area feeds the creative engine.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════════ CONNECT ═══════════════════ -->
+        <section id="connect" class="section">
+            <div class="tumble">
+                <div class="label"><span class="ornament"></span>Connect</div>
+                <h2 class="font-serif italic text-4xl md:text-5xl text-[#3b3a36] mt-3 leading-tight">
+                    Let's build<br/>
+                    <span class="text-[#c97a5b]">something together.</span>
+                </h2>
+                <p class="font-serif italic text-xl text-[#6a6860] mt-6 max-w-md">Please contact me for AI discussions or opportunities, or just to connect with me.</p>
+                <div class="mt-10 flex flex-wrap gap-4">
+                    <a href="mailto:marian.helcl@gmail.com" class="btn-classic">Say hello ✉</a>
+                    <a href="https://github.com/movfast" class="btn-ghost">GitHub</a>
+                    <a href="https://www.linkedin.com/" class="btn-ghost">LinkedIn</a>
+                    <a href="experiment6.html" class="btn-ghost">← Back to site</a>
+                </div>
+                <div class="mt-16 label">© 2026 Marian Helcl Øverli<span class="ornament"></span>the full story</div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- PLATE STYLE (reused from experiment6) -->
+    <style>
+        .plate {
+            background: var(--cream);
+            border: 1px solid rgba(59,58,54,0.18);
+            border-radius: 6px;
+            padding: 1.1rem 1.6rem;
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-weight: 500;
+            font-size: 1.3rem;
+            line-height: 1.2;
+            color: var(--ink);
+            box-shadow: 6px 8px 0 rgba(59,58,54,0.08);
+            display: inline-block;
+        }
+    </style>
+
+    <script>
+        // Scroll-in animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry, i) => {
+                if (entry.isIntersecting) {
+                    setTimeout(() => entry.target.classList.add('in'), i * 80);
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.15 });
+
+        document.querySelectorAll('.tumble').forEach(el => observer.observe(el));
+
+        // Expandable cards
+        function toggleExpand(id, btn) {
+            const el = document.getElementById(id);
+            if (el.style.maxHeight && el.style.maxHeight !== '0px') {
+                el.style.maxHeight = '0px';
+                btn.textContent = 'Read more +';
+            } else {
+                el.style.maxHeight = el.scrollHeight + 'px';
+                btn.textContent = 'Read less −';
+            }
+        }
+    </script>
+
+</body>
+</html>
