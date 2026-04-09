@@ -30,7 +30,7 @@
                 var(--cream);
             color: var(--ink);
             font-family: 'Cormorant Garamond', Georgia, serif;
-            font-size: 18px;
+            font-size: clamp(16px, 1vw + 14px, 18px);
             overflow-x: clip;
             margin: 0;
         }
@@ -58,10 +58,10 @@
             z-index: 2;
             max-width: 900px;
             margin: 0 auto;
-            padding: 0 2rem;
+            padding: 0 clamp(1rem, 4vw, 2rem);
         }
         .section {
-            padding: 5rem 0;
+            padding: clamp(2.5rem, 6vw, 5rem) 0;
             border-top: 1px solid rgba(59,58,54,0.1);
         }
         .section:first-of-type { border-top: none; }
@@ -79,7 +79,7 @@
         /* Components */
         .label {
             font-family: 'JetBrains Mono', monospace;
-            font-size: 0.7rem;
+            font-size: clamp(0.6875rem, 1.5vw, 0.75rem);
             text-transform: uppercase;
             letter-spacing: 0.32em;
             color: var(--terracotta);
@@ -98,7 +98,7 @@
             background: var(--cream);
             border: 1px solid rgba(59,58,54,0.12);
             border-radius: 4px;
-            padding: 2rem;
+            padding: clamp(1.25rem, 3vw, 2rem);
             box-shadow:
                 0 1px 0 rgba(255,255,255,0.7) inset,
                 8px 10px 0 rgba(59,58,54,0.06),
@@ -106,17 +106,10 @@
             transition: transform 0.4s cubic-bezier(.2,.8,.2,1), box-shadow 0.4s ease;
             position: relative;
         }
-        .paper-card:hover {
-            transform: translateY(-4px);
-            box-shadow:
-                0 1px 0 rgba(255,255,255,0.7) inset,
-                10px 14px 0 rgba(59,58,54,0.08),
-                0 32px 64px -24px rgba(59,58,54,0.24);
-        }
 
         .paper-note {
             background: var(--cream);
-            padding: 1.75rem;
+            padding: clamp(1.1rem, 3vw, 1.75rem);
             border-radius: 2px;
             box-shadow:
                 6px 10px 0 rgba(59,58,54,0.08),
@@ -156,7 +149,6 @@
             gap: 0.6rem;
             text-decoration: none;
         }
-        .btn-classic:hover { transform: translateY(2px); box-shadow: 0 2px 0 #9a5a40, 0 6px 14px -4px rgba(201,122,91,0.5); }
 
         .btn-ghost {
             background: transparent;
@@ -175,7 +167,6 @@
             gap: 0.6rem;
             text-decoration: none;
         }
-        .btn-ghost:hover { background: var(--ink); color: var(--cream); }
 
         /* Scroll animations */
         .tumble {
@@ -188,7 +179,7 @@
         /* Timeline */
         .timeline-entry {
             border-left: 2px solid var(--terracotta);
-            padding-left: 2rem;
+            padding-left: clamp(1.25rem, 3vw, 2rem);
             margin-left: 0.5rem;
             position: relative;
         }
@@ -240,19 +231,21 @@
             letter-spacing: 0.1em;
             text-transform: uppercase;
             cursor: pointer;
-            padding: 0.5rem 0;
-            transition: opacity 0.2s;
+            padding: 0.75rem 1rem;
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
         }
-        .expand-btn:hover { opacity: 0.7; }
 
         /* Mobile nav */
         .mobile-menu {
             display: none;
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
+            padding-top: 5rem;
             background: rgba(245,239,230,0.97);
             backdrop-filter: blur(12px);
-            z-index: 99;
+            z-index: 101;
             flex-direction: column;
             align-items: center;
             justify-content: center;
@@ -260,8 +253,77 @@
         }
         .mobile-menu.open { display: flex; }
 
+        /* Fluid section headings */
+        .section-heading {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-style: italic;
+            font-size: clamp(1.8rem, 4vw + 0.5rem, 3rem);
+            color: var(--ink);
+            margin-top: 0.75rem;
+            line-height: 1.15;
+        }
+
+        /* Skill tags */
+        .skill-tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: clamp(0.6875rem, 1.5vw, 0.75rem);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            padding: 0.3rem 0.6rem;
+            background: var(--linen);
+            border-radius: 4px;
+            color: var(--ink);
+        }
+
+        /* Hamburger icon */
+        .hamburger-bar {
+            display: block;
+            width: 22px;
+            height: 2px;
+            background: var(--ink);
+            border-radius: 1px;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            position: absolute;
+        }
+        .hamburger-bar:nth-child(1) { transform: translateY(-7px); }
+        .hamburger-bar:nth-child(2) { transform: translateY(0); }
+        .hamburger-bar:nth-child(3) { transform: translateY(7px); }
+        @media (min-width: 768px) { #menuBtn { display: none !important; } }
+        .menu-open .hamburger-bar:nth-child(1) { transform: rotate(45deg); }
+        .menu-open .hamburger-bar:nth-child(2) { opacity: 0; }
+        .menu-open .hamburger-bar:nth-child(3) { transform: rotate(-45deg); }
+
+        /* Hover — desktop only */
+        @media (hover: hover) {
+            .paper-card:hover {
+                transform: translateY(-4px);
+                box-shadow:
+                    0 1px 0 rgba(255,255,255,0.7) inset,
+                    10px 14px 0 rgba(59,58,54,0.08),
+                    0 32px 64px -24px rgba(59,58,54,0.24);
+            }
+            .btn-classic:hover { transform: translateY(2px); box-shadow: 0 2px 0 #9a5a40, 0 6px 14px -4px rgba(201,122,91,0.5); }
+            .btn-ghost:hover { background: var(--ink); color: var(--cream); }
+            .expand-btn:hover { opacity: 0.7; }
+        }
+
+        /* Grid progressions */
+        .grid-progressive-3 { display: grid; gap: 1rem; grid-template-columns: 1fr; }
+        @media (min-width: 480px) { .grid-progressive-3 { grid-template-columns: repeat(2, 1fr); } }
+        @media (min-width: 768px) { .grid-progressive-3 { grid-template-columns: repeat(3, 1fr); gap: 1.25rem; } }
+
+        /* Mobile */
         @media (max-width: 768px) {
-            .section { padding: 3.5rem 0; }
+            .horizon-nav { backdrop-filter: none; background: rgba(245,239,230,0.97); }
+            .mobile-menu { backdrop-filter: none; }
+            .mobile-menu a { padding: 0.75rem 1rem; min-height: 44px; display: flex; align-items: center; }
+            body::before { display: none; }
+        }
+
+        /* Small phones */
+        @media (max-width: 480px) {
+            .timeline-entry { margin-left: 0; }
+            .plate { font-size: 1rem; padding: 0.8rem 1.1rem; }
         }
     </style>
 </head>
@@ -270,9 +332,9 @@
     <!-- HORIZON NAV -->
     <nav class="horizon-nav">
         <div class="flex items-center justify-between px-6 md:px-12 py-5">
-            <a href="experiment6.html" class="flex items-center gap-3 no-underline">
-                <span class="font-mono text-xs tracking-[0.3em] text-[#c97a5b]">M·H·Ø</span>
-                <span class="font-serif italic text-xl text-[#3b3a36]">Marian H. Øverli</span>
+            <a href="experiment6.html" class="flex items-center gap-3 no-underline min-w-0">
+                <span class="font-mono text-xs tracking-[0.3em] text-[#c97a5b] shrink-0">M·H·Ø</span>
+                <span class="font-serif italic text-xl text-[#3b3a36] hidden sm:inline">Marian H. Øverli</span>
             </a>
             <div class="hidden md:flex items-center gap-10 font-sans text-xs uppercase tracking-[0.2em] font-medium text-[#3b3a36]">
                 <a href="#" class="text-[#c97a5b]" style="pointer-events:none">About</a>
@@ -282,8 +344,15 @@
                 <a href="experiment6.html" class="hover:text-[#c97a5b] transition">← Back</a>
                 <a href="experiment6.html#connect" class="btn-classic !py-2 !px-5 !text-[10px]">Let's Talk →</a>
             </div>
-            <!-- Mobile hamburger -->
-            <button id="menuBtn" class="md:hidden font-mono text-sm text-[#3b3a36] tracking-wider" onclick="document.getElementById('mobileMenu').classList.toggle('open'); this.textContent = this.textContent.trim() === 'MENU' ? 'CLOSE' : 'MENU'">MENU</button>
+            <div class="flex items-center gap-4">
+                <a href="experiment6.html" class="md:hidden font-sans text-xs uppercase tracking-[0.15em] font-medium text-[#3b3a36] hover:text-[#c97a5b] transition no-underline">← Back</a>
+                <!-- Mobile hamburger -->
+                <button id="menuBtn" aria-label="Menu" style="background:none;border:none;cursor:pointer;width:44px;height:44px;position:relative;display:flex;align-items:center;justify-content:center;">
+                <span class="hamburger-bar"></span>
+                <span class="hamburger-bar"></span>
+                <span class="hamburger-bar"></span>
+            </button>
+            </div>
         </div>
     </nav>
 
@@ -302,7 +371,7 @@
         <section class="section" style="border-top:none; padding-top:2rem;">
             <div class="tumble">
                 <div class="label"><span class="ornament"></span>About me</div>
-                <h1 class="font-serif italic text-[#3b3a36] mt-4 leading-tight" style="font-size: clamp(2.8rem, 7vw, 5.5rem);">
+                <h1 class="font-serif italic text-[#3b3a36] mt-4 leading-tight" style="font-size: clamp(2rem, 6vw, 5.5rem);">
                     Marian Helcl<br/>
                     <span class="text-[#c97a5b]" style="font-style:normal; font-weight:600;">Øverli.</span>
                 </h1>
@@ -325,7 +394,7 @@
             </div>
 
             <!-- Fun facts -->
-            <div class="mt-10 grid gap-4 sm:grid-cols-3">
+            <div class="mt-10 grid-progressive-3">
                 <div class="paper-note tumble">
                     <div class="pin"></div>
                     <p class="font-serif text-base text-[#3b3a36] leading-relaxed mt-2">I love all dogs, but there's something special about small dogs. They can be noisy, but also very cute.</p>
@@ -345,7 +414,7 @@
         <section id="education" class="section">
             <div class="tumble">
                 <div class="label"><span class="ornament"></span>The Foundation</div>
-                <h2 class="font-serif italic text-4xl md:text-5xl text-[#3b3a36] mt-3 leading-tight">Where physics meets<br/><span class="text-[#c97a5b]">problem solving.</span></h2>
+                <h2 class="section-heading">Where physics meets<br/><span class="text-[#c97a5b]">problem solving.</span></h2>
             </div>
             <div class="tumble mt-6">
                 <p class="font-serif italic text-xl text-[#6a6860] max-w-lg">I studied physics and mathematics at NTNU, but the real education was learning to think in systems.</p>
@@ -353,7 +422,7 @@
             <div class="tumble mt-4">
                 <p class="font-serif text-lg text-[#3b3a36] max-w-2xl leading-relaxed">At NTNU, I studied Applied Physics and Mathematics — a combination that teaches you not just how to solve equations, but how to model reality. Physics gave me the ability to break complex systems into understandable parts. Mathematics gave me the language to describe them precisely. Together, they shaped how I approach every problem: understand the fundamentals first, then build up.</p>
             </div>
-            <div class="mt-10 grid gap-5 sm:grid-cols-3">
+            <div class="mt-10 grid-progressive-3">
                 <div class="paper-card tumble">
                     <h3 class="font-sans font-semibold text-sm uppercase tracking-[0.15em] text-[#3b3a36] mb-3">Analytical Thinking</h3>
                     <p class="font-serif text-base text-[#6a6860] leading-relaxed">Physics trained me to decompose problems into first principles — identify what you know, what you need to find, and the simplest path between them.</p>
@@ -373,7 +442,7 @@
         <section id="journey" class="section">
             <div class="tumble">
                 <div class="label"><span class="ornament"></span>The Journey</div>
-                <h2 class="font-serif italic text-4xl md:text-5xl text-[#3b3a36] mt-3 leading-tight">From sound waves<br/><span class="text-[#c97a5b]">to software.</span></h2>
+                <h2 class="section-heading">From sound waves<br/><span class="text-[#c97a5b]">to software.</span></h2>
             </div>
             <div class="tumble mt-6 mb-12">
                 <p class="font-serif italic text-xl text-[#6a6860] max-w-lg">Every career has a turning point. Mine was realizing that the best acoustic solutions were built with code.</p>
@@ -399,14 +468,14 @@
                     <li>Mentored new employees and shared knowledge across the team</li>
                 </ul>
                 <div class="flex flex-wrap gap-2">
-                    <span class="font-mono text-[10px] uppercase tracking-[0.15em] px-2 py-1 bg-[#ece3d4] rounded text-[#3b3a36]">C#</span>
-                    <span class="font-mono text-[10px] uppercase tracking-[0.15em] px-2 py-1 bg-[#ece3d4] rounded text-[#3b3a36]">SQL</span>
-                    <span class="font-mono text-[10px] uppercase tracking-[0.15em] px-2 py-1 bg-[#ece3d4] rounded text-[#3b3a36]">Blazor</span>
-                    <span class="font-mono text-[10px] uppercase tracking-[0.15em] px-2 py-1 bg-[#ece3d4] rounded text-[#3b3a36]">ASP.NET</span>
-                    <span class="font-mono text-[10px] uppercase tracking-[0.15em] px-2 py-1 bg-[#ece3d4] rounded text-[#3b3a36]">CadnaA</span>
-                    <span class="font-mono text-[10px] uppercase tracking-[0.15em] px-2 py-1 bg-[#ece3d4] rounded text-[#3b3a36]">Python</span>
-                    <span class="font-mono text-[10px] uppercase tracking-[0.15em] px-2 py-1 bg-[#ece3d4] rounded text-[#3b3a36]">Data Analysis</span>
-                    <span class="font-mono text-[10px] uppercase tracking-[0.15em] px-2 py-1 bg-[#ece3d4] rounded text-[#3b3a36]">Project Leadership</span>
+                    <span class="skill-tag">C#</span>
+                    <span class="skill-tag">SQL</span>
+                    <span class="skill-tag">Blazor</span>
+                    <span class="skill-tag">ASP.NET</span>
+                    <span class="skill-tag">CadnaA</span>
+                    <span class="skill-tag">Python</span>
+                    <span class="skill-tag">Data Analysis</span>
+                    <span class="skill-tag">Project Leadership</span>
                 </div>
             </div>
 
@@ -421,10 +490,10 @@
                     <li>Collaborated with experienced researchers in a multidisciplinary environment</li>
                 </ul>
                 <div class="flex flex-wrap gap-2">
-                    <span class="font-mono text-[10px] uppercase tracking-[0.15em] px-2 py-1 bg-[#ece3d4] rounded text-[#3b3a36]">Acoustics</span>
-                    <span class="font-mono text-[10px] uppercase tracking-[0.15em] px-2 py-1 bg-[#ece3d4] rounded text-[#3b3a36]">Laboratory Work</span>
-                    <span class="font-mono text-[10px] uppercase tracking-[0.15em] px-2 py-1 bg-[#ece3d4] rounded text-[#3b3a36]">Data Collection</span>
-                    <span class="font-mono text-[10px] uppercase tracking-[0.15em] px-2 py-1 bg-[#ece3d4] rounded text-[#3b3a36]">Research</span>
+                    <span class="skill-tag">Acoustics</span>
+                    <span class="skill-tag">Laboratory Work</span>
+                    <span class="skill-tag">Data Collection</span>
+                    <span class="skill-tag">Research</span>
                 </div>
             </div>
 
@@ -439,10 +508,10 @@
                     <li>Explored solutions for more efficient operations</li>
                 </ul>
                 <div class="flex flex-wrap gap-2">
-                    <span class="font-mono text-[10px] uppercase tracking-[0.15em] px-2 py-1 bg-[#ece3d4] rounded text-[#3b3a36]">Automation</span>
-                    <span class="font-mono text-[10px] uppercase tracking-[0.15em] px-2 py-1 bg-[#ece3d4] rounded text-[#3b3a36]">Workflow Design</span>
-                    <span class="font-mono text-[10px] uppercase tracking-[0.15em] px-2 py-1 bg-[#ece3d4] rounded text-[#3b3a36]">Python</span>
-                    <span class="font-mono text-[10px] uppercase tracking-[0.15em] px-2 py-1 bg-[#ece3d4] rounded text-[#3b3a36]">Engineering</span>
+                    <span class="skill-tag">Automation</span>
+                    <span class="skill-tag">Workflow Design</span>
+                    <span class="skill-tag">Python</span>
+                    <span class="skill-tag">Engineering</span>
                 </div>
             </div>
 
@@ -457,11 +526,11 @@
                     <li>Built strong communication skills that transfer to technical consulting</li>
                 </ul>
                 <div class="flex flex-wrap gap-2">
-                    <span class="font-mono text-[10px] uppercase tracking-[0.15em] px-2 py-1 bg-[#ece3d4] rounded text-[#3b3a36]">Teaching</span>
-                    <span class="font-mono text-[10px] uppercase tracking-[0.15em] px-2 py-1 bg-[#ece3d4] rounded text-[#3b3a36]">Communication</span>
-                    <span class="font-mono text-[10px] uppercase tracking-[0.15em] px-2 py-1 bg-[#ece3d4] rounded text-[#3b3a36]">Physics</span>
-                    <span class="font-mono text-[10px] uppercase tracking-[0.15em] px-2 py-1 bg-[#ece3d4] rounded text-[#3b3a36]">Mathematics</span>
-                    <span class="font-mono text-[10px] uppercase tracking-[0.15em] px-2 py-1 bg-[#ece3d4] rounded text-[#3b3a36]">Chemistry</span>
+                    <span class="skill-tag">Teaching</span>
+                    <span class="skill-tag">Communication</span>
+                    <span class="skill-tag">Physics</span>
+                    <span class="skill-tag">Mathematics</span>
+                    <span class="skill-tag">Chemistry</span>
                 </div>
             </div>
         </section>
@@ -470,7 +539,7 @@
         <section id="skills" class="section">
             <div class="tumble">
                 <div class="label"><span class="ornament"></span>Skills &amp; Tools</div>
-                <h2 class="font-serif italic text-4xl md:text-5xl text-[#3b3a36] mt-3 leading-tight">What I bring<br/><span class="text-[#c97a5b]">to the table.</span></h2>
+                <h2 class="section-heading">What I bring<br/><span class="text-[#c97a5b]">to the table.</span></h2>
             </div>
             <div class="tumble mt-6 mb-4">
                 <p class="font-serif italic text-xl text-[#6a6860] max-w-lg">A toolkit shaped by physics, refined by consulting, and expanding into AI.</p>
@@ -566,7 +635,7 @@
         <section id="thinking" class="section">
             <div class="tumble">
                 <div class="label"><span class="ornament"></span>How I Think</div>
-                <h2 class="font-serif italic text-4xl md:text-5xl text-[#3b3a36] mt-3 leading-tight">Approaches to<br/><span class="text-[#c97a5b]">complex problems.</span></h2>
+                <h2 class="section-heading">Approaches to<br/><span class="text-[#c97a5b]">complex problems.</span></h2>
             </div>
             <div class="tumble mt-6 mb-10">
                 <p class="font-serif italic text-xl text-[#6a6860] max-w-lg">The right framework turns a tangled problem into a solvable one.</p>
@@ -621,7 +690,7 @@
         <section id="why-hire" class="section">
             <div class="tumble">
                 <div class="label"><span class="ornament"></span>Why Work With Me</div>
-                <h2 class="font-serif italic text-4xl md:text-5xl text-[#3b3a36] mt-3 leading-tight">What I bring<br/><span class="text-[#c97a5b]">to your team.</span></h2>
+                <h2 class="section-heading">What I bring<br/><span class="text-[#c97a5b]">to your team.</span></h2>
             </div>
             <div class="tumble mt-6 mb-10">
                 <p class="font-serif italic text-xl text-[#6a6860] max-w-lg">You need someone who can bridge the gap between deep technical work and clear communication.</p>
@@ -632,35 +701,35 @@
                     <div class="pin"></div>
                     <h3 class="font-sans font-semibold text-sm uppercase tracking-[0.15em] text-[#3b3a36] mt-2 mb-3">Strong Technical Expertise</h3>
                     <p class="font-serif text-base text-[#3b3a36] leading-relaxed mb-4">You need someone who doesn't just use tools — they understand the science behind them. My foundation in Applied Physics and Mathematics means I approach data analysis, modeling, and programming with deep understanding, not just pattern matching. When something breaks, I don't just Google the error; I reason about why it happened.</p>
-                    <p class="label" style="font-size: 0.6rem;">M.Sc. in Applied Physics and Mathematics from NTNU. Hands-on experience in data collection, analysis, modeling, and programming with Python and C#.</p>
+                    <p class="label" style="font-size: 0.6875rem;">M.Sc. in Applied Physics and Mathematics from NTNU. Hands-on experience in data collection, analysis, modeling, and programming with Python and C#.</p>
                 </div>
 
                 <div class="paper-note tumble">
                     <div class="pin"></div>
                     <h3 class="font-sans font-semibold text-sm uppercase tracking-[0.15em] text-[#3b3a36] mt-2 mb-3">Real-World Consulting Experience</h3>
                     <p class="font-serif text-base text-[#3b3a36] leading-relaxed mb-4">Theory is powerful, but it needs to be tested in the real world. Over five years as an Acoustic Consultant, I managed projects end-to-end — from planning and client conversations to data analysis and final delivery. I learned that the best technical solution means nothing if you can't communicate it clearly and deliver it on time.</p>
-                    <p class="label" style="font-size: 0.6rem;">5+ years at Brekke &amp; Strand Akustikk AS, leading projects in industrial and transportation acoustics.</p>
+                    <p class="label" style="font-size: 0.6875rem;">5+ years at Brekke &amp; Strand Akustikk AS, leading projects in industrial and transportation acoustics.</p>
                 </div>
 
                 <div class="paper-note tumble">
                     <div class="pin"></div>
                     <h3 class="font-sans font-semibold text-sm uppercase tracking-[0.15em] text-[#3b3a36] mt-2 mb-3">AI &amp; Machine Learning Focus</h3>
                     <p class="font-serif text-base text-[#3b3a36] leading-relaxed mb-4">The field is moving fast, and I'm moving with it. My current work centers on developing AI tools and AI agents, backed by certifications in Neural Networks and Deep Learning. I'm not just following the AI trend — I'm building with it, understanding the principles behind it, and thinking critically about its implications.</p>
-                    <p class="label" style="font-size: 0.6rem;">Certifications in Neural Networks and Deep Learning. Active development of AI tools and agent-based systems.</p>
+                    <p class="label" style="font-size: 0.6875rem;">Certifications in Neural Networks and Deep Learning. Active development of AI tools and agent-based systems.</p>
                 </div>
 
                 <div class="paper-note tumble">
                     <div class="pin"></div>
                     <h3 class="font-sans font-semibold text-sm uppercase tracking-[0.15em] text-[#3b3a36] mt-2 mb-3">Teaching &amp; Communication Skills</h3>
                     <p class="font-serif text-base text-[#3b3a36] leading-relaxed mb-4">The ability to explain complex ideas simply is underrated. Years of teaching physics, math, and chemistry to children — plus experience as a course leader — taught me that communication is a skill you practice, not a talent you're born with. I bring this to every team meeting, client presentation, and code review.</p>
-                    <p class="label" style="font-size: 0.6rem;">Described as 'pedagogical in training new employees' and 'eager to share knowledge' by former employer.</p>
+                    <p class="label" style="font-size: 0.6875rem;">Described as 'pedagogical in training new employees' and 'eager to share knowledge' by former employer.</p>
                 </div>
 
                 <div class="paper-note tumble sm:col-span-2">
                     <div class="pin"></div>
                     <h3 class="font-sans font-semibold text-sm uppercase tracking-[0.15em] text-[#3b3a36] mt-2 mb-3">Adaptability &amp; Growth Mindset</h3>
                     <p class="font-serif text-base text-[#3b3a36] leading-relaxed mb-4">From acoustics to automation, from C# to AI agents — my career is defined by adaptation. I don't just tolerate change; I seek it out. Every new domain is an opportunity to apply familiar thinking to unfamiliar problems, and that cross-pollination is where the best ideas come from.</p>
-                    <p class="label" style="font-size: 0.6rem;">Diverse career spanning physics, acoustics, software development, automation, and AI. Consistent pattern of learning new domains and delivering results quickly.</p>
+                    <p class="label" style="font-size: 0.6875rem;">Diverse career spanning physics, acoustics, software development, automation, and AI. Consistent pattern of learning new domains and delivering results quickly.</p>
                 </div>
             </div>
         </section>
@@ -669,7 +738,7 @@
         <section id="focus" class="section">
             <div class="tumble">
                 <div class="label"><span class="ornament"></span>Where I'm Headed</div>
-                <h2 class="font-serif italic text-4xl md:text-5xl text-[#3b3a36] mt-3 leading-tight">AI, agents, and<br/><span class="text-[#c97a5b]">the future.</span></h2>
+                <h2 class="section-heading">AI, agents, and<br/><span class="text-[#c97a5b]">the future.</span></h2>
             </div>
             <div class="tumble mt-6 mb-10">
                 <p class="font-serif italic text-xl text-[#6a6860] max-w-lg">The tools we build today will shape how we solve problems tomorrow.</p>
@@ -722,7 +791,7 @@
         <section id="creative" class="section">
             <div class="tumble">
                 <div class="label"><span class="ornament"></span>The Creative Side</div>
-                <h2 class="font-serif italic text-4xl md:text-5xl text-[#3b3a36] mt-3 leading-tight">Where curiosity<br/><span class="text-[#c97a5b]">meets craft.</span></h2>
+                <h2 class="section-heading">Where curiosity<br/><span class="text-[#c97a5b]">meets craft.</span></h2>
             </div>
             <div class="tumble mt-6">
                 <p class="font-serif italic text-xl text-[#6a6860] max-w-lg">Creativity isn't separate from technical work — it's the engine that drives it.</p>
@@ -755,7 +824,7 @@
         <section id="connect" class="section">
             <div class="tumble">
                 <div class="label"><span class="ornament"></span>Connect</div>
-                <h2 class="font-serif italic text-4xl md:text-5xl text-[#3b3a36] mt-3 leading-tight">
+                <h2 class="section-heading">
                     Let's build<br/>
                     <span class="text-[#c97a5b]">something together.</span>
                 </h2>
@@ -782,7 +851,7 @@
             font-family: 'Cormorant Garamond', serif;
             font-style: italic;
             font-weight: 500;
-            font-size: 1.3rem;
+            font-size: clamp(1rem, 2vw + 0.3rem, 1.3rem);
             line-height: 1.2;
             color: var(--ink);
             box-shadow: 6px 8px 0 rgba(59,58,54,0.08);
@@ -814,6 +883,19 @@
                 btn.textContent = 'Read less −';
             }
         }
+
+        // Hamburger menu
+        function toggleMenu() {
+            document.getElementById('menuBtn').classList.toggle('menu-open');
+            document.getElementById('mobileMenu').classList.toggle('open');
+        }
+        document.getElementById('menuBtn').addEventListener('click', toggleMenu);
+        document.querySelectorAll('#mobileMenu a').forEach(a => {
+            a.addEventListener('click', () => {
+                document.getElementById('mobileMenu').classList.remove('open');
+                document.getElementById('menuBtn').classList.remove('menu-open');
+            });
+        });
     </script>
 
 </body>

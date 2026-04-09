@@ -363,6 +363,53 @@
             .hero-stage { padding-top: 5rem; }
             .moving-title { --p: 0 !important; transform: none !important; }
         }
+
+        /* Hamburger icon */
+        .hamburger-bar {
+            display: block;
+            width: 22px;
+            height: 2px;
+            background: var(--ink);
+            border-radius: 1px;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            position: absolute;
+        }
+        .hamburger-bar:nth-child(1) { transform: translateY(-7px); }
+        .hamburger-bar:nth-child(2) { transform: translateY(0); }
+        .hamburger-bar:nth-child(3) { transform: translateY(7px); }
+        .menu-open .hamburger-bar:nth-child(1) { transform: rotate(45deg); }
+        .menu-open .hamburger-bar:nth-child(2) { opacity: 0; }
+        .menu-open .hamburger-bar:nth-child(3) { transform: rotate(-45deg); }
+        @media (min-width: 768px) { #menuBtn { display: none !important; } }
+
+        /* Mobile menu overlay */
+        .mobile-menu {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            padding-top: 5rem;
+            background: rgba(245,239,230,0.97);
+            z-index: 101;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+        }
+        .mobile-menu.open { display: flex; }
+        .mobile-menu a {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: var(--ink);
+            text-decoration: none;
+            padding: 0.75rem 1rem;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            transition: color 0.2s;
+        }
+        .mobile-menu a:hover { color: var(--terracotta); }
     </style>
 </head>
 <body>
@@ -381,8 +428,23 @@
                 <a href="#news" class="hover:text-[#c97a5b] transition">News</a>
                 <a href="#connect" class="btn-classic !py-2 !px-5 !text-[10px]">Let's Talk →</a>
             </div>
+            <!-- Mobile hamburger -->
+            <button id="menuBtn" aria-label="Menu" style="background:none;border:none;cursor:pointer;width:44px;height:44px;position:relative;display:flex;align-items:center;justify-content:center;">
+                <span class="hamburger-bar"></span>
+                <span class="hamburger-bar"></span>
+                <span class="hamburger-bar"></span>
+            </button>
         </div>
     </nav>
+
+    <!-- MOBILE MENU -->
+    <div id="mobileMenu" class="mobile-menu">
+        <a href="about.html">About</a>
+        <a href="#projects" onclick="closeMenu()">Work</a>
+        <a href="#writing" onclick="closeMenu()">Writing</a>
+        <a href="#news" onclick="closeMenu()">News</a>
+        <a href="#connect" class="btn-classic mt-4" onclick="closeMenu()">Let's Talk →</a>
+    </div>
 
     <!-- THE SLOPE -->
     <div class="slope-container">
@@ -728,10 +790,10 @@
         <section id="skills" class="slope-section" style="transform: rotate(calc(var(--tilt) * -1)); transform-origin: center center;">
             <div class="label"><span class="ornament"></span> skills</div>
 
-            <div class="grid grid-cols-2 md:grid-cols-5 gap-10 max-w-5xl" style="margin-top: 100px;">
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-x-6 gap-y-8 md:gap-10 max-w-5xl" style="margin-top: 100px;">
                 <div>
-                    <h3 class="font-serif italic text-2xl text-[#3b3a36]">Languages</h3>
-                    <ul class="mt-3 space-y-1 font-serif text-lg text-[#6a6860]">
+                    <h3 class="font-serif italic text-xl md:text-2xl text-[#3b3a36]">Languages</h3>
+                    <ul class="mt-3 space-y-1 font-serif text-base md:text-lg text-[#6a6860]">
                         <li>Python</li>
                         <li>JavaScript</li>
                         <li>C#</li>
@@ -741,8 +803,8 @@
                     </ul>
                 </div>
                 <div>
-                    <h3 class="font-serif italic text-2xl text-[#3b3a36]">ML Frameworks</h3>
-                    <ul class="mt-3 space-y-1 font-serif text-lg text-[#6a6860]">
+                    <h3 class="font-serif italic text-xl md:text-2xl text-[#3b3a36]">ML Frameworks</h3>
+                    <ul class="mt-3 space-y-1 font-serif text-base md:text-lg text-[#6a6860]">
                         <li>PyTorch</li>
                         <li>TensorFlow</li>
                         <li>HuggingFace</li>
@@ -750,8 +812,8 @@
                     </ul>
                 </div>
                 <div>
-                    <h3 class="font-serif italic text-2xl text-[#3b3a36]">AI Engineering</h3>
-                    <ul class="mt-3 space-y-1 font-serif text-lg text-[#6a6860]">
+                    <h3 class="font-serif italic text-xl md:text-2xl text-[#3b3a36]">AI Engineering</h3>
+                    <ul class="mt-3 space-y-1 font-serif text-base md:text-lg text-[#6a6860]">
                         <li>LLMs</li>
                         <li>RAG</li>
                         <li>Agents</li>
@@ -760,16 +822,16 @@
                     </ul>
                 </div>
                 <div>
-                    <h3 class="font-serif italic text-2xl text-[#3b3a36]">Tools &amp; Platforms</h3>
-                    <ul class="mt-3 space-y-1 font-serif text-lg text-[#6a6860]">
+                    <h3 class="font-serif italic text-xl md:text-2xl text-[#3b3a36]">Tools &amp; Platforms</h3>
+                    <ul class="mt-3 space-y-1 font-serif text-base md:text-lg text-[#6a6860]">
                         <li>Git &amp; GitHub</li>
                         <li>Linux</li>
                         <li>Jupyter</li>
                     </ul>
                 </div>
                 <div>
-                    <h3 class="font-serif italic text-2xl text-[#3b3a36]">Data</h3>
-                    <ul class="mt-3 space-y-1 font-serif text-lg text-[#6a6860]">
+                    <h3 class="font-serif italic text-xl md:text-2xl text-[#3b3a36]">Data</h3>
+                    <ul class="mt-3 space-y-1 font-serif text-base md:text-lg text-[#6a6860]">
                         <li>Pandas &amp; NumPy</li>
                         <li>Matplotlib</li>
                         <li>PostgreSQL</li>
@@ -992,6 +1054,18 @@
                 });
             });
         })();
+
+        // ============================================================
+        //  MOBILE MENU
+        // ============================================================
+        function closeMenu() {
+            document.getElementById('mobileMenu').classList.remove('open');
+            document.getElementById('menuBtn').classList.remove('menu-open');
+        }
+        document.getElementById('menuBtn').addEventListener('click', function() {
+            this.classList.toggle('menu-open');
+            document.getElementById('mobileMenu').classList.toggle('open');
+        });
     </script>
 
 </body>
