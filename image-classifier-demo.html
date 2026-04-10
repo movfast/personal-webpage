@@ -266,6 +266,10 @@ let hiddenAct = zerosArray(64);
 let outputAct = zerosArray(10);
 
 // Load pre-trained weights
+if (typeof MNIST_W === 'undefined') {
+  console.error('MNIST_W not loaded! Check js/mnist_weights.js path.');
+  alert('Error: MNIST weights not loaded. Please use a local server (python3 -m http.server).');
+}
 const W1 = new Float32Array(MNIST_W.W1);  // 784×128
 const b1 = new Float32Array(MNIST_W.b1);  // 128
 const W2 = new Float32Array(MNIST_W.W2);  // 128×10
@@ -436,6 +440,11 @@ function classify() {
     input[i] = imgData.data[i * 4] / 255.0; // red channel (grayscale)
   }
   forward(input);
+  // Debug: log top prediction
+  let maxP = 0, maxI = 0;
+  for (let i = 0; i < 10; i++) { if (outputAct[i] > maxP) { maxP = outputAct[i]; maxI = i; } }
+  const inkCount = input.reduce((a,b) => a + (b > 0.1 ? 1 : 0), 0);
+  console.log(`Classify: ink=${inkCount}px, pred=${maxI} (${(maxP*100).toFixed(1)}%), W1 loaded=${W1.length}, top3: ${Array.from(outputAct).map((v,i)=>({v,i})).sort((a,b)=>b.v-a.v).slice(0,3).map(x=>`${x.i}:${(x.v*100).toFixed(0)}%`).join(' ')}`);
   updateProbBars();
   drawNetwork();
 }
