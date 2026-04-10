@@ -3,861 +3,1096 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Marian Helcl Øverli— AI Engineer</title>
+    <title>Marian Helcl Øverli — Physics, AI engineering</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* The Slope */
+            --tilt: -8deg;
 
-    <!-- SEO Meta Tags -->
-    <meta name="description" content="Marian Helcl Øverli— Aspiring AI Engineer. Portfolio showcasing machine learning, NLP, and deep learning projects.">
-    <meta name="keywords" content="AI engineer, machine learning, deep learning, NLP, portfolio, Marian Helcl Øverli">
-    <meta name="author" content="Marian Helcl Øverli">
+            /* Soft, classic palette */
+            --cream:    #f5efe6;   /* paper */
+            --linen:    #ece3d4;   /* deeper paper */
+            --dusty:    #c8d3d8;   /* dusty sky */
+            --sage:     #a8b9a3;   /* soft sage */
+            --terracotta:#c97a5b;  /* construction-orange, softened */
+            --rose:     #d9a89a;   /* rose blush */
+            --ink:      #3b3a36;   /* warm charcoal */
+            --ink-soft: #6a6860;
+            --gold:     #c9a961;
+        }
 
-    <!-- Open Graph / Social Sharing -->
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="Marian Helcl Øverli — AI Engineer">
-    <meta property="og:description" content="Aspiring AI engineer passionate about machine learning, NLP, and building intelligent systems.">
-    <meta property="og:image" content="assets/images/og-image.png">
-    <meta property="og:url" content="https://www.marianhelcloverli.com">
+        * { box-sizing: border-box; }
 
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Marian Helcl — AI Engineer">
-    <meta name="twitter:description" content="Aspiring AI engineer passionate about machine learning, NLP, and building intelligent systems.">
-    <meta name="twitter:image" content="assets/images/og-image.png">
+        html {
+            background: var(--cream);
+        }
+        html, body {
+            background:
+                radial-gradient(ellipse at 20% 0%, #e7dccb 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 100%, #d3dde2 0%, transparent 50%),
+                var(--cream);
+            color: var(--ink);
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 18px;
+            overflow-x: clip;
+            margin: 0;
+            min-height: 100vh;
+        }
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="favicon.svg" width="500" height="600">
+        /* subtle paper grain */
+        body::before {
+            content: "";
+            position: fixed; inset: 0;
+            background-image:
+                radial-gradient(rgba(59,58,54,0.04) 1px, transparent 1px),
+                radial-gradient(rgba(59,58,54,0.03) 1px, transparent 1px);
+            background-size: 3px 3px, 7px 7px;
+            background-position: 0 0, 1px 1px;
+            pointer-events: none;
+            z-index: 1;
+            mix-blend-mode: multiply;
+        }
 
-    <!-- Stylesheet -->
-    <link rel="stylesheet" href="css/base.css">
-    <link rel="stylesheet" href="css/components.css">
-    <link rel="stylesheet" href="css/layout.css">
-    <link rel="stylesheet" href="css/botanical.css">
+        .font-sans { font-family: 'Inter', system-ui, sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+        .font-serif { font-family: 'Cormorant Garamond', Georgia, serif; }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* The slanted main container — gentle 8deg tilt.
+           Width is exactly the viewport so the visual right edge of the
+           rotated rectangle never floats past the viewport. */
+        .slope-container {
+            transform: rotate(var(--tilt));
+            transform-origin: top left;
+            width: 100vw;
+            margin-left: 0;
+            padding-top: 18vh;
+            padding-bottom: 0;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Counter-rotate to keep things visually upright when needed */
+        .upright {
+            display: inline-block;
+            transform: rotate(calc(var(--tilt) * -1));
+            transform-origin: top left;
+        }
+        .upright-block {
+            display: block;
+            transform: rotate(calc(var(--tilt) * -1));
+            transform-origin: top left;
+        }
+        /* Counter-rotate around the element's own center — for content
+           that should stay visually centered after un-tilting. */
+        .upright-center {
+            display: inline-block;
+            transform: rotate(calc(var(--tilt) * -1));
+            transform-origin: center center;
+        }
+
+        /* Classic paper card */
+        .paper-card {
+            background: var(--cream);
+            border: 1px solid rgba(59,58,54,0.12);
+            border-radius: 4px;
+            padding: 2.25rem;
+            box-shadow:
+                0 1px 0 rgba(255,255,255,0.7) inset,
+                12px 14px 0 rgba(59,58,54,0.06),
+                0 30px 60px -30px rgba(59,58,54,0.18);
+            transition: transform 0.4s cubic-bezier(.2,.8,.2,1), box-shadow 0.4s ease;
+            position: relative;
+        }
+        .paper-card:hover {
+            transform: scale(1.08);
+            z-index: 5;
+            box-shadow:
+                0 1px 0 rgba(255,255,255,0.7) inset,
+                18px 22px 0 rgba(59,58,54,0.10),
+                0 40px 80px -28px rgba(59,58,54,0.28);
+        }
+
+        /* Classic terracotta button */
+        .btn-classic {
+            background: var(--terracotta);
+            color: var(--cream);
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 0.78rem;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            padding: 0.95rem 1.8rem;
+            border-radius: 999px;
+            border: 1px solid rgba(59,58,54,0.2);
+            box-shadow: 0 4px 0 #9a5a40, 0 12px 24px -8px rgba(201,122,91,0.5);
+            transition: transform 0.15s, box-shadow 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+        .btn-classic:hover { transform: translateY(2px); box-shadow: 0 2px 0 #9a5a40, 0 6px 14px -4px rgba(201,122,91,0.5); }
+        .btn-ghost {
+            background: transparent;
+            color: var(--ink);
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 0.78rem;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            padding: 0.95rem 1.8rem;
+            border-radius: 999px;
+            border: 1px solid var(--ink);
+            transition: background 0.2s, color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+        .btn-ghost:hover { background: var(--ink); color: var(--cream); }
+
+        /* Section labels — small caps */
+        .label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.32em;
+            color: var(--terracotta);
+            font-weight: 500;
+        }
+        .ornament {
+            display: inline-block;
+            width: 36px;
+            height: 1px;
+            background: var(--terracotta);
+            vertical-align: middle;
+            margin: 0 0.6rem;
+        }
+
+        /* The HERO TITLE — moves along an off-centered line on scroll */
+        .hero-stage {
+            position: relative;
+            min-height: 75vh;
+            padding: 6rem 4rem 0 7rem;
+            overflow: hidden;
+        }
+        .moving-title {
+            position: relative;
+            display: inline-block;
+            will-change: transform;
+            /* set by JS via --p (0..1) */
+            --p: 0;
+            /* off-centered line: shift right, drop down, slight rotation */
+            transform:
+                translate(calc(var(--p) * 38vw), calc(var(--p) * 70vh))
+                rotate(calc(var(--p) * 6deg));
+            transition: transform 0.05s linear;
+        }
+        .moving-title h1 {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-weight: 500;
+            font-style: italic;
+            font-size: clamp(3.5rem, 9vw, 9rem);
+            line-height: 0.92;
+            letter-spacing: -0.02em;
+            color: var(--ink);
+            margin: 0;
+        }
+        .moving-title h1 .accent {
+            color: var(--terracotta);
+            font-style: normal;
+            font-weight: 600;
+        }
+        .moving-title h1 .small {
+            display: block;
+            font-family: 'Inter', sans-serif;
+            font-style: normal;
+            font-weight: 500;
+            font-size: 0.18em;
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
+            color: var(--ink-soft);
+            margin-bottom: 1.2rem;
+        }
+
+        /* The "off-centered line" — a faint guideline showing the path */
+        .guide-line {
+            position: absolute;
+            top: 18%;
+            left: 8%;
+            width: 70%;
+            height: 80%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.4;
+        }
+        .guide-line svg { width: 100%; height: 100%; overflow: visible; }
+        .guide-dot {
+            fill: var(--terracotta);
+        }
+
+        /* Bio "boulders" — softened to classic plates */
+        .plate {
+            background: var(--cream);
+            border: 1px solid rgba(59,58,54,0.18);
+            border-radius: 6px;
+            padding: 1.1rem 1.6rem;
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-weight: 500;
+            font-size: 1.55rem;
+            line-height: 1.2;
+            color: var(--ink);
+            box-shadow: 6px 8px 0 rgba(59,58,54,0.08);
+            display: inline-block;
+        }
+        .plate--accent {
+            background: var(--terracotta);
+            color: var(--cream);
+            border-color: rgba(59,58,54,0.25);
+        }
+        .plate--sage { background: var(--sage); color: var(--cream); border-color: rgba(59,58,54,0.2); }
+
+        /* Notice board — pinned papers */
+        .paper-note {
+            background: var(--cream);
+            padding: 1.75rem 1.75rem 2rem;
+            border-radius: 2px;
+            box-shadow:
+                6px 10px 0 rgba(59,58,54,0.08),
+                0 30px 50px -30px rgba(59,58,54,0.25);
+            position: relative;
+            border: 1px solid rgba(59,58,54,0.1);
+        }
+        .pin {
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            width: 14px;
+            height: 14px;
+            background: var(--terracotta);
+            border-radius: 50%;
+            transform: translateX(-50%);
+            box-shadow:
+                0 0 0 3px rgba(201,122,91,0.25),
+                inset 2px 2px 0 rgba(255,255,255,0.4);
+        }
+
+        /* Scroll-in animations */
+        .tumble {
+            opacity: 0;
+            transform: translate(40px, -60px) rotate(15deg);
+            transition: opacity 0.8s ease, transform 1s cubic-bezier(.18,.89,.32,1.28);
+        }
+        .tumble.in { opacity: 1; transform: translate(0,0) rotate(0deg); }
+
+        .flutter {
+            opacity: 0;
+            transform: translateY(-30px) rotate(6deg);
+            transition: opacity 0.7s ease, transform 0.9s cubic-bezier(.18,.89,.32,1.28);
+        }
+        .flutter.in { opacity: 1; transform: translateY(0) rotate(0); }
+        .flutter:nth-child(2) { transition-delay: 0.1s; transform: translateY(-20px) rotate(-4deg); }
+        .flutter:nth-child(3) { transition-delay: 0.2s; transform: translateY(-40px) rotate(3deg); }
+
+        /* HORIZON nav — perfectly horizontal */
+        .horizon-nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            background: rgba(245,239,230,0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(59,58,54,0.15);
+        }
+
+        /* CONVEYOR BELT — full-bleed track with edge fade so cards can
+           slide all the way to the left and dissolve into the void.       */
+        .conveyor {
+            /* Break out of the section's symmetric 7rem/7rem padding so the
+               track exactly spans the section's outer edges. */
+            margin-left: -7rem;
+            width: calc(100% + 14rem);
+            -webkit-mask-image: linear-gradient(
+                to right,
+                transparent 0,
+                #000 7rem,
+                #000 calc(100% - 7rem),
+                transparent 100%
+            );
+                    mask-image: linear-gradient(
+                to right,
+                transparent 0,
+                #000 7rem,
+                #000 calc(100% - 7rem),
+                transparent 100%
+            );
+        }
+        /* Auto-scrolling tracks. Both rows use the same animation;
+           the reverse modifier flips direction so the two rows drift
+           past each other in opposite directions. */
+        .conveyor-auto-track {
+            display: flex;
+            gap: 2.5rem;
+            width: max-content;
+            padding: 2rem 0;
+            animation: marquee 60s linear infinite;
+        }
+        .conveyor-auto-track.reverse { animation-direction: reverse; }
+        @keyframes marquee {
+            from { transform: translateX(0); }
+            to   { transform: translateX(-50%); }
+        }
+        /* HOVER A CARD: pause every track in the projects section. */
+        #projects:has(.paper-card:hover) .conveyor-auto-track {
+            animation-play-state: paused;
+        }
+
+        @media (max-width: 768px) {
+            .conveyor { margin-left: -2rem; width: calc(100% + 4rem); }
+            .conveyor-track { padding: 1.5rem 2rem; }
+        }
+
+        /* Section padding rhythm — all sections share the SAME left padding
+           so that, combined with the JS rotation-compensation, every section
+           starts at the same visual vertical axis. */
+        .slope-container > section { padding-left: clamp(2rem, 5vw, 7rem); padding-right: clamp(2rem, 5vw, 7rem); }
+        .slope-section { padding-top: clamp(2.5rem, 5vh, 4.5rem); padding-bottom: clamp(2.5rem, 5vh, 4.5rem); }
+        .hero-stage { padding-top: clamp(3rem, 5vh, 6rem); padding-bottom: clamp(3rem, 5vh, 6rem); }
+        @media (max-width: 768px) {
+            .slope-container { transform: none; }
+            .slope-container > section { padding-left: clamp(1rem, 4vw, 2rem); padding-right: clamp(1rem, 4vw, 2rem); max-width: 100vw; overflow: hidden; }
+            .slope-container > section#projects { overflow: visible; }
+            .slope-section { padding-top: clamp(1.5rem, 4vh, 2.5rem); padding-bottom: clamp(1.5rem, 4vh, 2.5rem); }
+            .hero-stage { padding: clamp(3rem, 5vh, 5rem) clamp(1rem, 3vw, 1.5rem) clamp(2rem, 4vh, 3rem) clamp(1rem, 3vw, 1.5rem); min-height: auto; }
+            .moving-title { --p: 0 !important; transform: none !important; }
+            .upright, .upright-block, .upright-center { transform: none; display: block; }
+            #skills { transform: none; }
+            .conveyor { margin-top: 2rem !important; }
+            .slope-container > section .grid[style*="margin-top: 100px"] { margin-top: 2rem !important; }
+            .upright-block.ml-4 { margin-left: 0; }
+        }
+
+        /* Hamburger icon */
+        .hamburger-bar {
+            display: block;
+            width: 22px;
+            height: 2px;
+            background: var(--ink);
+            border-radius: 1px;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            position: absolute;
+        }
+        .hamburger-bar:nth-child(1) { transform: translateY(-7px); }
+        .hamburger-bar:nth-child(2) { transform: translateY(0); }
+        .hamburger-bar:nth-child(3) { transform: translateY(7px); }
+        .menu-open .hamburger-bar:nth-child(1) { transform: rotate(45deg); }
+        .menu-open .hamburger-bar:nth-child(2) { opacity: 0; }
+        .menu-open .hamburger-bar:nth-child(3) { transform: rotate(-45deg); }
+        @media (min-width: 768px) { #menuBtn { display: none !important; } }
+
+        /* Mobile menu overlay */
+        .mobile-menu {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            padding-top: 5rem;
+            background: rgba(245,239,230,0.97);
+            z-index: 101;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+        }
+        .mobile-menu.open { display: flex; }
+        .mobile-menu a {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: var(--ink);
+            text-decoration: none;
+            padding: 0.75rem 1rem;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            transition: color 0.2s;
+        }
+        .mobile-menu a:hover { color: var(--terracotta); }
+    </style>
 </head>
-<body class="botanical">
+<body>
 
-<!-- Nav -->
-<nav>
-    <div class="nav-inner">
-        <a href="index.html" class="logo"><img src="favicon.svg" alt="MHØ" class="logo-img"></a>
-        <button class="hamburger" aria-label="Menu">&#9776;</button>
-        <ul class="nav-links">
-            <li><a href="#about">About</a></li>
-            <li><a href="#projects">Projects</a></li>
-            <li><a href="#skills">Skills</a></li>
-            <li><a href="#blog">Writing</a></li>
-            <li><a href="#ai-news">AI News</a></li>
-            <li><a href="#contact">Contact</a></li>
-        </ul>
-        <a href="#ai-twin" class="btn btn-primary nav-cta">Chat with My AI Twin</a>
-    </div>
-</nav>
-
-<!-- Hero -->
-<div class="section-wrap section-wrap--hero">
-<section class="hero">
-    <div class="hero-heading">
-        <p class="greeting">Hi, my name is</p>
-        <h1>Marian Helcl Øverli.<br><span class="highlight">I build intelligent systems.</span></h1>
-    </div>
-    <div class="hero-inner">
-        <div class="hero-text">
-            <p>
-                Norwegian University of Science and Technology, M. Sc. in Applied Physics and Mathematics, five years experience as an Acoustic Consultant, solving real world problems. AI Engineering and Data Scientist.
-            </p>
-            <div class="cta-group">
-                <a href="#projects" class="btn btn-primary">View My Work</a>
-                <a href="#contact" class="btn btn-outline">Get In Touch</a>
-                <a href="CV__Marian Øverli.pdf" class="btn btn-outline" download>Download Resume</a>
+    <!-- HORIZON NAV -->
+    <nav class="horizon-nav">
+        <div class="flex items-center justify-between px-6 md:px-12 py-5">
+            <div class="flex items-center gap-3">
+                <span class="font-mono text-xs tracking-[0.3em] text-[#c97a5b]">M·H·Ø</span>
+                <span class="font-serif italic text-xl text-[#3b3a36]">Marian H. Øverli</span>
             </div>
+            <div class="hidden md:flex items-center gap-10 font-sans text-xs uppercase tracking-[0.2em] font-medium text-[#9a9890]">
+                <a href="about.html" class="text-[#3b3a36] hover:text-[#c97a5b] transition">About</a>
+                <a href="#projects" class="hover:text-[#c97a5b] transition">Work</a>
+                <a href="#writing" class="hover:text-[#c97a5b] transition">Writing</a>
+                <a href="#news" class="hover:text-[#c97a5b] transition">News</a>
+            </div>
+            <!-- Mobile hamburger -->
+            <button id="menuBtn" aria-label="Menu" style="background:none;border:none;cursor:pointer;width:44px;height:44px;position:relative;display:flex;align-items:center;justify-content:center;">
+                <span class="hamburger-bar"></span>
+                <span class="hamburger-bar"></span>
+                <span class="hamburger-bar"></span>
+            </button>
         </div>
-        <!-- Replace src with your photo: assets/images/profile.jpg -->
-        <img src="assets/images/profile.jpg" alt="Marian Helcl" class="profile-photo"
-             onerror="this.parentElement.classList.add('no-photo')">
+    </nav>
+
+    <!-- MOBILE MENU -->
+    <div id="mobileMenu" class="mobile-menu">
+        <a href="about.html" style="color:#3b3a36; font-weight:600;">About</a>
+        <a href="#projects" onclick="closeMenu()">Work</a>
+        <a href="#writing" onclick="closeMenu()">Writing</a>
+        <a href="#news" onclick="closeMenu()">News</a>
     </div>
-</section>
-</div>
 
-<!-- About -->
-<div class="section-wrap section-wrap--about">
-<section id="about" class="fade-in">
-    <h2 class="section-title">About Me</h2>
-    <p class="section-subtitle">A bit about who I am and what I do.</p>
-    <div class="about-content">
-        <div class="about-text">
-            <p>
-                I spent five years turning sound data into insight as an acoustic consultant. Now I'm doing the same with AI. With an M.Sc. in Applied Physics and Mathematics from NTNU as my foundation, I've pivoted into AI engineering — building LLM-powered tools, RAG systems, and ML pipelines that solve real problems. I'm not starting from scratch; I'm bringing a scientific mindset and years of domain expertise into a field I'm deeply passionate about.
-            </p>
-            <p>
-                I enjoy the full arc of building — from exploring a new architecture or framework to shipping something that actually works end-to-end. My projects span conversational AI agents, NLP and explainable ML.     
+    <!-- THE SLOPE -->
+    <div class="slope-container">
 
-            </p>
-            <p>
-                Some highlights: a <a href="https://movfast.github.io/language-learner-german/">German language learning app</a> with flashcards, quizzes, and hover-to-translate stories across all CEFR levels; a <a href="https://movfast.github.io/behaviour-analysis-wolfs/">wolf behavior classification dashboard</a> that uses Random Forest on GPS tracking data to map resting, foraging, and traveling states; and a <a href="projects/meow-master.html">cat training game</a> where you teach a procedurally-drawn cat tricks across 7 rooms using reinforcement-style reward mechanics. I've also made some <a href="#blog">articles on AI topics</a> and curate a <a href="#ai-news">live AI news feed</a> if you want to stay in the loop. Want to pick up a conversation? Feel free to <a href="#ai-twin">talk with my AI twin</a> or <a href="#contact">contact me directly</a>.
-            </p>
-        </div>
-        <div class="about-details">
-            <div class="detail-card">
+        <!-- HERO STAGE: title travels along an off-centered line on scroll -->
+        <section class="hero-stage">
+
+            <!-- The faint guideline showing the path -->
+            <div class="guide-line">
+                <svg viewBox="0 0 1000 800" preserveAspectRatio="none">
+                    <defs>
+                        <pattern id="dots" x="0" y="0" width="22" height="22" patternUnits="userSpaceOnUse">
+                            <circle cx="1.5" cy="1.5" r="1.5" fill="#c97a5b" opacity="0.5"/>
+                        </pattern>
+                    </defs>
+                    <!-- Off-centered diagonal line w/ slight curve -->
+                    <path d="M 60 80 Q 420 220 760 720"
+                          stroke="#c97a5b" stroke-width="1" fill="none"
+                          stroke-dasharray="2 8" opacity="0.7"/>
+                   <!-- <circle cx="60" cy="80" r="5" class="guide-dot"/>
+                    <circle cx="760" cy="720" r="5" class="guide-dot"/>-->
+           <!--         <text x="78" y="74" font-family="JetBrains Mono" font-size="14" fill="#c97a5b" letter-spacing="2">START</text>
+                    <text x="660" y="745" font-family="JetBrains Mono" font-size="14" fill="#c97a5b" letter-spacing="2">DOWNHILL →</text>
+                    -->
+                </svg>
+            </div>
+        <br/>
+            <!-- the moving title — JS sets --p (0..1) on scroll -->
+            <div class="moving-title" id="movingTitle">
+              <!-- <span class="upright label"><span class="ornament"></span>hello, i am marian<span class="ornament"></span></span>-->
+                <h1>
+                    <!--<span class="small">A Portfolio In Three Acts</span>-->
+                    Marian <!--<br/>-->
+                    Helcl
+                    <span class="accent">Øverli.</span>
+                </h1>
+
+            </div>
+
+            <!-- Static caption sits below the moving title's starting position -->
+            <div class="upright-block mt-20 ml-4 max-w-md" style="position: relative; z-index: 5;">
+                <p class="font-sans text-sm uppercase tracking-[0.18em] text-[#6a6860] font-medium leading-loose">
+                    Applied physics &amp; mathematics from NTNU, Trondheim <br class="md:hidden"/><span class="text-[#c97a5b]">//</span> 5 years acoustic consultant <br class="md:hidden"/><span class="text-[#c97a5b]">//</span> <span class="text-[#3b3a36] font-semibold">AI engineer / Data Scientist</span>
+                </p>
+                <p class="font-serif italic text-xl text-[#3b3a36] mt-4 leading-relaxed">
+                    Building LLM tools, RAG systems, and ML pipelines that solve real problems.
+                </p>
+                <div class="mt-8 flex flex-wrap gap-4 items-center">
+                    <a href="#projects" class="btn-classic">See my work →</a>
+                    <a href="#connect" class="btn-ghost">Or just say hi</a>
+                </div>
+             <!--   <div class="mt-12 label">scroll, and watch it slide ↓</div>-->
+            </div>
+        </section>
+
+        <div class="upright mt-12 md:mt-1 grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 max-w-[90vw] md:max-w-3xl pl-6 md:pl-0">
+            <div>
                 <div class="label">Focus</div>
-                <div class="value">GenAI & Machine learning</div>
+                <div class="font-serif italic text-xl md:text-2xl mt-1 text-[#3b3a36]">GenAI &amp; ML</div>
             </div>
-            <div class="detail-card">
+            <div>
                 <div class="label">Interest</div>
-                <div class="value">NLP &amp; LLMs</div>
+                <div class="font-serif italic text-xl md:text-2xl mt-1 text-[#3b3a36]">NLP &amp; LLMs</div>
             </div>
-            <div class="detail-card">
+            <div>
                 <div class="label">Currently</div>
-                <div class="value">Learning &amp; Building</div>
+                <div class="font-serif italic text-xl md:text-2xl mt-1 text-[#3b3a36]">Building</div>
             </div>
-            <div class="detail-card">
+            <div>
                 <div class="label">Open to</div>
-                <div class="value">Opportunities</div>
-            </div>
-        </div>
-    </div>
-</section>
-</div>
-
-<!-- Projects -->
-<div class="section-wrap section-wrap--projects">
-<section id="projects" class="fade-in">
-    <h2 class="section-title">Projects</h2>
-    <p class="section-subtitle">Things I've built and experiments I've run.</p>
-    <div class="projects-grid" data-show-more="4" data-full-page="projects.html">
-
-        <div class="project-card">
-            <a href="https://movcrafter.com" class="project-screenshot-link">
-                <div class="project-screenshot">
-                    <img src="assets/images/movcrafter-screenshot.png" alt="MovCrafter interior design builder showing 3D room with furniture">
-                </div>
-            </a>
-            <div class="project-body">
-                <h3>MovCrafter</h3>
-                <p>
-                    A browser-based interior design visualizer. Draw rooms, place
-                    furniture with two-click tools, and switch between 2D and 3D
-                    views. Features procedural textures, color palettes, auto-rotate
-                    near walls, and GLB/PNG export.
-                </p>
-                <div class="project-tags">
-                    <span class="tag">Three.js</span>
-                    <span class="tag">JavaScript</span>
-                    <span class="tag">3D</span>
-                    <span class="tag">Canvas 2D</span>
-                </div>
-                <div class="project-links">
-                    <a href="https://github.com/movfast/interior-design-builder">GitHub</a>
-                    <a href="https://movcrafter.com">Live App</a>
-                </div>
+                <div class="font-serif italic text-xl md:text-2xl mt-1 text-[#3b3a36]">Opportunities</div>
             </div>
         </div>
 
-        <div class="project-card">
-            <a href="https://movfast.github.io/language-learner-german/" class="project-screenshot-link">
-                <div class="project-screenshot">
-                    <img src="assets/images/project-german-learner.png" alt="German Learner App dashboard with pink theme showing Learn German hero section">
-                </div>
-            </a>
-            <div class="project-body">
-                <h3>German Learner App</h3>
-                <p>
-                    An interactive dashboard to master German — from vocabulary
-                    flashcards and grammar cards to quizzes and reading stories
-                    with hover-to-translate. Covers CEFR levels A1–C2 with a
-                    playful pink theme and dark mode support.
-                </p>
-                <div class="project-tags">
-                    <span class="tag">Next.js</span>
-                    <span class="tag">React</span>
-                    <span class="tag">TypeScript</span>
-                    <span class="tag">Tailwind CSS</span>
-                </div>
-                <div class="project-links">
-                    <a href="https://github.com/movfast/language-learner-german">GitHub</a>
-                    <a href="https://movfast.github.io/language-learner-german/">Live App</a>
-                </div>
-            </div>
-        </div>
+        <!-- PROJECTS — The Conveyor Belt -->
+        <section id="projects" class="slope-section !max-w-none">
+            <!-- Centered title — extends to the same width as the belt below
+                 so it is centered over the belt itself, not the section padding. -->
+                 <!--<div class="text-center mb-12" style="margin-top: 80px; margin-left: -7rem; width: calc(100% + 14rem);">
+                     <div class="upright-center text-center">
+                         
+                         <!-- <div class="label"><span class="ornament"></span>act ii — selected work<span class="ornament"></span></div>-->
+                         <!--<h2 class="font-serif italic text-5xl md:text-6xl text-[#3b3a36] mt-3">A selection of my Projects.</h2>
+                         <p class="font-serif italic text-xl text-[#6a6860] mt-2">Scroll and click on the cards to interact and learn more.</p>
+                        </div>
+                    </div>-->
+                    
+                    <h2 class="font-serif italic text-5xl md:text-6xl text-[#3b3a36] hidden md:block"> </h2>
+                    
+                    <div class="conveyor" style="margin-top: 250px;">
+                        <div class="label ml-4 md:ml-[10rem] mb-4 md:mb-4 mt-4 md:mt-[100px]"><span class="ornament"></span>Projects - Scroll and click on the cards to interact and learn more.</div>
+                        <div style="margin-bottom: 2rem; text-align: center;"><a href="projects.html" class="btn-ghost !py-2 !px-5 !text-[10px]">— view all —</a></div>
+                        <div class="conveyor-auto-track">
 
-        <div class="project-card">
-            <a href="projects/acoustic-anomaly-demo.html" class="project-screenshot-link">
-                <div class="project-screenshot">
-                    <img src="assets/images/project-acoustic-anomaly.png" alt="Acoustic Anomaly Detector spectrogram with detection controls">
-                </div>
-            </a>
-            <div class="project-body">
-                <h3>Acoustic Anomaly Detector</h3>
-                <p>
-                    Detect anomalies in audio using spectrograms and a CNN.
-                    Bridges acoustics domain expertise with deep learning
-                    for industrial fault detection.
-                </p>
-                <div class="project-tags">
-                    <span class="tag">Python</span>
-                    <span class="tag">PyTorch</span>
-                    <span class="tag">Librosa</span>
-                </div>
-                <div class="project-links">
-                    <a href="https://github.com/movfast/acoustic-anomaly-detector">GitHub</a>
-                    <a href="projects/acoustic-anomaly-demo.html">Try Demo</a>
-                </div>
-            </div>
-        </div>
+                <!-- Crate 1 -->
+                <a href="https://movcrafter.com" class="min-w-[380px] max-w-[380px] paper-card group block">
+                    <div class="h-48 bg-[#ece3d4] rounded-sm mb-5 overflow-hidden border border-[rgba(59,58,54,0.15)]">
+                        <img src="assets/images/movcrafter-screenshot.png" alt="MovCrafter" class="w-full h-full object-cover group-hover:translate-y-2 transition-transform duration-500"/>
+                    </div>
+                    <div class="label">3D · 2026</div>
+                    <h3 class="font-serif italic text-3xl mt-1 text-[#3b3a36]">MovCrafter</h3>
+                    <p class="font-serif text-lg text-[#6a6860] mt-2 leading-snug">A browser interior designer. Rooms, furniture, 2D &amp; 3D, GLB/PNG export.</p>
+                    <div class="flex flex-wrap gap-1.5 mt-3"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Three.js</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">JavaScript</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">3D</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Canvas 2D</span></div>
+                </a>
 
-        <div class="project-card">
-            <a href="projects/meow-master.html" class="project-screenshot-link">
-                <div class="project-screenshot">
-                    <img src="assets/images/project-meow-master.png" alt="Meow Master cat training game with animated cat in living room">
-                </div>
-            </a>
-            <div class="project-body">
-                <h3>Meow Master!</h3>
-                <p>
-                    A browser-based cat training game where you teach a
-                    procedurally-drawn cat tricks, just like a real cat.
-                </p>
-                <div class="project-tags">
-                    <span class="tag">JavaScript</span>
-                    <span class="tag">Canvas 2D</span>
-                    <span class="tag">Web Audio API</span>
-                </div>
-                <div class="project-links">
-                    <a href="projects/meow-master.html">Play Game</a>
-                </div>
-            </div>
-        </div>
+                <!-- Crate 2 -->
+                <a href="https://movfast.github.io/learn-storytelling/" class="min-w-[380px] max-w-[380px] paper-card group block">
+                    <div class="h-48 bg-[#ece3d4] rounded-sm mb-5 overflow-hidden border border-[rgba(59,58,54,0.15)]">
+                        <img src="assets/images/project-learn-storytelling.png" alt="Learn Storytelling" class="w-full h-full object-cover group-hover:translate-y-2 transition-transform duration-500"/>
+                    </div>
+                    <div class="label">Web App · 2026</div>
+                    <h3 class="font-serif italic text-3xl mt-1 text-[#3b3a36]">Learn Storytelling</h3>
+                    <p class="font-serif text-lg text-[#6a6860] mt-2 leading-snug">A six-level course in storytelling for LinkedIn &amp; Instagram, backed by neuroscience.</p>
+                    <div class="flex flex-wrap gap-1.5 mt-3"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Next.js</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">React</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">TypeScript</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Tailwind CSS</span></div>
+                </a>
 
-        <div class="project-card">
-            <a href="https://movfast.github.io/neuroscience-learning/" class="project-screenshot-link">
-                <div class="project-screenshot">
-                    <img src="assets/images/project-neuroexplorer.png" alt="NeuroExplorer 3D brain atlas showing colorful brain regions">
-                </div>
-            </a>
-            <div class="project-body">
-                <h3>NeuroExplorer</h3>
-                <p>
-                    An interactive 3D brain dashboard for exploring neuroscience.
-                    Click through 10 brain regions, learn how memory and learning
-                    work at the cellular level, and watch animated neural signal
-                    propagation with neurotransmitter particle effects.
-                </p>
-                <div class="project-tags">
-                    <span class="tag">Three.js</span>
-                    <span class="tag">JavaScript</span>
-                    <span class="tag">3D</span>
-                    <span class="tag">WebGL</span>
-                </div>
-                <div class="project-links">
-                    <a href="https://github.com/movfast/neuroscience-learning">GitHub</a>
-                    <a href="https://movfast.github.io/neuroscience-learning/">Live App</a>
-                </div>
-            </div>
-        </div>
+                <!-- Crate 3 -->
+                <a href="https://movfast.github.io/language-learner-german/" class="min-w-[380px] max-w-[380px] paper-card group block">
+                    <div class="h-48 bg-[#ece3d4] rounded-sm mb-5 overflow-hidden border border-[rgba(59,58,54,0.15)]">
+                        <img src="assets/images/project-german-learner.png" alt="German Learner" class="w-full h-full object-cover group-hover:translate-y-2 transition-transform duration-500"/>
+                    </div>
+                    <div class="label">Education · 2026</div>
+                    <h3 class="font-serif italic text-3xl mt-1 text-[#3b3a36]">German Learner</h3>
+                    <p class="font-serif text-lg text-[#6a6860] mt-2 leading-snug">Flashcards, grammar, quizzes &amp; hover-to-translate stories across CEFR A1–C2.</p>
+                    <div class="flex flex-wrap gap-1.5 mt-3"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Next.js</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">React</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">TypeScript</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Tailwind CSS</span></div>
+                </a>
 
-        <div class="project-card">
-            <a href="https://movfast.github.io/behaviour-analysis-wolfs/" class="project-screenshot-link">
-                <div class="project-screenshot">
-                    <img src="assets/images/project-wolf-behaviour.png" alt="Wolf Behavior Classification Dashboard showing overview with model accuracy and behavior distribution">
-                </div>
-            </a>
-            <div class="project-body">
-                <h3>Wolf Behavior Classification</h3>
-                <p>
-                    An interactive dashboard that visualizes how GPS tracking data
-                    and machine learning classify wolf behavior into resting,
-                    foraging, and traveling states. Features movement maps, feature
-                    analysis, and model performance metrics across 6 tracked wolves.
-                </p>
-                <div class="project-tags">
-                    <span class="tag">React</span>
-                    <span class="tag">Recharts</span>
-                    <span class="tag">Random Forest</span>
-                    <span class="tag">Vite</span>
-                </div>
-                <div class="project-links">
-                    <a href="https://github.com/movfast/behaviour-analysis-wolfs">GitHub</a>
-                    <a href="https://movfast.github.io/behaviour-analysis-wolfs/">Dashboard</a>
-                </div>
-            </div>
-        </div>
+                <!-- Crate 4 -->
+                <a href="projects/acoustic-anomaly-demo.html" class="min-w-[380px] max-w-[380px] paper-card group block">
+                    <div class="h-48 bg-[#ece3d4] rounded-sm mb-5 overflow-hidden border border-[rgba(59,58,54,0.15)]">
+                        <img src="assets/images/project-acoustic-anomaly.png" alt="Acoustic Anomaly" class="w-full h-full object-cover group-hover:translate-y-2 transition-transform duration-500"/>
+                    </div>
+                    <div class="label">Deep Learning · 2026</div>
+                    <h3 class="font-serif italic text-3xl mt-1 text-[#3b3a36]">Acoustic Anomaly</h3>
+                    <p class="font-serif text-lg text-[#6a6860] mt-2 leading-snug">Detect anomalies in audio with spectrograms and a CNN. Industrial fault detection.</p>
+                    <div class="flex flex-wrap gap-1.5 mt-3"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Python</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">PyTorch</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Librosa</span></div>
+                </a>
 
-        <div class="project-card">
-            <a href="https://movfast.github.io/behavior-analysis/" class="project-screenshot-link">
-                <div class="project-screenshot">
-                    <img src="assets/images/project-gull-behaviour.png" alt="Gull Behavior Prediction Dashboard showing interactive map and behavioral analysis of Lesser Black-backed Gulls">
-                </div>
-            </a>
-            <div class="project-body">
-                <h3>Gull Behavior Prediction</h3>
-                <p>
-                    An interactive dashboard that predicts Lesser Black-backed Gull
-                    behavior from 61K+ GPS fixes using Random Forest and Gradient
-                    Boosting. Features a Leaflet map with 10K+ color-coded points,
-                    behavioral radar charts, and model comparison metrics.
-                </p>
-                <div class="project-tags">
-                    <span class="tag">React</span>
-                    <span class="tag">Leaflet</span>
-                    <span class="tag">Recharts</span>
-                    <span class="tag">scikit-learn</span>
-                    <span class="tag">Vite</span>
-                </div>
-                <div class="project-links">
-                    <a href="https://github.com/movfast/behavior-analysis">GitHub</a>
-                    <a href="https://movfast.github.io/behavior-analysis/">Dashboard</a>
-                </div>
-            </div>
-        </div>
+                <!-- Crate 5 -->
+                <a href="projects/meow-master.html" class="min-w-[380px] max-w-[380px] paper-card group block">
+                    <div class="h-48 bg-[#ece3d4] rounded-sm mb-5 overflow-hidden border border-[rgba(59,58,54,0.15)]">
+                        <img src="assets/images/project-meow-master.png" alt="Meow Master" class="w-full h-full object-cover group-hover:translate-y-2 transition-transform duration-500"/>
+                    </div>
+                    <div class="label">Browser Game · 2026</div>
+                    <h3 class="font-serif italic text-3xl mt-1 text-[#3b3a36]">Meow Master</h3>
+                    <p class="font-serif text-lg text-[#6a6860] mt-2 leading-snug">Train a procedurally-drawn cat through tricks across seven rooms with reward mechanics.</p>
+                    <div class="flex flex-wrap gap-1.5 mt-3"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">JavaScript</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Canvas 2D</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Web Audio API</span></div>
+                </a>
 
-        <div class="project-card">
-            <div class="project-screenshot">
-                <img src="assets/images/project-risk-copilot.png" alt="Financial Risk Copilot training dashboard showing ROC curve, SHAP feature importance, and confusion matrix">
-            </div>
-            <div class="project-body">
-                <h3>Financial Risk Copilot</h3>
-                <p>
-                    An AI-powered system that predicts corporate bankruptcy risk
-                    using XGBoost with SHAP explainability, RAG over 10-K filings,
-                    and a conversational chat agent that routes queries to the
-                    right tool automatically.
-                </p>
-                <div class="project-tags">
-                    <span class="tag">Python</span>
-                    <span class="tag">XGBoost</span>
-                    <span class="tag">LangChain</span>
-                    <span class="tag">SHAP</span>
-                    <span class="tag">Streamlit</span>
-                </div>
-                <div class="project-links">
-                    <a href="https://github.com/movfast/financial_risk_copilot_with_chat_agent">GitHub</a>
-                    <a href="#">Demo</a>
-                </div>
-            </div>
-        </div>
+                <!-- Crate 6 -->
+                <a href="https://movfast.github.io/behaviour-analysis-wolfs/" class="min-w-[380px] max-w-[380px] paper-card group block">
+                    <div class="h-48 bg-[#ece3d4] rounded-sm mb-5 overflow-hidden border border-[rgba(59,58,54,0.15)]">
+                        <img src="assets/images/project-wolf-behaviour.png" alt="Wolf Behavior" class="w-full h-full object-cover group-hover:translate-y-2 transition-transform duration-500"/>
+                    </div>
+                    <div class="label">Random Forest · 2026</div>
+                    <h3 class="font-serif italic text-3xl mt-1 text-[#3b3a36]">Wolf Behavior</h3>
+                    <p class="font-serif text-lg text-[#6a6860] mt-2 leading-snug">Classify resting, foraging &amp; traveling states from raw GPS tracking data.</p>
+                    <div class="flex flex-wrap gap-1.5 mt-3"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">React</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Recharts</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Random Forest</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Vite</span></div>
+                </a>
 
-        <div class="project-card">
-            <div class="project-screenshot">
-                <img src="assets/images/project-interactive-diary.png" alt="Interactive Diary chat interface powered by Claude AI">
-            </div>
-            <div class="project-body">
-                <h3>Interactive Diary</h3>
-                <p>
-                    A conversational journaling app where you chat with Claude
-                    about your day. It summarizes the conversation into structured
-                    diary entries with themes, mood, and patterns — saved to Notion.
-                </p>
-                <div class="project-tags">
-                    <span class="tag">Python</span>
-                    <span class="tag">Claude API</span>
-                    <span class="tag">Gradio</span>
-                    <span class="tag">Notion API</span>
-                </div>
-                <div class="project-links">
-                    <a href="https://github.com/movfast/Diary_updater">GitHub</a>
-                </div>
-            </div>
-        </div>
+                <a href="projects.html" class="min-w-[260px] max-w-[260px] paper-card !bg-[#c97a5b] flex items-center justify-center text-center group">
+                    <span class="font-serif italic text-2xl text-[#f5efe6] leading-tight">See all<br/>18 projects →</span>
+                </a>
 
-        <div class="project-card">
-            <div class="project-screenshot">
-                <img src="assets/images/project-voice-transcriber.png" alt="Voice Transcriber diary entry in Notion">
-            </div>
-            <div class="project-body">
-                <h3>Voice Diary Transcriber</h3>
-                <p>
-                    A privacy-focused CLI tool that records voice notes and
-                    transcribes them locally using Whisper — no cloud uploads.
-                    Supports multilingual input and saves entries to Notion.
-                </p>
-                <div class="project-tags">
-                    <span class="tag">Python</span>
-                    <span class="tag">Whisper</span>
-                    <span class="tag">Notion API</span>
-                </div>
-                <div class="project-links">
-                    <a href="https://github.com/movfast/Diary_updater">GitHub</a>
-                </div>
-            </div>
-        </div>
+                <!-- Set 2 — exact duplicate so the marquee loop is seamless -->
+                <a href="https://movcrafter.com" class="min-w-[380px] max-w-[380px] paper-card group block" aria-hidden="true">
+                    <div class="h-48 bg-[#ece3d4] rounded-sm mb-5 overflow-hidden border border-[rgba(59,58,54,0.15)]">
+                        <img src="assets/images/movcrafter-screenshot.png" alt="" class="w-full h-full object-cover"/>
+                    </div>
+                    <div class="label">3D · 2026</div>
+                    <h3 class="font-serif italic text-3xl mt-1 text-[#3b3a36]">MovCrafter</h3>
+                    <p class="font-serif text-lg text-[#6a6860] mt-2 leading-snug">A browser interior designer. Rooms, furniture, 2D &amp; 3D, GLB/PNG export.</p>
+                    <div class="flex flex-wrap gap-1.5 mt-3"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Three.js</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">JavaScript</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">3D</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Canvas 2D</span></div>
+                </a>
+                <a href="https://movfast.github.io/learn-storytelling/" class="min-w-[380px] max-w-[380px] paper-card group block" aria-hidden="true">
+                    <div class="h-48 bg-[#ece3d4] rounded-sm mb-5 overflow-hidden border border-[rgba(59,58,54,0.15)]">
+                        <img src="assets/images/project-learn-storytelling.png" alt="" class="w-full h-full object-cover"/>
+                    </div>
+                    <div class="label">Web App · 2026</div>
+                    <h3 class="font-serif italic text-3xl mt-1 text-[#3b3a36]">Learn Storytelling</h3>
+                    <p class="font-serif text-lg text-[#6a6860] mt-2 leading-snug">A six-level course in storytelling for LinkedIn &amp; Instagram, backed by neuroscience.</p>
+                    <div class="flex flex-wrap gap-1.5 mt-3"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Next.js</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">React</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">TypeScript</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Tailwind CSS</span></div>
+                </a>
+                <a href="https://movfast.github.io/language-learner-german/" class="min-w-[380px] max-w-[380px] paper-card group block" aria-hidden="true">
+                    <div class="h-48 bg-[#ece3d4] rounded-sm mb-5 overflow-hidden border border-[rgba(59,58,54,0.15)]">
+                        <img src="assets/images/project-german-learner.png" alt="" class="w-full h-full object-cover"/>
+                    </div>
+                    <div class="label">Education · 2026</div>
+                    <h3 class="font-serif italic text-3xl mt-1 text-[#3b3a36]">German Learner</h3>
+                    <p class="font-serif text-lg text-[#6a6860] mt-2 leading-snug">Flashcards, grammar, quizzes &amp; hover-to-translate stories across CEFR A1–C2.</p>
+                    <div class="flex flex-wrap gap-1.5 mt-3"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Next.js</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">React</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">TypeScript</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Tailwind CSS</span></div>
+                </a>
+                <a href="projects/acoustic-anomaly-demo.html" class="min-w-[380px] max-w-[380px] paper-card group block" aria-hidden="true">
+                    <div class="h-48 bg-[#ece3d4] rounded-sm mb-5 overflow-hidden border border-[rgba(59,58,54,0.15)]">
+                        <img src="assets/images/project-acoustic-anomaly.png" alt="" class="w-full h-full object-cover"/>
+                    </div>
+                    <div class="label">Deep Learning · 2026</div>
+                    <h3 class="font-serif italic text-3xl mt-1 text-[#3b3a36]">Acoustic Anomaly</h3>
+                    <p class="font-serif text-lg text-[#6a6860] mt-2 leading-snug">Detect anomalies in audio with spectrograms and a CNN. Industrial fault detection.</p>
+                    <div class="flex flex-wrap gap-1.5 mt-3"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Python</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">PyTorch</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Librosa</span></div>
+                </a>
+                <a href="projects/meow-master.html" class="min-w-[380px] max-w-[380px] paper-card group block" aria-hidden="true">
+                    <div class="h-48 bg-[#ece3d4] rounded-sm mb-5 overflow-hidden border border-[rgba(59,58,54,0.15)]">
+                        <img src="assets/images/project-meow-master.png" alt="" class="w-full h-full object-cover"/>
+                    </div>
+                    <div class="label">Browser Game · 2026</div>
+                    <h3 class="font-serif italic text-3xl mt-1 text-[#3b3a36]">Meow Master</h3>
+                    <p class="font-serif text-lg text-[#6a6860] mt-2 leading-snug">Train a procedurally-drawn cat through tricks across seven rooms with reward mechanics.</p>
+                    <div class="flex flex-wrap gap-1.5 mt-3"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">JavaScript</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Canvas 2D</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Web Audio API</span></div>
+                </a>
+                <a href="https://movfast.github.io/behaviour-analysis-wolfs/" class="min-w-[380px] max-w-[380px] paper-card group block" aria-hidden="true">
+                    <div class="h-48 bg-[#ece3d4] rounded-sm mb-5 overflow-hidden border border-[rgba(59,58,54,0.15)]">
+                        <img src="assets/images/project-wolf-behaviour.png" alt="" class="w-full h-full object-cover"/>
+                    </div>
+                    <div class="label">Random Forest · 2026</div>
+                    <h3 class="font-serif italic text-3xl mt-1 text-[#3b3a36]">Wolf Behavior</h3>
+                    <p class="font-serif text-lg text-[#6a6860] mt-2 leading-snug">Classify resting, foraging &amp; traveling states from raw GPS tracking data.</p>
+                    <div class="flex flex-wrap gap-1.5 mt-3"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">React</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Recharts</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Random Forest</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Vite</span></div>
+                </a>
+                <a href="projects.html" class="min-w-[260px] max-w-[260px] paper-card !bg-[#c97a5b] flex items-center justify-center text-center group" aria-hidden="true">
+                    <span class="font-serif italic text-2xl text-[#f5efe6] leading-tight">See all<br/>18 projects →</span>
+                </a>
 
-        <div class="project-card">
-            <a href="projects/rag-chatbot-demo.html" class="project-screenshot-link">
-                <div class="project-screenshot">
-                    <img src="assets/images/project-rag-chatbot.png" alt="RAG Pipeline Visualizer with knowledge base chunks and query interface">
-                </div>
-            </a>
-            <div class="project-body">
-                <h3>Chatbot with RAG</h3>
-                <p>
-                    A retrieval-augmented generation chatbot that answers
-                    questions from a custom knowledge base using embeddings
-                    and an LLM.
-                </p>
-                <div class="project-tags">
-                    <span class="tag">Python</span>
-                    <span class="tag">LangChain</span>
-                    <span class="tag">FAISS</span>
-                </div>
-                <div class="project-links">
-                    <a href="https://github.com/movfast/rag-chatbot">GitHub</a>
-                    <a href="projects/rag-chatbot-demo.html">Try Demo</a>
-                </div>
+              </div>
             </div>
-        </div>
 
-        <div class="project-card">
-            <a href="projects/image-classifier-demo.html" class="project-screenshot-link">
-                <div class="project-screenshot">
-                    <img src="assets/images/project-image-classifier.png" alt="Draw and Classify digit recognition interface with neural network">
-                </div>
-            </a>
-            <div class="project-body">
-                <h3>Image Classifier</h3>
-                <p>
-                    A convolutional neural network trained to classify images,
-                    with a simple web interface for uploading and predicting.
-                </p>
-                <div class="project-tags">
-                    <span class="tag">PyTorch</span>
-                    <span class="tag">Flask</span>
-                    <span class="tag">CNN</span>
-                </div>
-                <div class="project-links">
-                    <a href="https://github.com/movfast/image-classifier">GitHub</a>
-                    <a href="projects/image-classifier-demo.html">Try Demo</a>
-                </div>
-            </div>
-        </div>
+            <!-- SECOND ROW — auto-scrolls in the opposite direction -->
+            <div class="conveyor mt-6">
+              <div class="conveyor-auto-track reverse">
+                <!-- Set 1 -->
+                <a href="projects/rag-chatbot-demo.html" class="min-w-[340px] max-w-[340px] paper-card group block">
+                    <div class="h-40 bg-[#ece3d4] rounded-sm mb-4 overflow-hidden border border-[rgba(59,58,54,0.15)]">
+                        <img src="assets/images/project-rag-chatbot.png" alt="RAG Chatbot" class="w-full h-full object-cover group-hover:translate-y-2 transition-transform duration-500"/>
+                    </div>
+                    <div class="label">RAG · 2026</div>
+                    <h3 class="font-serif italic text-2xl mt-1 text-[#3b3a36]">RAG Chatbot</h3>
+                    <p class="font-serif text-base text-[#6a6860] mt-1 leading-snug">Retrieval-augmented assistant over your own documents.</p>
+                    <div class="flex flex-wrap gap-1.5 mt-2"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Python</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">LangChain</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">FAISS</span></div>
+                </a>
+                <a href="projects/image-classifier-demo.html" class="min-w-[340px] max-w-[340px] paper-card group block">
+                    <div class="h-40 bg-[#ece3d4] rounded-sm mb-4 overflow-hidden border border-[rgba(59,58,54,0.15)]">
+                        <img src="assets/images/project-image-classifier.png" alt="Image Classifier" class="w-full h-full object-cover group-hover:translate-y-2 transition-transform duration-500"/>
+                    </div>
+                    <div class="label">CNN · 2026</div>
+                    <h3 class="font-serif italic text-2xl mt-1 text-[#3b3a36]">Image Classifier</h3>
+                    <p class="font-serif text-base text-[#6a6860] mt-1 leading-snug">Train and deploy a CNN classifier in a single notebook.</p>
+                    <div class="flex flex-wrap gap-1.5 mt-2"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">PyTorch</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Flask</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">CNN</span></div>
+                </a>
+                <a href="projects/sentiment-analyzer-demo.html" class="min-w-[340px] max-w-[340px] paper-card group block">
+                    <div class="h-40 bg-[#ece3d4] rounded-sm mb-4 overflow-hidden border border-[rgba(59,58,54,0.15)]">
+                        <img src="assets/images/project-sentiment-analyzer.png" alt="Sentiment Analyzer" class="w-full h-full object-cover group-hover:translate-y-2 transition-transform duration-500"/>
+                    </div>
+                    <div class="label">NLP · 2026</div>
+                    <h3 class="font-serif italic text-2xl mt-1 text-[#3b3a36]">Sentiment Analyzer</h3>
+                    <p class="font-serif text-base text-[#6a6860] mt-1 leading-snug">Detect tone in product reviews with a fine-tuned transformer.</p>
+                    <div class="flex flex-wrap gap-1.5 mt-2"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Transformers</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">HuggingFace</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">NLP</span></div>
+                </a>
+                <a href="projects/paper-summarizer-demo.html" class="min-w-[340px] max-w-[340px] paper-card group block">
+                    <div class="h-40 bg-[#ece3d4] rounded-sm mb-4 overflow-hidden border border-[rgba(59,58,54,0.15)]">
+                        <img src="assets/images/project-paper-summarizer.png" alt="Paper Summarizer" class="w-full h-full object-cover group-hover:translate-y-2 transition-transform duration-500"/>
+                    </div>
+                    <div class="label">LLM · 2026</div>
+                    <h3 class="font-serif italic text-2xl mt-1 text-[#3b3a36]">Paper Summarizer</h3>
+                    <p class="font-serif text-base text-[#6a6860] mt-1 leading-snug">Turn arXiv preprints into one-paragraph TL;DRs.</p>
+                    <div class="flex flex-wrap gap-1.5 mt-2"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Python</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">LangChain</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">LLM</span></div>
+                </a>
+                <a href="projects/scene-narrator-demo.html" class="min-w-[340px] max-w-[340px] paper-card group block">
+                    <div class="h-40 bg-[#ece3d4] rounded-sm mb-4 overflow-hidden border border-[rgba(59,58,54,0.15)]">
+                        <img src="assets/images/project-scene-narrator.png" alt="Scene Narrator" class="w-full h-full object-cover group-hover:translate-y-2 transition-transform duration-500"/>
+                    </div>
+                    <div class="label">Vision-LLM · 2026</div>
+                    <h3 class="font-serif italic text-2xl mt-1 text-[#3b3a36]">Scene Narrator</h3>
+                    <p class="font-serif text-base text-[#6a6860] mt-1 leading-snug">Describe a video scene-by-scene with multimodal models.</p>
+                    <div class="flex flex-wrap gap-1.5 mt-2"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Python</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">CLIP</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">OpenCV</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">LLM</span></div>
+                </a>
+                <a href="projects/speech-translator-demo.html" class="min-w-[340px] max-w-[340px] paper-card group block">
+                    <div class="h-40 bg-[#ece3d4] rounded-sm mb-4 overflow-hidden border border-[rgba(59,58,54,0.15)]">
+                        <img src="assets/images/project-speech-translator.png" alt="Speech Translator" class="w-full h-full object-cover group-hover:translate-y-2 transition-transform duration-500"/>
+                    </div>
+                    <div class="label">Speech · 2026</div>
+                    <h3 class="font-serif italic text-2xl mt-1 text-[#3b3a36]">Speech Translator</h3>
+                    <p class="font-serif text-base text-[#6a6860] mt-1 leading-snug">Live translate spoken audio between languages with Whisper.</p>
+                    <div class="flex flex-wrap gap-1.5 mt-2"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Python</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Whisper</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">TTS</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">LLM</span></div>
+                </a>
 
-        <div class="project-card">
-            <a href="projects/sentiment-analyzer-demo.html" class="project-screenshot-link">
-                <div class="project-screenshot">
-                    <img src="assets/images/project-sentiment-analyzer.png" alt="Sentiment Heatmap with word-level analysis and category filters">
-                </div>
-            </a>
-            <div class="project-body">
-                <h3>Sentiment Analyzer</h3>
-                <p>
-                    Fine-tuned a transformer model for sentiment analysis
-                    on product reviews, achieving strong accuracy on a
-                    custom test set.
-                </p>
-                <div class="project-tags">
-                    <span class="tag">Transformers</span>
-                    <span class="tag">HuggingFace</span>
-                    <span class="tag">NLP</span>
-                </div>
-                <div class="project-links">
-                    <a href="https://github.com/movfast/sentiment-analyzer">GitHub</a>
-                    <a href="projects/sentiment-analyzer-demo.html">Try Demo</a>
-                </div>
+                <!-- Set 2 — exact duplicate so the loop is seamless -->
+                <a href="projects/rag-chatbot-demo.html" class="min-w-[340px] max-w-[340px] paper-card group block" aria-hidden="true">
+                    <div class="h-40 bg-[#ece3d4] rounded-sm mb-4 overflow-hidden border border-[rgba(59,58,54,0.15)]">
+                        <img src="assets/images/project-rag-chatbot.png" alt="" class="w-full h-full object-cover"/>
+                    </div>
+                    <div class="label">RAG · 2026</div>
+                    <h3 class="font-serif italic text-2xl mt-1 text-[#3b3a36]">RAG Chatbot</h3>
+                    <p class="font-serif text-base text-[#6a6860] mt-1 leading-snug">Retrieval-augmented assistant over your own documents.</p>
+                    <div class="flex flex-wrap gap-1.5 mt-2"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Python</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">LangChain</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">FAISS</span></div>
+                </a>
+                <a href="projects/image-classifier-demo.html" class="min-w-[340px] max-w-[340px] paper-card group block" aria-hidden="true">
+                    <div class="h-40 bg-[#ece3d4] rounded-sm mb-4 overflow-hidden border border-[rgba(59,58,54,0.15)]">
+                        <img src="assets/images/project-image-classifier.png" alt="" class="w-full h-full object-cover"/>
+                    </div>
+                    <div class="label">CNN · 2026</div>
+                    <h3 class="font-serif italic text-2xl mt-1 text-[#3b3a36]">Image Classifier</h3>
+                    <p class="font-serif text-base text-[#6a6860] mt-1 leading-snug">Train and deploy a CNN classifier in a single notebook.</p>
+                    <div class="flex flex-wrap gap-1.5 mt-2"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">PyTorch</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Flask</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">CNN</span></div>
+                </a>
+                <a href="projects/sentiment-analyzer-demo.html" class="min-w-[340px] max-w-[340px] paper-card group block" aria-hidden="true">
+                    <div class="h-40 bg-[#ece3d4] rounded-sm mb-4 overflow-hidden border border-[rgba(59,58,54,0.15)]">
+                        <img src="assets/images/project-sentiment-analyzer.png" alt="" class="w-full h-full object-cover"/>
+                    </div>
+                    <div class="label">NLP · 2026</div>
+                    <h3 class="font-serif italic text-2xl mt-1 text-[#3b3a36]">Sentiment Analyzer</h3>
+                    <p class="font-serif text-base text-[#6a6860] mt-1 leading-snug">Detect tone in product reviews with a fine-tuned transformer.</p>
+                    <div class="flex flex-wrap gap-1.5 mt-2"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Transformers</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">HuggingFace</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">NLP</span></div>
+                </a>
+                <a href="projects/paper-summarizer-demo.html" class="min-w-[340px] max-w-[340px] paper-card group block" aria-hidden="true">
+                    <div class="h-40 bg-[#ece3d4] rounded-sm mb-4 overflow-hidden border border-[rgba(59,58,54,0.15)]">
+                        <img src="assets/images/project-paper-summarizer.png" alt="" class="w-full h-full object-cover"/>
+                    </div>
+                    <div class="label">LLM · 2026</div>
+                    <h3 class="font-serif italic text-2xl mt-1 text-[#3b3a36]">Paper Summarizer</h3>
+                    <p class="font-serif text-base text-[#6a6860] mt-1 leading-snug">Turn arXiv preprints into one-paragraph TL;DRs.</p>
+                    <div class="flex flex-wrap gap-1.5 mt-2"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Python</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">LangChain</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">LLM</span></div>
+                </a>
+                <a href="projects/scene-narrator-demo.html" class="min-w-[340px] max-w-[340px] paper-card group block" aria-hidden="true">
+                    <div class="h-40 bg-[#ece3d4] rounded-sm mb-4 overflow-hidden border border-[rgba(59,58,54,0.15)]">
+                        <img src="assets/images/project-scene-narrator.png" alt="" class="w-full h-full object-cover"/>
+                    </div>
+                    <div class="label">Vision-LLM · 2026</div>
+                    <h3 class="font-serif italic text-2xl mt-1 text-[#3b3a36]">Scene Narrator</h3>
+                    <p class="font-serif text-base text-[#6a6860] mt-1 leading-snug">Describe a video scene-by-scene with multimodal models.</p>
+                    <div class="flex flex-wrap gap-1.5 mt-2"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Python</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">CLIP</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">OpenCV</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">LLM</span></div>
+                </a>
+                <a href="projects/speech-translator-demo.html" class="min-w-[340px] max-w-[340px] paper-card group block" aria-hidden="true">
+                    <div class="h-40 bg-[#ece3d4] rounded-sm mb-4 overflow-hidden border border-[rgba(59,58,54,0.15)]">
+                        <img src="assets/images/project-speech-translator.png" alt="" class="w-full h-full object-cover"/>
+                    </div>
+                    <div class="label">Speech · 2026</div>
+                    <h3 class="font-serif italic text-2xl mt-1 text-[#3b3a36]">Speech Translator</h3>
+                    <p class="font-serif text-base text-[#6a6860] mt-1 leading-snug">Live translate spoken audio between languages with Whisper.</p>
+                    <div class="flex flex-wrap gap-1.5 mt-2"><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Python</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">Whisper</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">TTS</span><span class="font-mono text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-sm border border-[rgba(59,58,54,0.15)] text-[#6a6860] bg-[#ece3d4]">LLM</span></div>
+                </a>
+              </div>
             </div>
-        </div>
+        </section>
 
-        <div class="project-card">
-            <a href="projects/paper-summarizer-demo.html" class="project-screenshot-link">
-                <div class="project-screenshot">
-                    <img src="assets/images/project-paper-summarizer.png" alt="Paper Dissector showing structured summary of an arXiv paper">
-                </div>
-            </a>
-            <div class="project-body">
-                <h3>AI Paper Summarizer</h3>
-                <p>
-                    Feed in arXiv PDFs and get structured summaries of key
-                    findings, methods, and results using an LLM chunking
-                    pipeline.
-                </p>
-                <div class="project-tags">
-                    <span class="tag">Python</span>
-                    <span class="tag">LangChain</span>
-                    <span class="tag">LLM</span>
-                </div>
-                <div class="project-links">
-                    <a href="https://github.com/movfast/ai-paper-summarizer">GitHub</a>
-                    <a href="projects/paper-summarizer-demo.html">Try Demo</a>
-                </div>
-            </div>
-        </div>
+        <!-- SKILLS — counter-rotated to sit horizontal -->
+        <section id="skills" class="slope-section" style="transform: rotate(calc(var(--tilt) * -1)); transform-origin: center center;">
+            <div class="label"><span class="ornament"></span> skills</div>
 
-        <div class="project-card">
-            <a href="projects/scene-narrator-demo.html" class="project-screenshot-link">
-                <div class="project-screenshot">
-                    <img src="assets/images/project-scene-narrator.png" alt="Video Scene Narrator with storyboard timeline and auto-narration">
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-x-6 gap-y-8 md:gap-10 max-w-[90vw] md:max-w-5xl" style="margin-top: 100px;">
+                <div>
+                    <h3 class="font-serif italic text-xl md:text-2xl text-[#3b3a36]">Languages</h3>
+                    <ul class="mt-3 space-y-1 font-serif text-base md:text-lg text-[#6a6860]">
+                        <li>Python</li>
+                        <li>JavaScript</li>
+                        <li>C#</li>
+                        <li>SQL</li>
+                        <li>CSS</li>
+                        <li>Bash</li>
+                    </ul>
                 </div>
-            </a>
-            <div class="project-body">
-                <h3>Video Scene Narrator</h3>
-                <p>
-                    Samples keyframes from video, uses a vision model to
-                    understand each scene, and generates natural language
-                    narration with automatic subtitles.
-                </p>
-                <div class="project-tags">
-                    <span class="tag">Python</span>
-                    <span class="tag">CLIP</span>
-                    <span class="tag">OpenCV</span>
-                    <span class="tag">LLM</span>
+                <div>
+                    <h3 class="font-serif italic text-xl md:text-2xl text-[#3b3a36]">ML Frameworks</h3>
+                    <ul class="mt-3 space-y-1 font-serif text-base md:text-lg text-[#6a6860]">
+                        <li>PyTorch</li>
+                        <li>TensorFlow</li>
+                        <li>HuggingFace</li>
+                        <li>scikit-learn</li>
+                    </ul>
                 </div>
-                <div class="project-links">
-                    <a href="https://github.com/movfast/video-scene-narrator">GitHub</a>
-                    <a href="projects/scene-narrator-demo.html">Try Demo</a>
+                <div>
+                    <h3 class="font-serif italic text-xl md:text-2xl text-[#3b3a36]">AI Engineering</h3>
+                    <ul class="mt-3 space-y-1 font-serif text-base md:text-lg text-[#6a6860]">
+                        <li>LLMs</li>
+                        <li>RAG</li>
+                        <li>Agents</li>
+                        <li>API Integration</li>
+                        <li>Claude Code</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-serif italic text-xl md:text-2xl text-[#3b3a36]">Tools &amp; Platforms</h3>
+                    <ul class="mt-3 space-y-1 font-serif text-base md:text-lg text-[#6a6860]">
+                        <li>Git &amp; GitHub</li>
+                        <li>Linux</li>
+                        <li>Jupyter</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-serif italic text-xl md:text-2xl text-[#3b3a36]">Data</h3>
+                    <ul class="mt-3 space-y-1 font-serif text-base md:text-lg text-[#6a6860]">
+                        <li>Pandas &amp; NumPy</li>
+                        <li>Matplotlib</li>
+                        <li>PostgreSQL</li>
+                        <li>Vector Databases</li>
+                    </ul>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <div class="project-card">
-            <a href="projects/object-tracker-demo.html" class="project-screenshot-link">
-                <div class="project-screenshot">
-                    <img src="assets/images/project-object-tracker.png" alt="Real-time Object Tracker with colorful bubble visualization">
-                </div>
-            </a>
-            <div class="project-body">
-                <h3>Real-time Object Tracker</h3>
-                <p>
-                    Webcam-based object detection and tracking with YOLO
-                    and DeepSORT, featuring a live dashboard with stats
-                    and trajectories.
-                </p>
-                <div class="project-tags">
-                    <span class="tag">Python</span>
-                    <span class="tag">YOLOv8</span>
-                    <span class="tag">OpenCV</span>
-                    <span class="tag">Streamlit</span>
-                </div>
-                <div class="project-links">
-                    <a href="https://github.com/movfast/realtime-object-tracker">GitHub</a>
-                    <a href="projects/object-tracker-demo.html">Try Demo</a>
-                </div>
-            </div>
-        </div>
+        <!-- WRITING — The Notice Board -->
+        <section id="writing" class="slope-section">
+            <!-- <h2 class="upright font-serif italic text-5xl md:text-6xl text-[#3b3a36] mt-3">The notice board.</h2>-->
+            <!-- <p class="upright font-serif italic text-xl text-[#6a6860] mt-2 max-w-md mb-14">Pinned notes, fluttering as they slide down the slope.</p>-->
 
-        <div class="project-card">
-            <a href="projects/speech-translator-demo.html" class="project-screenshot-link">
-                <div class="project-screenshot">
-                    <img src="assets/images/project-speech-translator.png" alt="Language Telephone speech translation interface with flag icons">
-                </div>
-            </a>
-            <div class="project-body">
-                <h3>Real-time Speech Translator</h3>
-                <p>
-                    Record speech in one language, transcribe with Whisper,
-                    translate via LLM, and synthesize audio output.
-                    Built on the Voice Diary Transcriber foundation.
-                </p>
-                <div class="project-tags">
-                    <span class="tag">Python</span>
-                    <span class="tag">Whisper</span>
-                    <span class="tag">TTS</span>
-                    <span class="tag">LLM</span>
-                </div>
-                <div class="project-links">
-                    <a href="https://github.com/movfast/realtime-speech-translator">GitHub</a>
-                    <a href="projects/speech-translator-demo.html">Try Demo</a>
+            <div class="upright label"><span class="ornament"></span> writing</div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10 max-w-[90vw] md:max-w-5xl" style="margin-top: 30px;">
+                <a href="writing/understanding-rag.html" class="paper-note flutter group block">
+                    <div class="pin"></div>
+                    <div class="label">LLMs</div>
+                    <h3 class="font-serif italic text-2xl mt-2 text-[#3b3a36] group-hover:text-[#c97a5b] transition">Understanding RAG</h3>
+                    <p class="font-serif text-lg text-[#6a6860] mt-2 leading-snug">How retrieval-augmented generation actually works under the hood.</p>
+                </a>
+                <a href="writing/ai-security-risks-2026.html" class="paper-note flutter group block">
+                    <div class="pin"></div>
+                    <div class="label">Security</div>
+                    <h3 class="font-serif italic text-2xl mt-2 text-[#3b3a36] group-hover:text-[#c97a5b] transition">AI Security Risks 2026</h3>
+                    <p class="font-serif text-lg text-[#6a6860] mt-2 leading-snug">The threats every AI builder should know about going into 2026.</p>
+                </a>
+                <a href="writing/prompting-claude-effectively.html" class="paper-note flutter group block">
+                    <div class="pin"></div>
+                    <div class="label">Prompting</div>
+                    <h3 class="font-serif italic text-2xl mt-2 text-[#3b3a36] group-hover:text-[#c97a5b] transition">Prompting Claude Effectively</h3>
+                    <p class="font-serif text-lg text-[#6a6860] mt-2 leading-snug">Patterns and tactics for getting the most out of Claude.</p>
+                </a>
+            </div>
+
+            <div class="upright mt-14">
+                <a href="writing.html" class="btn-classic">More writing →</a>
+            </div>
+        </section>
+
+        <!-- NEWS — A second notice board, title on the right -->
+        <section id="news" class="slope-section">
+            <!-- Right-aligned header -->
+            <div class="flex justify-end">
+                <div class="upright text-right">
+                    <!--<h2 class="font-serif italic text-5xl md:text-6xl text-[#3b3a36] mt-3">From the wires.</h2>
+                    <p class="font-serif italic text-xl text-[#6a6860] mt-2 max-w-md ml-auto mb-14">Fresh AI clippings, pinned to the board the moment they land.</p>-->
                 </div>
             </div>
-        </div>
+            <div class="label"><span class="ornament"></span>News from AI</div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10 max-w-[90vw] md:max-w-5xl" style="margin-top: 30px;">
+                <a href="https://aimodels.org" class="paper-note flutter group block">
+                    <div class="pin"></div>
+                    <div class="label">Models</div>
+                    <h3 class="font-serif italic text-2xl mt-2 text-[#3b3a36] group-hover:text-[#c97a5b] transition">Frontier Model Updates</h3>
+                    <p class="font-serif text-lg text-[#6a6860] mt-2 leading-snug">Anthropic, OpenAI &amp; Google ship new flagships almost monthly. The pace isn't slowing.</p>
+                </a>
+                <a href="https://huggingface.co/blog" class="paper-note flutter group block">
+                    <div class="pin"></div>
+                    <div class="label">Open Source</div>
+                    <h3 class="font-serif italic text-2xl mt-2 text-[#3b3a36] group-hover:text-[#c97a5b] transition">Open Weights Catch Up</h3>
+                    <p class="font-serif text-lg text-[#6a6860] mt-2 leading-snug">Llama, Mistral &amp; DeepSeek narrow the gap with closed labs on reasoning benchmarks.</p>
+                </a>
+                <a href="https://arxiv.org/list/cs.AI/recent" class="paper-note flutter group block">
+                    <div class="pin"></div>
+                    <div class="label">Research</div>
+                    <h3 class="font-serif italic text-2xl mt-2 text-[#3b3a36] group-hover:text-[#c97a5b] transition">Agents, Memory, Tools</h3>
+                    <p class="font-serif text-lg text-[#6a6860] mt-2 leading-snug">Long-horizon agents with persistent memory dominate the latest arXiv preprints.</p>
+                </a>
+            </div>
+
+            <div class="upright mt-14 w-full flex justify-start md:justify-end">
+                <a href="experiment7.html#news" class="btn-classic">All AI news →</a>
+            </div>
+        </section>
+
+        <!-- CONNECT — Landing Pad -->
+        <section id="connect" class="slope-section">
+            <div class="upright">
+                <div class="label"><span class="ornament"></span>landing pad</div>
+                <h2 class="font-serif italic text-4xl md:text-7xl text-[#3b3a36] mt-3 leading-tight">
+                    Connect<br/>
+                    <span class="text-[#c97a5b]">with me.</span>
+                </h2>
+                <p class="font-serif italic text-lg md:text-xl text-[#6a6860] mt-6 max-w-sm md:max-w-md">Please contact me for AI discussions, opportunities, or just to connect with me.</p>
+                <div class="mt-10 flex flex-wrap gap-4">
+                    <a href="mailto:marian.helcl@gmail.com" class="btn-classic">Say hello ✉</a>
+                    <a href="https://github.com/movfast" class="btn-ghost">GitHub</a>
+                    <a href="https://www.linkedin.com/" class="btn-ghost">LinkedIn</a>
+                    <a href="experiment7.html" class="btn-ghost">← Main site</a>
+                </div>
+                <div class="mt-16 label">© 2026 Marian Helcl Øverli<span class="ornament"></span>built on a gentle slope</div>
+            </div>
+        </section>
 
     </div>
-</section>
-</div>
 
-<!-- Skills -->
-<div class="section-wrap section-wrap--skills">
-<section id="skills" class="fade-in">
-    <h2 class="section-title">Skills</h2>
-    <p class="section-subtitle">Technologies and tools I work with.</p>
-    <div class="skills-grid">
-        <div class="skill-category">
-            <h3>Languages</h3>
-            <ul>
-                <li>Python</li>
-                <li>JavaScript</li>
-                <li>C#</li>
-                <li>SQL</li>
-                <li>CSS</li>
-                <li>Bash</li>
-            </ul>
-        </div>
-        <div class="skill-category">
-            <h3>ML Frameworks</h3>
-            <ul>
-                <li>PyTorch</li>
-                <li>TensorFlow</li>
-                <li>HuggingFace</li>
-                <li>scikit-learn</li>
-            </ul>
-        </div>
-        <div class="skill-category">
-            <h3>AI Engineering</h3>
-            <ul>
-                <li>LLMs</li>
-                <li>RAG</li>
-                <li>Agents</li>
-                <li>API Integration</li>
-                <li>Claude Code</li>
-            </ul>
-        </div>
-        <div class="skill-category">
-            <h3>Tools &amp; Platforms</h3>
-            <ul>
-                <li>Git &amp; GitHub</li>
-                <li>Linux</li>
-                <li>Jupyter</li>
-            </ul>
-        </div>
-        <div class="skill-category">
-            <h3>Data</h3>
-            <ul>
-                <li>Pandas &amp; NumPy</li>
-                <li>Matplotlib</li>
-                <li>PostgreSQL</li>
-                <li>Vector Databases</li>
-            </ul>
-        </div>
+    <!-- FIXED CHAT BUBBLE -->
+    <div class="fixed bottom-4 right-4 md:bottom-8 md:right-8 z-[60]">
+        <a href="mailto:marian.helcl@gmail.com" class="bg-[#3b3a36] text-[#f5efe6] px-3 py-2 md:px-4 md:py-3 rounded-sm shadow-2xl flex items-center gap-2 md:gap-3 font-serif italic text-sm md:text-base hover:bg-[#c97a5b] transition border border-[rgba(245,239,230,0.2)]">
+            <div class="w-2 h-2 bg-[#a8b9a3] rounded-full animate-pulse"></div>
+            <span class="hidden sm:inline">"Don't fall off — let's chat."</span>
+            <span class="sm:hidden">Chat</span>
+        </a>
     </div>
-</section>
-</div>
 
-<!-- Blog / Writing -->
-<div class="section-wrap section-wrap--blog">
-<section id="blog" class="fade-in">
-    <h2 class="section-title">Writing</h2>
-    <p class="section-subtitle">Thoughts on AI, learning, and building things.</p>
-    <div class="blog-grid" data-show-more="4" data-full-page="writing.html">
+    <script>
+        // ============================================================
+        //  THE OFF-CENTERED LINE
+        //  As you scroll down through the hero, the title travels along
+        //  a diagonal path: rightward + downward + slight rotation.
+        //  We expose progress (0..1) as the CSS variable --p on the
+        //  .moving-title element. The transform is defined in CSS.
+        // ============================================================
+        // ============================================================
+        //  ALIGN SECTIONS TO THE SAME VERTICAL AXIS
+        //  Because the slope-container is rotated by --tilt around its
+        //  top-left corner, any child at unrotated coordinates (0, y)
+        //  visually drifts right by y * tan(|tilt|). To make every
+        //  section start at the same visual left edge (and prevent
+        //  bottom sections from leaving the viewport on the right),
+        //  we shift each section LEFT by exactly that amount.
+        // ============================================================
+        const TILT_DEG = parseFloat(getComputedStyle(document.documentElement)
+                                      .getPropertyValue('--tilt')) || -8;
+        const TILT_RAD = TILT_DEG * Math.PI / 180;
 
-        <div class="blog-card">
-            <div class="blog-date">April 2026</div>
-            <h3>Fix Your Entire Life in One Day: Breaking Down Dan Koe's Protocol</h3>
-            <p>
-                A breakdown of Dan Koe's viral article &mdash; the one-day protocol for
-                identity-first change, the Anti-Vision framework, morning excavation
-                questions, and key takeaways.
-            </p>
-            <a href="writing/fix-your-life-dan-koe.html" class="read-more">Read more &rarr;</a>
-        </div>
+        function alignSections() {
+            const sections = document.querySelectorAll('.slope-container > section');
+            // First reset so offsetTop measures the natural layout
+            sections.forEach(s => { s.style.marginLeft = ''; });
+            // Skip alignment on mobile — slope is disabled via CSS
+            if (window.innerWidth <= 768) return;
+            // Then apply compensation. Lower section => larger negative shift.
+            sections.forEach(s => {
+                const top = s.offsetTop;
+                // visual_x_drift = top * sin(|tilt|), in pre-rotation coords we
+                // pull left by top * tan(|tilt|) to land back on x = 0.
+                const shift = top * Math.tan(Math.abs(TILT_RAD));
+                s.style.marginLeft = `${-shift}px`;
+            });
+        }
 
-        <div class="blog-card">
-            <div class="blog-date">April 2026</div>
-            <h3>The Two Traps of Money &mdash; and the Life That Slips Through Both</h3>
-            <p>
-                A reflection on what three books taught me about the two traps of money &mdash;
-                spending everything and spending nothing &mdash; and why uncertain times make it
-                harder, not easier, to get it right.
-            </p>
-            <a href="writing/die-with-zero-money-philosophy.html" class="read-more">Read more &rarr;</a>
-        </div>
+        const movingTitle = document.getElementById('movingTitle');
+        const heroStage   = document.querySelector('.hero-stage');
 
-        <div class="blog-card">
-            <div class="blog-date">April 2026</div>
-            <h3>Guardrails When Building with Claude Code: What It Does Well and Where It Falls Short</h3>
-            <p>
-                An honest look at what Claude Code excels at, where it struggles, and the
-                guardrails every developer should set when using AI coding assistants to
-                build real projects.
-            </p>
-            <a href="writing/claude-code-guardrails.html" class="read-more">Read more &rarr;</a>
-        </div>
+        function updateTitleTravel() {
+            if (!movingTitle || !heroStage) return;
+            // Distance over which the animation plays = hero stage height
+            const start = 0;
+            const end   = heroStage.offsetHeight * 0.85;
+            const y     = window.scrollY;
+            let p = (y - start) / (end - start);
+            p = Math.max(0, Math.min(1, p));
+            // ease-out for a smoother arrival
+            const eased = 1 - Math.pow(1 - p, 2);
+            movingTitle.style.setProperty('--p', eased.toFixed(4));
+        }
 
-        <div class="blog-card">
-            <div class="blog-date">April 2026</div>
-            <h3>Meta's TRIBE v2: Predicting Your Brain's Response to Content</h3>
-            <p>
-                Meta open-sources a model trained on 1,000+ hours of fMRI data that
-                predicts neural responses to content — and combined with their wearable
-                hardware, it starts to look like a closed loop on human attention.
-            </p>
-            <a href="writing/meta-tribe-brain-prediction.html" class="read-more">Read more &rarr;</a>
-        </div>
+        window.addEventListener('scroll', updateTitleTravel, { passive: true });
+        window.addEventListener('resize', () => { alignSections(); updateTitleTravel(); });
+        window.addEventListener('load', () => { alignSections(); updateTitleTravel(); });
+        alignSections();
+        updateTitleTravel();
 
-        <div class="blog-card">
-            <div class="blog-date">April 2026</div>
-            <h3>Google's Flex and Priority Inference: Choosing Between Cost and Speed</h3>
-            <p>
-                Google adds two inference tiers to the Gemini API — Flex cuts your bill
-                in half for background workloads, Priority guarantees your requests
-                never get dropped.
-            </p>
-            <a href="writing/gemini-flex-priority-inference.html" class="read-more">Read more &rarr;</a>
-        </div>
+        // ============================================================
+        //  Tumble + flutter scroll-in animations
+        // ============================================================
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry, i) => {
+                if (entry.isIntersecting) {
+                    setTimeout(() => entry.target.classList.add('in'), i * 80);
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.2 });
 
-        <div class="blog-card">
-            <div class="blog-date">March 2026</div>
-            <h3>How to Actually Prompt Claude Well (And What to Stop Doing)</h3>
-            <p>
-                What actually improves Claude's output, what's cargo-culted nonsense,
-                and which popular prompting tricks you can safely drop.
-            </p>
-            <a href="writing/prompting-claude-effectively.html" class="read-more">Read more &rarr;</a>
-        </div>
+        document.querySelectorAll('.tumble, .flutter').forEach(el => observer.observe(el));
 
-        <div class="blog-card">
-            <div class="blog-date">March 2026</div>
-            <h3>AI Businesses You Can Actually Build in 2026</h3>
-            <p>
-                Nine categories where small teams can build real AI businesses —
-                from vertical SaaS and consulting to fintech and developer tools,
-                with honest assessments of competition and defensibility.
-            </p>
-            <a href="writing/ai-businesses-2026.html" class="read-more">Read more &rarr;</a>
-        </div>
+        // ============================================================
+        //  CONVEYOR SCROLL CONTROL
+        //  Horizontal scrolling (trackpad/shift+wheel) nudges the
+        //  conveyor belt by adjusting each track's animation delay,
+        //  giving the user direct control over the scroll direction.
+        // ============================================================
+        (function () {
+            const conveyors = document.querySelectorAll('.conveyor');
 
-        <div class="blog-card">
-            <div class="blog-date">March 2026</div>
-            <h3>The Real Cost of AI: Energy, Water, and Carbon</h3>
-            <p>
-                What the numbers actually say about AI's energy consumption,
-                CO2 footprint, and water usage — plus practical steps developers
-                can take to reduce the impact.
-            </p>
-            <a href="writing/ai-energy-consumption.html" class="read-more">Read more &rarr;</a>
-        </div>
+            conveyors.forEach(conveyor => {
+                const tracks = conveyor.querySelectorAll('.conveyor-auto-track');
 
-        <div class="blog-card">
-            <div class="blog-date">March 2026</div>
-            <h3>Security Considerations When Adding an LLM Chatbot to Your Website</h3>
-            <p>
-                Prompt injection, data leakage, API abuse, XSS, and privacy —
-                the security checklist for embedding an LLM chat on your site,
-                drawn from building my own AI Twin.
-            </p>
-            <a href="writing/llm-chatbot-security.html" class="read-more">Read more &rarr;</a>
-        </div>
+                tracks.forEach(track => {
+                    // Accumulated manual offset in px
+                    let manualOffset = 0;
+                    // Store the computed animation duration in ms
+                    const style = getComputedStyle(track);
+                    const durationStr = style.animationDuration || '60s';
+                    const duration = parseFloat(durationStr) * 1000; // ms
+                    // Total scroll distance = half the track width (the marquee goes from 0 to -50%)
+                    const isReverse = track.classList.contains('reverse');
 
-        <div class="blog-card">
-            <div class="blog-date">March 2026</div>
-            <h3>The Biggest Security Risks of AI Right Now</h3>
-            <p>
-                Prompt injection, deepfakes, model theft, data poisoning, agent
-                autonomy risks, and supply chain attacks — the AI security
-                landscape as of early 2026.
-            </p>
-            <a href="writing/ai-security-risks-2026.html" class="read-more">Read more &rarr;</a>
-        </div>
+                    function shiftTrack(delta) {
+                        const scrollWidth = track.scrollWidth / 2;
+                        const pxToMs = duration / scrollWidth;
+                        const timeShift = delta * pxToMs * (isReverse ? -1 : 1);
+                        const current = parseFloat(track.style.animationDelay || '0') * 1000;
+                        const newDelay = current - timeShift;
+                        track.style.animationDelay = `${newDelay / 1000}s`;
+                    }
 
-        <div class="blog-card">
-            <div class="blog-date">March 2026</div>
-            <h3>Supabase: What It Is, What It's Used For, and How to Secure It</h3>
-            <p>
-                A practical overview of Supabase — its components, common use cases,
-                the security risks developers overlook, and how to prevent them.
-            </p>
-            <a href="writing/supabase-security.html" class="read-more">Read more &rarr;</a>
-        </div>
+                    conveyor.addEventListener('wheel', (e) => {
+                        // Only intercept horizontal scrolling; let vertical scroll pass through to the page
+                        if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+                        if (e.deltaX === 0) return;
+                        e.preventDefault();
+                        shiftTrack(e.deltaX);
+                    }, { passive: false });
 
-        <div class="blog-card">
-            <div class="blog-date">March 2026</div>
-            <h3>Understanding RAG: From Theory to Implementation</h3>
-            <p>
-                A deep dive into retrieval-augmented generation — how it works,
-                when to use it, and lessons learned building my own RAG chatbot.
-            </p>
-            <a href="writing/understanding-rag.html" class="read-more">Read more &rarr;</a>
-        </div>
+                    // Touch swipe support for mobile
+                    let touchStartX = 0;
+                    conveyor.addEventListener('touchstart', (e) => {
+                        touchStartX = e.touches[0].clientX;
+                    }, { passive: true });
+                    conveyor.addEventListener('touchmove', (e) => {
+                        const delta = touchStartX - e.touches[0].clientX;
+                        if (Math.abs(delta) > 5) {
+                            shiftTrack(delta * 2);
+                            touchStartX = e.touches[0].clientX;
+                        }
+                    }, { passive: true });
+                });
+            });
+        })();
 
-        <div class="blog-card">
-            <div class="blog-date">February 2026</div>
-            <h3>Fine-Tuning Transformers on a Budget</h3>
-            <p>
-                Practical techniques for fine-tuning large language models on
-                limited hardware — LoRA, QLoRA, quantization, and smart
-                dataset choices.
-            </p>
-            <a href="writing/fine-tuning-on-a-budget.html" class="read-more">Read more &rarr;</a>
-        </div>
-
-        <div class="blog-card">
-            <div class="blog-date">January 2026</div>
-            <h3>My Path Into AI Engineering</h3>
-            <p>
-                How I got started with AI, the resources that helped most, and
-                advice for others beginning the same journey.
-            </p>
-            <a href="#" class="read-more">Read more &rarr;</a>
-        </div>
-
-    </div>
-</section>
-</div>
-
-<!-- Latest in AI -->
-<div class="section-wrap section-wrap--news">
-<section id="ai-news" class="fade-in">
-    <h2 class="section-title">Latest in AI</h2>
-    <p class="section-subtitle">Auto-updated headlines from across the AI world.</p>
-    <div class="news-grid" id="news-grid">
-        <div class="news-loading">Loading latest news...</div>
-    </div>
-</section>
-</div>
-
-<!-- AI Twin Chat -->
-<div class="section-wrap section-wrap--twin">
-<section id="ai-twin" class="fade-in">
-    <h2 class="section-title">Chat with My AI Twin</h2>
-    <p class="section-subtitle">Ask me anything — my AI twin knows about my background, skills, and projects.</p>
-    <div class="chat-container">
-        <!-- Replace the src below with your Gradio app URL, e.g. https://your-space.hf.space -->
-        <iframe
-            src=""
-            class="chat-iframe"
-            title="AI Twin Chat"
-            allow="microphone"
-        ></iframe>
-        <div class="chat-placeholder">
-            <div class="chat-placeholder-icon">&#129302;</div>
-            <h3>AI Twin — Coming Soon</h3>
-            <p>
-                This is a Gradio-powered chatbot trained on my background, projects, and expertise.
-                Ask it anything you'd ask me in an interview!
-            </p>
-            <p class="chat-placeholder-hint">Gradio app will be embedded here once deployed.</p>
-        </div>
-    </div>
-</section>
-</div>
-
-<!-- Contact -->
-<div class="section-wrap section-wrap--contact">
-<section id="contact" class="fade-in">
-    <h2 class="section-title">Get In Touch</h2>
-    <div class="contact-content">
-        <p>
-            I'm always open to discussing AI projects, collaboration opportunities,
-            or just chatting about interesting ideas. Feel free to reach out!
-        </p>
-        <a href="https://mail.google.com/mail/?view=cm&to=marian.overli@gmail.com" target="_blank" rel="noopener" class="btn btn-primary">Say Hello</a>
-        <div class="social-links">
-            <a href="https://github.com/movfast">GitHub</a>
-            <a href="https://www.linkedin.com/in/marianhelcloverli/">LinkedIn</a>
-        </div>
-    </div>
-</section>
-</div>
-
-<footer>
-    <div class="footer-logo">
-        <img src="assets/images/marian_helcl_overli_ai_engineer_logo.svg" alt="Marian Helcl Øverli — AI Engineer">
-    </div>
-    <p>&copy; 2026 Marian Helcl Øverli. All rights reserved.</p>
-</footer>
-
-<script src="js/main.js"></script>
-<script src="js/news.js"></script>
-<!-- Quirk system: registry first, then individual quirks, then init last -->
-<script src="js/quirks/registry.js"></script>
-<script src="js/quirks/retro-clicks.js"></script>
-<script src="js/quirks/rainbow-wave.js"></script>
-<script src="js/quirks/konami-matrix.js"></script>
-<script src="js/quirks/particle-burst.js"></script>
-<script src="js/quirks/typewriter.js"></script>
-<script src="js/quirks/card-tilt.js"></script>
-<script src="js/quirks/confetti.js"></script>
-<script src="js/quirks/console-msg.js"></script>
-<script src="js/quirks/gravity-drop.js"></script>
-<script src="js/quirks/magnetic.js"></script>
-<script src="js/quirks/secret-word.js"></script>
-<script src="js/quirks/emoji-trail.js"></script>
-<script src="js/quirks/night-mode.js"></script>
-<script src="js/quirks/init.js"></script>
-<script src="js/botanical.js"></script>
+        // ============================================================
+        //  MOBILE MENU
+        // ============================================================
+        function closeMenu() {
+            document.getElementById('mobileMenu').classList.remove('open');
+            document.getElementById('menuBtn').classList.remove('menu-open');
+        }
+        document.getElementById('menuBtn').addEventListener('click', function() {
+            this.classList.toggle('menu-open');
+            document.getElementById('mobileMenu').classList.toggle('open');
+        });
+    </script>
 
 </body>
 </html>
