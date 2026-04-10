@@ -433,53 +433,48 @@ const smallCtx = smallCanvas.getContext('2d', { willReadFrequently: true });
 function classify() {
   if (!hasDrawn) return;
 
-  // Step 1: Find bounding box of the drawing on the 280x280 canvas
-  const fullData = drawCtx.getImageData(0, 0, 280, 280).data;
-  let minX = 280, minY = 280, maxX = 0, maxY = 0;
-  for (let y = 0; y < 280; y++) {
-    for (let x = 0; x < 280; x++) {
-      if (fullData[(y * 280 + x) * 4] > 30) {
-        if (x < minX) minX = x;
-        if (x > maxX) maxX = x;
-        if (y < minY) minY = y;
-        if (y > maxY) maxY = y;
+  // Step 1: Downsample 280→28 directly
+  smallCtx.clearRect(0, 0, 28, 28);
+  smallCtx.drawImage(drawCanvas, 0, 0, 28, 28);
+  const rawData = smallCtx.getImageData(0, 0, 28, 28);
+  const raw = new Float32Array(784);
+  for (let i = 0; i < 784; i++) raw[i] = rawData.data[i * 4] / 255.0;
+
+  // Step 2: Find center of mass
+  let cx = 0, cy = 0, mass = 0;
+  for (let y = 0; y < 28; y++) {
+    for (let x = 0; x < 28; x++) {
+      const v = raw[y * 28 + x];
+      cx += x * v;
+      cy += y * v;
+      mass += v;
+    }
+  }
+
+  // Step 3: Shift so center of mass is at (14, 14)
+  const input = new Float32Array(784);
+  if (mass > 0) {
+    cx = Math.round(cx / mass);
+    cy = Math.round(cy / mass);
+    const dx = 14 - cx;
+    const dy = 14 - cy;
+    for (let y = 0; y < 28; y++) {
+      for (let x = 0; x < 28; x++) {
+        const sy = y - dy, sx = x - dx;
+        if (sy >= 0 && sy < 28 && sx >= 0 && sx < 28) {
+          input[y * 28 + x] = raw[sy * 28 + sx];
+        }
       }
     }
   }
 
-  // Step 2: Crop and center into a 20x20 area within 28x28 (MNIST standard)
-  const cropW = maxX - minX + 1;
-  const cropH = maxY - minY + 1;
-  const cropSize = Math.max(cropW, cropH);
-
-  // Temporary canvas for cropping
-  const tmpCanvas = document.createElement('canvas');
-  tmpCanvas.width = 28; tmpCanvas.height = 28;
-  const tmpCtx = tmpCanvas.getContext('2d');
-  tmpCtx.fillStyle = '#000';
-  tmpCtx.fillRect(0, 0, 28, 28);
-
-  if (cropSize > 0) {
-    // Scale to fit in 20x20 centered area (MNIST convention: 20x20 in 28x28 with 4px padding)
-    const scale = 20 / cropSize;
-    const scaledW = cropW * scale;
-    const scaledH = cropH * scale;
-    const offsetX = (28 - scaledW) / 2;
-    const offsetY = (28 - scaledH) / 2;
-    tmpCtx.drawImage(drawCanvas, minX, minY, cropW, cropH, offsetX, offsetY, scaledW, scaledH);
-  }
-
-  const imgData = tmpCtx.getImageData(0, 0, 28, 28);
-  const input = new Float32Array(784);
-  for (let i = 0; i < 784; i++) {
-    input[i] = imgData.data[i * 4] / 255.0;
-  }
+  const cropW = 0, cropH = 0; // for debug log
   forward(input);
   // Debug
   let maxP = 0, maxI = 0;
   for (let i = 0; i < 10; i++) { if (outputAct[i] > maxP) { maxP = outputAct[i]; maxI = i; } }
   const inkCount = input.reduce((a,b) => a + (b > 0.1 ? 1 : 0), 0);
-  console.log(`pred=${maxI} (${(maxP*100).toFixed(0)}%), ink=${inkCount}px, crop=${cropW}x${cropH}, top3: ${Array.from(outputAct).map((v,i)=>({v,i})).sort((a,b)=>b.v-a.v).slice(0,3).map(x=>`${x.i}:${(x.v*100).toFixed(0)}%`).join(' ')}`);;
+  console.log(`pred=${maxI} (${(maxP*100).toFixed(0)}%), ink=${inkCount}px, com=(${cx},${cy}), top3: ${Array.from(outputAct).map((v,i)=>({v,i})).sort((a,b)=>b.v-a.v).slice(0,3).map(x=>`${x.i}:${(x.v*100).toFixed(0)}%`).join(' ')}`);;
   updateProbBars();
   drawNetwork();
 }
