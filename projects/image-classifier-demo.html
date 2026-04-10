@@ -12,8 +12,8 @@
     <link rel="stylesheet" href="../css/article.css">
     <link rel="stylesheet" href="../css/warm-theme.css">
     <style>
-        .game-wrapper { max-width: 840px; margin: 2rem auto; }
-        .game-frame { width: 100%; aspect-ratio: 4 / 3; border: none; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(108,99,255,0.1); }
+        .game-wrapper { max-width: 1140px; margin: 2rem auto; }
+        .game-frame { width: 100%; aspect-ratio: 1 / 1; border: none; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(108,99,255,0.1); }
         .game-info { margin-top: 2.5rem; }
         .game-info h2 { font-size: 1.3rem; margin-bottom: 0.75rem; }
         .game-info p { color: var(--text-muted); line-height: 1.7; margin-bottom: 1rem; }
@@ -28,21 +28,20 @@
 
 <nav>
     <div class="nav-inner">
-        <a href="../experiment6.html" class="logo"><img src="../favicon.svg" alt="MHØ" class="logo-img"></a>
+        <a href="../index.html" class="logo"><img src="../favicon.svg" alt="MHØ" class="logo-img"></a>
         <button class="hamburger" aria-label="Menu">&#9776;</button>
         <ul class="nav-links">
-            <li><a href="../experiment6.html#about">About</a></li>
-            <li><a href="../experiment6.html#projects">Projects</a></li>
-            <li><a href="../experiment6.html#skills">Skills</a></li>
-            <li><a href="../experiment6.html#blog">Writing</a></li>
-            <li><a href="../experiment6.html#contact">Contact</a></li>
+            <li><a href="../about.html">About</a></li>
+            <li><a href="../index.html#projects">Projects</a></li>
+            <li><a href="../index.html#skills">Skills</a></li>
+            <li><a href="../index.html#writing">Writing</a></li>
+            <li><a href="../index.html#connect">Contact</a></li>
         </ul>
-        <a href="../experiment6.html#ai-twin" class="btn btn-primary nav-cta">Chat with My AI Twin</a>
     </div>
 </nav>
 
 <article class="article">
-    <a href="../experiment6.html#projects" class="article-back">&larr; Back to projects</a>
+    <a href="../index.html#projects" class="article-back">&larr; Back to projects</a>
 
     <header class="article-header">
         <h1>Draw & Classify — Neural Network Demo</h1>
@@ -65,9 +64,9 @@
     <div class="game-info">
         <h2>How It Works</h2>
         <p>
-            Draw a digit (0-9) on the canvas. Your drawing is downsampled to 28x28 pixels (like MNIST)
-            and fed through a 784→64→10 neural network running entirely in JavaScript. The network
-            diagram shows neuron activations in real-time.
+            Draw a digit (0-9) on the canvas. Your drawing goes through a preprocessing pipeline
+            that mirrors how the MNIST dataset was prepared, then gets classified by a neural network
+            running entirely in vanilla JavaScript — no TensorFlow, no external libraries.
         </p>
 
         <table>
@@ -75,18 +74,94 @@
             <tbody>
                 <tr><td>Draw on canvas</td><td>Sketch a digit with mouse or touch</td></tr>
                 <tr><td>Clear</td><td>Reset the canvas</td></tr>
-                <tr><td>Eraser</td><td>Toggle eraser mode</td></tr>
+                <tr><td>Pen / Eraser</td><td>Switch between drawing and erasing</td></tr>
                 <tr><td>Brush size</td><td>Adjust stroke width</td></tr>
                 <tr><td>Gallery digits</td><td>Load a pre-drawn example</td></tr>
             </tbody>
         </table>
 
-        <h2>The Network Architecture</h2>
+        <h2>The Pipeline</h2>
         <p>
-            The network has an input layer (784 neurons for the 28x28 image), a hidden layer (64 neurons
-            with ReLU activation and hand-crafted spatial pattern detectors), and an output layer
-            (10 neurons with softmax for digit probabilities). The visualization shows the most active
-            hidden neurons glowing proportionally to their activation values.
+            When you draw on the 280x280 canvas, the image is downsampled to 28x28 pixels — the same resolution
+            as the MNIST handwritten digit dataset. But raw downsampling isn't enough. The image is then
+            <strong>centered by its center of mass</strong>, shifting the ink so its weighted center sits at pixel (14, 14).
+            This is exactly how the original MNIST data was prepared, and it turned out to be the single most
+            important preprocessing step for making the classifier work on hand-drawn input.
+        </p>
+        <p>
+            The centered 784-pixel image is fed into a <strong>two-layer neural network</strong>:
+            784 input neurons → 128 hidden neurons (ReLU activation) → 10 output neurons (softmax).
+            The network has 101,770 pre-trained weights that were learned from 120,000 training examples
+            (the full MNIST training set plus augmented thick-stroke variants). Training reached 99.6% accuracy.
+        </p>
+        <p>
+            The weights are embedded directly in a JavaScript file (~750KB), so the forward pass runs instantly
+            with simple matrix multiplication — no model loading, no waiting, no dependencies.
+        </p>
+
+        <h2>What Was Tried and What Failed</h2>
+        <p>
+            Getting this classifier to work was a journey. Several approaches were attempted before
+            landing on the current solution:
+        </p>
+
+        <h3>Attempt 1: Hand-Crafted Spatial Pattern Detectors</h3>
+        <p>
+            The first approach used rectangular "hot zones" on the 28x28 grid as feature detectors —
+            top bars, vertical strokes, center blobs — with hand-tuned weights mapping patterns to digits.
+            <strong>Why it failed:</strong> the patterns were too crude. A horizontal bar at the top fires for
+            both "7" and "2", and there's no way to hand-tune enough rectangular regions to distinguish
+            all ten digits reliably. The predictions were essentially random.
+        </p>
+
+        <h3>Attempt 2: Canvas-Rendered Digit Templates</h3>
+        <p>
+            Next, actual digit shapes were drawn programmatically onto a canvas using thick strokes
+            (matching the user's brush), then compared to the user's drawing using cosine similarity.
+            Multiple font variants per digit were tried to handle different drawing styles.
+            <strong>Why it failed:</strong> rendered text looks nothing like hand-drawn digits. The stroke
+            patterns, angles, and proportions are fundamentally different. Digits like 6 and 8 — which
+            cover more pixel area — consistently dominated the similarity scores regardless of what was drawn.
+        </p>
+
+        <h3>Attempt 3: Region-Based Scoring</h3>
+        <p>
+            The image was divided into a 4x4 grid of regions, computing ink density in each. Each digit
+            was scored based on hand-crafted spatial rules (e.g., "1" has high vertical-center density
+            but low sides; "0" has ink on edges but empty center).
+            <strong>Why it failed:</strong> too coarse. 16 regions can't capture the structural differences
+            between digits that share similar spatial distributions. "2" and "7" both have ink in the
+            top-right, and "3" and "5" are nearly mirrors of each other. Hand-tuning the scoring weights
+            was an endless game of whack-a-mole.
+        </p>
+
+        <h3>Attempt 4: TensorFlow.js with Inline Training</h3>
+        <p>
+            A TensorFlow.js model was loaded from CDN and trained on embedded MNIST samples on every
+            page load. This worked in principle but added a 3-5 second loading delay, required a large
+            external library, and the training data embedding bloated the page.
+        </p>
+
+        <h3>What Finally Worked</h3>
+        <p>
+            The solution was simple in hindsight: <strong>train once, embed the weights, run pure JS inference</strong>.
+            A 784→128→10 network was trained offline using Python/NumPy on 120,000 MNIST samples
+            (including augmented thick-stroke variants created by morphological dilation). The trained
+            weights were exported as a JSON array and embedded in a static JS file.
+        </p>
+        <p>
+            The critical insight was preprocessing: the original MNIST dataset centers each digit by its
+            center of mass, not by bounding box. Earlier attempts used bounding-box cropping which distorted
+            aspect ratios — a tall narrow "7" got squished to look like a "2". Switching to center-of-mass
+            shifting (the actual MNIST method) fixed the remaining classification errors.
+        </p>
+
+        <h2>The Visualization</h2>
+        <p>
+            The network diagram in the center shows a simplified view: 8 input neurons (of 784),
+            the 12 most active hidden neurons (of 128, sorted by activation), and all 10 output neurons.
+            Connection lines pulse proportionally to the activation flowing through them. The probability
+            bars on the right show the softmax output — the network's confidence for each digit.
         </p>
     </div>
 </article>
