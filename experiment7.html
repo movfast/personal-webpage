@@ -31,13 +31,44 @@
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="css/botanical.css">
+    <style>
+        /* Projects carousel — inlined for guaranteed override */
+        .projects-carousel {
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: nowrap !important;
+            gap: 1.5rem;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+            padding: 0.5rem 0.25rem 1rem;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            width: 100%;
+        }
+        .projects-carousel::-webkit-scrollbar { display: none; }
+        .projects-carousel > .project-card {
+            flex: 0 0 320px !important;
+            width: 320px !important;
+            max-width: 320px !important;
+            scroll-snap-align: start;
+        }
+        @media (max-width: 600px) {
+            .projects-carousel > .project-card {
+                flex: 0 0 280px !important;
+                width: 280px !important;
+                max-width: 280px !important;
+            }
+        }
+    </style>
 </head>
 <body class="botanical">
 
 <!-- Nav -->
 <nav>
     <div class="nav-inner">
-        <a href="index.html" class="logo"><img src="favicon.svg" alt="MHØ" class="logo-img"></a>
+        <a href="experiment7.html" class="logo"><img src="favicon.svg" alt="MHØ" class="logo-img"></a>
         <button class="hamburger" aria-label="Menu">&#9776;</button>
         <ul class="nav-links">
             <li><a href="#about">About</a></li>
@@ -121,7 +152,11 @@
 <section id="projects" class="fade-in">
     <h2 class="section-title">Projects</h2>
     <p class="section-subtitle">Things I've built and experiments I've run.</p>
-    <div class="projects-grid" data-show-more="4" data-full-page="projects.html">
+    <div class="projects-carousel-meta">
+        <span class="projects-counter">01 / 01</span>
+        <a class="projects-view-all" href="projects.html">View All →</a>
+    </div>
+    <div class="projects-carousel">
 
         <div class="project-card">
             <a href="https://movcrafter.com" class="project-screenshot-link">
@@ -555,7 +590,35 @@
             </div>
         </div>
 
+        <div class="project-card">
+            <a href="https://movfast.github.io/learn-storytelling/" class="project-screenshot-link">
+                <div class="project-screenshot">
+                    <img src="assets/images/project-learn-storytelling.png" alt="Learn Storytelling app showing levels and learning path">
+                </div>
+            </a>
+            <div class="project-body">
+                <h3>Learn Storytelling</h3>
+                <p>
+                    From blank page to beacon — a six-level course that teaches
+                    storytelling for LinkedIn and Instagram using neuroscience-backed
+                    techniques: active recall flashcards, spaced repetition, generation
+                    effect writing exercises, and interleaved practice.
+                </p>
+                <div class="project-tags">
+                    <span class="tag">Next.js</span>
+                    <span class="tag">React</span>
+                    <span class="tag">TypeScript</span>
+                    <span class="tag">Tailwind CSS</span>
+                </div>
+                <div class="project-links">
+                    <a href="https://github.com/movfast/learn-storytelling">GitHub</a>
+                    <a href="https://movfast.github.io/learn-storytelling/">Live App</a>
+                </div>
+            </div>
+        </div>
+
     </div>
+    <div class="projects-progress"><div class="projects-progress-fill"></div></div>
 </section>
 </div>
 

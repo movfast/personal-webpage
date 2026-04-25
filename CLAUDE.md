@@ -18,7 +18,8 @@ personal_webpage/
 │   ├── ai-energy-consumption.html
 │   ├── ai-businesses-2026.html
 │   ├── prompting-claude-effectively.html
-│   └── gemini-flex-priority-inference.html
+│   ├── gemini-flex-priority-inference.html
+│   └── claude-code-guardrails.html
 ├── projects/               — interactive project demo pages
 │   ├── meow-master.html
 │   ├── rag-chatbot-demo.html

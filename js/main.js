@@ -77,3 +77,30 @@ document.querySelectorAll('[data-show-more]').forEach(grid => {
 
     grid.parentNode.insertBefore(wrapper, grid.nextSibling);
 });
+
+// Projects carousel: counter + progress bar
+const projectsCarousel = document.querySelector('.projects-carousel');
+const projectsCounter = document.querySelector('.projects-counter');
+const projectsProgressFill = document.querySelector('.projects-progress-fill');
+if (projectsCarousel && projectsCounter && projectsProgressFill) {
+    const cards = projectsCarousel.querySelectorAll('.project-card');
+    const total = cards.length;
+    const pad = (n) => String(n).padStart(2, '0');
+    const updateCarousel = () => {
+        const maxScroll = projectsCarousel.scrollWidth - projectsCarousel.clientWidth;
+        const ratio = maxScroll > 0 ? projectsCarousel.scrollLeft / maxScroll : 0;
+        projectsProgressFill.style.width = `${ratio * 100}%`;
+        const center = projectsCarousel.scrollLeft + projectsCarousel.clientWidth / 2;
+        let activeIdx = 0;
+        let minDist = Infinity;
+        cards.forEach((card, i) => {
+            const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+            const dist = Math.abs(cardCenter - center);
+            if (dist < minDist) { minDist = dist; activeIdx = i; }
+        });
+        projectsCounter.textContent = `${pad(activeIdx + 1)} / ${pad(total)}`;
+    };
+    projectsCarousel.addEventListener('scroll', updateCarousel, { passive: true });
+    window.addEventListener('resize', updateCarousel);
+    updateCarousel();
+}

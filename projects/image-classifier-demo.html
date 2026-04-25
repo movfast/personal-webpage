@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Draw & Classify — Neural Network Demo — Marian Helcl Øverli</title>
     <meta name="description" content="Draw digits and watch a neural network classify them in real-time with animated neuron activations.">
+    <link rel="canonical" href="https://marianhelcloverli.com/projects/image-classifier-demo.html">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://marianhelcloverli.com/projects/image-classifier-demo.html">
+    <meta property="og:title" content="Draw & Classify — Neural Network Demo — Marian Helcl Øverli">
+    <meta property="og:description" content="Draw digits and watch a neural network classify them in real-time with animated neuron activations.">
+    <meta property="og:image" content="https://marianhelcloverli.com/assets/images/og-image.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Draw & Classify — Neural Network Demo — Marian Helcl Øverli">
+    <meta name="twitter:description" content="Draw digits and watch a neural network classify them in real-time with animated neuron activations.">
+    <meta name="twitter:image" content="https://marianhelcloverli.com/assets/images/og-image.png">
     <link rel="icon" type="image/svg+xml" href="../favicon.svg">
     <link rel="stylesheet" href="../css/base.css">
     <link rel="stylesheet" href="../css/components.css">
@@ -13,14 +23,16 @@
     <link rel="stylesheet" href="../css/warm-theme.css">
     <style>
         .game-wrapper { max-width: 1140px; margin: 2rem auto; }
-        .game-frame { width: 100%; aspect-ratio: 1 / 1; border: none; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(108,99,255,0.1); }
-        .game-info { margin-top: 2.5rem; }
-        .game-info h2 { font-size: 1.3rem; margin-bottom: 0.75rem; }
+        .game-frame { width: 100%; aspect-ratio: 1 / 1.8; border: none; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(108,99,255,0.1); }
+        .article-header h1 { font-size: 2.2rem; }
+        .article-header .article-subtitle { font-size: 1.155rem; }
+        .game-info { margin-top: 2.5rem; font-size: 1.1rem; }
+        .game-info h2 { font-size: 1.43rem; margin-bottom: 0.75rem; }
         .game-info p { color: var(--text-muted); line-height: 1.7; margin-bottom: 1rem; }
         .game-info table { width: 100%; border-collapse: collapse; margin: 1rem 0 1.5rem; }
         .game-info th, .game-info td { text-align: left; padding: 0.5rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.08); }
-        .game-info th { color: var(--accent); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; }
-        .game-info td { color: var(--text-muted); font-size: 0.95rem; }
+        .game-info th { color: var(--accent); font-size: 0.935rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .game-info td { color: var(--text-muted); font-size: 1.045rem; }
         .tech-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; }
     </style>
 </head>
@@ -28,7 +40,7 @@
 
 <nav>
     <div class="nav-inner">
-        <a href="../index.html" class="logo"><img src="../favicon.svg" alt="MHØ" class="logo-img"></a>
+        <a href="../index.html" class="logo"><img src="../favicon.svg" alt="MHØ" class="logo-img" loading="lazy"></a>
         <button class="hamburger" aria-label="Menu">&#9776;</button>
         <ul class="nav-links">
             <li><a href="../about.html">About</a></li>
