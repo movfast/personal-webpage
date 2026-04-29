@@ -1,0 +1,24 @@
+{
+  "name": "personal_webpage",
+  "version": "1.0.0",
+  "description": "Personal portfolio website showcasing AI/ML projects, blog writing, and an interactive AI twin chatbot.",
+  "main": "index.js",
+  "scripts": {
+    "build:css": "tailwindcss -i tailwind.input.css -o css/tailwind.css --minify",
+    "watch:css": "tailwindcss -i tailwind.input.css -o css/tailwind.css --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/movfast/personal-webpage.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/movfast/personal-webpage/issues"
+  },
+  "homepage": "https://github.com/movfast/personal-webpage#readme",
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
+  }
+}
